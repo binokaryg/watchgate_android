@@ -37,4 +37,9 @@
     <string name="pref_postbalance_credit_regex_default">credit.*?([0-9,]+)</string>
     <string name="pref_stitch_update_func_default">updateStatusForObj</string>
     <string name="pref_header_variable">Advanced</string>
+    <string name="pref_header_query">Query Settings</string>
+    <string name="pref_sms_destination_default">1415</string>
+    <string name="pref_balance_query_prepaid_default">BL</string>
+    <string name="pref_balance_query_postpaid_default">CL</string>
+    <string name="pref_sms_source_default">1415</string>
 </resources>

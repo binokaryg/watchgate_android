@@ -14,8 +14,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class SMSHelper {
-    public static final String SMS_SENDER = "+9771415";
-    public static final String SMS_SENDER_2 = "1415";
     public static final String SMS_CONDITION_PREPAID = "Dear Customer, your current balance";
     public static final String SMS_CONDITION_POSTPAID = "Dear customer, your due amount";
     private static final String TAG = Constants.MAINTAG + SMSHelper.class.getSimpleName();
