@@ -1,0 +1,34 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- NOTE: EditTextPreference accepts EditText attributes. -->
+    <!-- NOTE: EditTextPreference's summary should be set to its value by the activity code. -->
+        <EditTextPreference
+        android:defaultValue="@string/pref_prebalance_regex_default"
+        android:key="pref_prebalance_regex"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="Prepaid Balance Regex" />
+    <EditTextPreference
+        android:defaultValue="@string/pref_postbalance_due_regex_default"
+        android:key="pref_postbalance_due_regex"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="Postpaid Balance Due Regex" />
+    <EditTextPreference
+        android:defaultValue="@string/pref_postbalance_credit_regex_default"
+        android:key="pref_postbalance_credit_regex"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="Postpaid Balance Credit Regex" />
+    <EditTextPreference
+        android:defaultValue="@string/pref_stitch_update_func_default"
+        android:key="pref_stitch_update_func"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="Stitch Update Function" />
+
+    <!-- NOTE: Hide buttons to simplify the UI. Users can touch outside the dialog to
+         dismiss it. -->
+    <!-- NOTE: ListPreference's summary should be set to its value by the activity code. -->
+
+</PreferenceScreen>
