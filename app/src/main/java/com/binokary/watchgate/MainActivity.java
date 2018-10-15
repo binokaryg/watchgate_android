@@ -133,9 +133,9 @@ public class MainActivity extends AppCompatActivity {
                 StatsHelper.CheckAndUpdateStats(getApplicationContext());
                 UpdateViews();
                 String smsQueryMsg = mSharedPreferences.getBoolean("switch_preference_1", false)
-                        ? mSharedPreferences.getString("pref_balance_query_postpaid", "")
-                        : mSharedPreferences.getString("pref_balance_query_prepaid", "");
-                SMSHelper.sendSms(mSharedPreferences.getString("pref_sms_destination", "1414"), smsQueryMsg);
+                        ? mSharedPreferences.getString("pref_balance_query_postpaid", "CL")
+                        : mSharedPreferences.getString("pref_balance_query_prepaid", "BL");
+                SMSHelper.sendSms(mSharedPreferences.getString("pref_sms_destination", "1415"), smsQueryMsg);
                 Toast.makeText(getApplicationContext(), R.string.toast_sending_sms + (mSharedPreferences.getBoolean("switch_preference_1", true) ? "Postpaid" : "Prepaid"), Toast.LENGTH_SHORT).show();
             }
         });
@@ -181,7 +181,7 @@ public class MainActivity extends AppCompatActivity {
                 //Log.d(TAG, "sending report");
                 mWorkManager = WorkManager.getInstance();
 
-                WorkerUtils.enqueueSMSSendingWork(mSharedPreferences.getString("pref_sms_destination", "1414"), smsQueryMsg, smsInterval, smsIntervalMin);
+                WorkerUtils.enqueueSMSSendingWork(mSharedPreferences.getString("pref_sms_destination", "1415"), smsQueryMsg, smsInterval, smsIntervalMin);
                 WorkerUtils.enqueueStitchReportingWork(instanceName, reportInterval, reportIntervalMin, reportOneIntervalMin);
             }
 

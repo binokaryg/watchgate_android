@@ -30,6 +30,12 @@ Install the generated apk in the phone that you want to monitor (should be Andro
 - Periodic Reporting Minimum Interval (minutes, default: 10): The app will not allow scheduled update requests to the server until these many minutes have passed after the previous request. Sometimes, if the phone has been offline for a long time, many periodic (scheduled) update requests may start one after another as soon as the phone gets online. We keep this interval so that the server is not overwhelmed.
 - One Time Reporting Minimum Interval (minutes, default: 3): The app will not allow any update request to the server until these many minutes have passed after the previous request. One time reporting happens when user specifically updates (using button with refresh icon), or new balance info is available.
 
+#### Query Settings
+- Query SMS Destination: The number (usually shortcode), where you want to send balance query SMS to.
+- Balance Info SMS Source: The number (usually shortcode), from where you get the balance information.
+- Balance Query Message (Prepaid): The message to be sent to query SMS for prepaid mobiles.
+- Balance Query Message (Postpaid): The message to be sent to query SMS for postpaid mobiles.
+
 #### Advanced
 - Prepaid Balance Regex: Regex for balance amount to be matched against the balance message on a prepaid system.
 - Postpaid Balance Due Regex: Regex for balance due amount to be matched against the balance message on a postpaid system.
