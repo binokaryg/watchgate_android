@@ -11,6 +11,10 @@
         android:icon="@drawable/ic_watch_later_black_24dp"
         android:title="@string/pref_header_interval" />
     <header
+        android:fragment="com.binokary.watchgate.SettingsActivity$QueryPreferenceFragment"
+        android:icon="@drawable/ic_sms_black_24dp"
+        android:title="@string/pref_header_query" />
+    <header
         android:fragment="com.binokary.watchgate.SettingsActivity$VariablePreferenceFragment"
         android:icon="@drawable/ic_code_black_24dp"
         android:title="@string/pref_header_variable" />

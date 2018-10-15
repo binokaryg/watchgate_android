@@ -1,6 +1,7 @@
 package com.binokary.watchgate;
 
 import android.annotation.TargetApi;
+import android.app.DownloadManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -136,7 +137,8 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
         return PreferenceFragment.class.getName().equals(fragmentName)
                 || GeneralPreferenceFragment.class.getName().equals(fragmentName)
                 || IntervalPreferenceFragment.class.getName().equals(fragmentName)
-                || VariablePreferenceFragment.class.getName().equals(fragmentName);
+                || VariablePreferenceFragment.class.getName().equals(fragmentName)
+                || QueryPreferenceFragment.class.getName().equals(fragmentName);
     }
 
     /**
@@ -214,6 +216,34 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             bindPreferenceSummaryToValue(findPreference("pref_postbalance_due_regex"));
             bindPreferenceSummaryToValue(findPreference("pref_postbalance_credit_regex"));
             bindPreferenceSummaryToValue(findPreference("pref_stitch_update_func"));
+        }
+
+        @Override
+        public boolean onOptionsItemSelected(MenuItem item) {
+            int id = item.getItemId();
+            if (id == android.R.id.home) {
+                startActivity(new Intent(getActivity(), SettingsActivity.class));
+                return true;
+            }
+            return super.onOptionsItemSelected(item);
+        }
+    }
+
+    public static class QueryPreferenceFragment extends PreferenceFragment {
+        @Override
+        public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            addPreferencesFromResource(R.xml.pref_network);
+            setHasOptionsMenu(true);
+
+            // Bind the summaries of EditText/List/Dialog/Ringtone preferences
+            // to their values. When their values change, their summaries are
+            // updated to reflect the new value, per the Android Design
+            // guidelines.
+            bindPreferenceSummaryToValue(findPreference("pref_sms_destination"));
+            bindPreferenceSummaryToValue(findPreference("pref_sms_source"));
+            bindPreferenceSummaryToValue(findPreference("pref_balance_query_prepaid"));
+            bindPreferenceSummaryToValue(findPreference("pref_balance_query_postpaid"));
         }
 
         @Override

@@ -114,7 +114,8 @@ public class MainActivity extends AppCompatActivity {
 
         PreferenceManager.setDefaultValues(this, R.xml.pref_general, false);
         PreferenceManager.setDefaultValues(this, R.xml.pref_interval, false);
-        PreferenceManager.setDefaultValues(this, R.xml.pref_variables, true);
+        PreferenceManager.setDefaultValues(this, R.xml.pref_variables, false);
+        PreferenceManager.setDefaultValues(this, R.xml.pref_network, false);
         mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
         //setTitle("Keep BroadcastReceiver Running After App Exit.");
@@ -131,8 +132,10 @@ public class MainActivity extends AppCompatActivity {
                 progressBar.setVisibility(View.VISIBLE);
                 StatsHelper.CheckAndUpdateStats(getApplicationContext());
                 UpdateViews();
-                String smsQueryMsg = mSharedPreferences.getBoolean("switch_preference_1", false) ? "cb" : "bl";
-                SMSHelper.sendSms("1415", smsQueryMsg);
+                String smsQueryMsg = mSharedPreferences.getBoolean("switch_preference_1", false)
+                        ? mSharedPreferences.getString("pref_balance_query_postpaid", "")
+                        : mSharedPreferences.getString("pref_balance_query_prepaid", "");
+                SMSHelper.sendSms(mSharedPreferences.getString("pref_sms_destination", "1414"), smsQueryMsg);
                 Toast.makeText(getApplicationContext(), R.string.toast_sending_sms + (mSharedPreferences.getBoolean("switch_preference_1", true) ? "Postpaid" : "Prepaid"), Toast.LENGTH_SHORT).show();
             }
         });
@@ -149,7 +152,9 @@ public class MainActivity extends AppCompatActivity {
                     e.printStackTrace();
                 }
 
-                String smsQueryMsg = mSharedPreferences.getBoolean("switch_preference_1", false) ? "cb" : "bl";
+                String smsQueryMsg = mSharedPreferences.getBoolean("switch_preference_1", false)
+                        ? mSharedPreferences.getString("pref_balance_query_postpaid", "")
+                        : mSharedPreferences.getString("pref_balance_query_prepaid", "");
                 String smsIntervalString = mSharedPreferences.getString("pref_interval_sms", "240");
                 String smsIntervalMinString = mSharedPreferences.getString("pref_interval_sms_min", "10");
                 String reportIntervalString = mSharedPreferences.getString("pref_interval_report", "30");
@@ -176,7 +181,7 @@ public class MainActivity extends AppCompatActivity {
                 //Log.d(TAG, "sending report");
                 mWorkManager = WorkManager.getInstance();
 
-                WorkerUtils.enqueueSMSSendingWork("1415", smsQueryMsg, smsInterval, smsIntervalMin);
+                WorkerUtils.enqueueSMSSendingWork(mSharedPreferences.getString("pref_sms_destination", "1414"), smsQueryMsg, smsInterval, smsIntervalMin);
                 WorkerUtils.enqueueStitchReportingWork(instanceName, reportInterval, reportIntervalMin, reportOneIntervalMin);
             }
 

@@ -57,7 +57,7 @@ public class SMSReceiver extends BroadcastReceiver {
                     stats.putLong(PrefStrings.LAST_SMS_IN_DATE, lastUserSMSInTime);
                     stats.apply();
                 }
-                if (smsSender.equals(SMSHelper.SMS_SENDER) || smsSender.equals(SMSHelper.SMS_SENDER_2)) {
+                if (smsSender.equals(mSharedPreferences.getString("pref_sms_source",""))) {
 
                     if (smsBody.startsWith(SMSHelper.SMS_CONDITION_PREPAID) || smsBody.startsWith(SMSHelper.SMS_CONDITION_POSTPAID)) {
                         Log.d(TAG, "Sms with condition detected");
