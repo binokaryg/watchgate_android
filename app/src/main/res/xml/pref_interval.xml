@@ -1,0 +1,48 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- NOTE: EditTextPreference accepts EditText attributes. -->
+    <!-- NOTE: EditTextPreference's summary should be set to its value by the activity code. -->
+        <EditTextPreference
+        android:defaultValue="@integer/default_sms_interval"
+        android:key="pref_interval_sms"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="Balance Query Interval (minutes)" />
+    <EditTextPreference
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:defaultValue="@integer/min_sms_interval"
+        android:key="pref_interval_sms_min"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="Balance Query Minimum Interval (minutes)" />
+    <EditTextPreference
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:defaultValue="@integer/default_report_interval"
+        android:key="pref_interval_report"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="Reporting Interval (minutes)" />
+    <EditTextPreference
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:defaultValue="@integer/min_report_interval"
+        android:key="pref_interval_report_min"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="Periodic Reporting Minimum Interval (minutes)" />
+    <EditTextPreference
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:defaultValue="@integer/min_one_report_interval"
+        android:key="pref_interval_report_one_min"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="One Time Reporting Minimum Interval (minutes)" />
+
+    <!-- NOTE: Hide buttons to simplify the UI. Users can touch outside the dialog to
+         dismiss it. -->
+    <!-- NOTE: ListPreference's summary should be set to its value by the activity code. -->
+
+</PreferenceScreen>
