@@ -155,6 +155,10 @@ public class StitchReporter extends Worker {
                                                     }
                                                 });
                                     }
+
+                                    else {
+                                        Log.e(TAG, "Could not log in to the Stitch Client" + task.getException());
+                                    }
                                 }
                             });
                 } catch (Exception e) {
