@@ -1,0 +1,12 @@
+exports = function(arg) {
+  const mongodb = context.services.get("mongodb-atlas");
+  const collection = mongodb.db("watchgate").collection("status");
+
+  return collection
+    .insertOne(arg)
+    .then(result => {
+      const { insertedId } = result;
+      // Do something with the insertedId
+      return `Inserted document with _id: ${insertedId} for instance: ${arg.id} with date: ${arg.date}`;
+   });
+};
