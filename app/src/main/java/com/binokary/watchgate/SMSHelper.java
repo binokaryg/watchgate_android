@@ -39,32 +39,6 @@ public class SMSHelper {
                         Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED;
     }
 
-    public static String readBalanceInfoFromMsgBody(String msgBody, boolean simTypePostpaid) {
-        //Prepaid:
-        //Dear Customer, your current balance is Rs 614.98,Expiry Date is 2020-06-13 23:59:59.
-        //Please dial *1415# to subscribe and query data package.-NT
-
-        //Postpaid:
-        //Dear customer, your due amount is Rs 4,331.43, and your available credit is Rs 6,774.26.
-        //Please dial *1415# to subscribe and query data package.-NT
-        int startIndex = 0;
-        int endIndex = 0;
-        int startIndex2 = 0;
-        int endIndex2 = 0;
-        if (simTypePostpaid) {
-            startIndex = msgBody.indexOf("due amount is Rs ") + 17;
-            endIndex = msgBody.indexOf("and your available credit") - 2;
-            startIndex2 = endIndex + 34;
-            endIndex2 = msgBody.indexOf("Please dial") - 2;
-            return "Due: " + msgBody.substring(startIndex, endIndex) + ", Available Credit: " + msgBody.substring(startIndex2, endIndex2);
-
-        } else {
-            startIndex = msgBody.indexOf("is Rs") + 6;
-            endIndex = msgBody.indexOf("Expiry") - 1;
-            return msgBody.substring(startIndex, endIndex);
-        }
-    }
-
     public static int getPrepaidBalanceFromMsgBody(String msgBody) {
         int balance = -1;
         try {
@@ -111,7 +85,7 @@ public class SMSHelper {
     }
 
     public static List<Integer> getPostpaidBalanceFromMsgBodyRegex(String msgBody){
-        List<Integer> balanceData = new ArrayList();
+        List<Integer> balanceData = new ArrayList<Integer>();
         Pattern pattern = Pattern.compile("Rs\\s(.*?)\\.");
         Matcher matcher = pattern.matcher(msgBody);
         while (matcher.find())
@@ -144,6 +118,12 @@ public class SMSHelper {
             return Integer.parseInt(matched);
         }
         return -1;
+    }
+
+    public static Boolean patternMatches(String msgBody, String regexp) {
+        Pattern pattern = Pattern.compile(regexp);
+        Matcher matcher = pattern.matcher(msgBody);
+        return matcher.matches();
     }
 
 

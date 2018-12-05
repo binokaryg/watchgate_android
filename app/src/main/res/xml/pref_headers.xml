@@ -15,6 +15,10 @@
         android:icon="@drawable/ic_sms_black_24dp"
         android:title="@string/pref_header_query" />
     <header
+        android:fragment="com.binokary.watchgate.SettingsActivity$SMSPreferenceFragment"
+        android:icon="@drawable/ic_sms_black_24dp"
+        android:title="@string/pref_header_sms" />
+    <header
         android:fragment="com.binokary.watchgate.SettingsActivity$VariablePreferenceFragment"
         android:icon="@drawable/ic_code_black_24dp"
         android:title="@string/pref_header_variable" />

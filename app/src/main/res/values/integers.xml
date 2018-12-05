@@ -5,4 +5,6 @@
     <integer name="min_sms_interval">10</integer>
     <integer name="min_report_interval">10</integer>
     <integer name="min_one_report_interval">3</integer>
+    <integer name="pref_sms_pack_min_default">100</integer>
+    <integer name="pref_sms_pack_min_bal_default">100</integer>
 </resources>

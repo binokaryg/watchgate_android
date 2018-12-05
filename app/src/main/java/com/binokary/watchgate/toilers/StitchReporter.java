@@ -81,6 +81,7 @@ public class StitchReporter extends Worker {
                     Integer balance = prefs.getInt(PrefStrings.PREPAID_BALANCE, -1);
                     Integer balanceDue = prefs.getInt(PrefStrings.POSTPAID_BALANCE_DUE, -1);
                     Integer balanceCredit = prefs.getInt(PrefStrings.POSTPAID_BALANCE_CREDIT, -1);
+                    Integer remainingSMS = prefs.getInt(PrefStrings.SMS_PACK_INFO, -1);
 
                     String stitchUpdateFunctionName = mPrefs.getString("pref_stitch_update_func", "updateStatusForObj");
                     Long dateL = System.currentTimeMillis();
@@ -118,9 +119,11 @@ public class StitchReporter extends Worker {
                     bObj.append("data", data);
                     bObj.append("wifiStrength", wifiStrength);
                     bObj.append("carrier", carrierName);
+                    if(remainingSMS > -1) {
+                        bObj.append("remainingSMS", remainingSMS);
+                    }
 
                     arg.add(bObj);
-
 
                     client = Stitch.getDefaultAppClient();
                     client.getAuth().loginWithCredential(new AnonymousCredential()).addOnCompleteListener(
