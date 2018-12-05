@@ -41,23 +41,26 @@
         android:selectAllOnFocus="true"
         android:singleLine="true"
         android:summary="If number of SMS remaining is below this value, new SMS pack will be subscribed"
-        android:title="Critical SMS Remaining" />
+        android:title="Critical SMS Remaining"
+        android:visibility="invisible" />
     <EditTextPreference
         android:defaultValue="@integer/pref_sms_pack_min_bal_default"
-        android:key="pref_sms_bal_min"
         android:dependency="switch_sms_preference"
+        android:key="pref_sms_bal_min"
         android:selectAllOnFocus="true"
         android:singleLine="true"
         android:summary="If main balance is below this value, new SMS pack will not be subscribed"
-        android:title="Critical Balance Remaining" />
+        android:title="Critical Balance Remaining"
+        android:visibility="invisible" />
     <EditTextPreference
         android:defaultValue="@string/pref_sms_sub_default"
-        android:key="pref_sms_sub"
         android:dependency="switch_sms_preference"
+        android:key="pref_sms_sub"
         android:selectAllOnFocus="true"
         android:singleLine="true"
         android:summary="SMS code to subscribe to a SMS pack"
-        android:title="SMS Pack Subscription Code" />
+        android:title="SMS Pack Subscription Code"
+        android:visibility="invisible" />
 
     <!-- NOTE: Hide buttons to simplify the UI. Users can touch outside the dialog to
          dismiss it. -->
