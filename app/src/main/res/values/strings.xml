@@ -31,15 +31,21 @@
     <string name="own_number">9841424262</string>
     <string name="own_number_label">Mobile Number</string>
     <string name="postpaid_switch_title">SIM Type</string>
+    <string name="sms_switch_title">SMS Packs</string>
 
-    <string name="pref_prebalance_regex_default">balance.*?([0-9,]+)</string>
-    <string name="pref_postbalance_due_regex_default">due.*?([0-9,]+)</string>
-    <string name="pref_postbalance_credit_regex_default">credit.*?([0-9,]+)</string>
+    <string name="pref_pre_balance_regex_default">.*current balance.*?([0-9,]+).*</string>
+    <string name="pref_post_balance_due_regex_default">.*your due.*?([0-9,]+).*</string>
+    <string name="pref_post_balance_credit_regex_default">.*available credit.*?([0-9,]+).*</string>
+    <string name="pref_sms_pack_info_regex_default">.*free sms.*?([0-9,]+).*</string>
+    <string name="pref_sms_pack_null_regex_default">.*no free resource.*</string>
     <string name="pref_stitch_update_func_default">updateStatusForObj</string>
     <string name="pref_header_variable">Advanced</string>
-    <string name="pref_header_query">Query Settings</string>
+    <string name="pref_header_query">Balance Query Settings</string>
+    <string name="pref_header_sms">SMS Pack Settings</string>
     <string name="pref_sms_destination_default">1415</string>
     <string name="pref_balance_query_prepaid_default">BL</string>
     <string name="pref_balance_query_postpaid_default">CL</string>
+    <string name="pref_sms_query_default">FR</string>
     <string name="pref_sms_source_default">1415</string>
+    <string name="pref_sms_sub_default">SMS300</string>
 </resources>

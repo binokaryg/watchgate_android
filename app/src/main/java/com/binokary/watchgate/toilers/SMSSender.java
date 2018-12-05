@@ -29,12 +29,12 @@ public class SMSSender extends Worker {
             // Fetch the arguments (and specify default values):
             String recipient = getInputData().getString(KEY_RECIPIENT_ARG);
             String msg = getInputData().getString(KEY_MSG_ARG);
-            Integer minInterval = getInputData().getInt("MIN", 10) * 60 * 1000;
+            Integer minInterval = getInputData().getInt("MIN", 0) * 60 * 1000;
             Boolean oneTime = getInputData().getBoolean("ONETIMEREQUEST", false);
             Long lastBalanceDate = prefs.getLong(PrefStrings.BALANCE_DATE, 0);
             Long date = System.currentTimeMillis();
             if (oneTime || (date - lastBalanceDate > minInterval)) {
-                Log.d(TAG, "Sending balance query sms as a " + (oneTime ? "One Time" : "Periodic") + " request");
+                Log.d(TAG, "Sending sms as a " + (oneTime ? "One Time" : "Periodic") + " request");
                 SmsManager smsManager = SmsManager.getDefault();
                 smsManager.sendTextMessage(recipient, null, msg, null, null);
             } else {

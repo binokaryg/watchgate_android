@@ -6,8 +6,8 @@ android {
         applicationId "com.binokary.watchgate"
         minSdkVersion 21
         targetSdkVersion 27
-        versionCode 12
-        versionName "0.6.1"
+        versionCode 14
+        versionName "0.7.1"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
     }

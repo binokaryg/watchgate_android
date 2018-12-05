@@ -138,7 +138,8 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                 || GeneralPreferenceFragment.class.getName().equals(fragmentName)
                 || IntervalPreferenceFragment.class.getName().equals(fragmentName)
                 || VariablePreferenceFragment.class.getName().equals(fragmentName)
-                || QueryPreferenceFragment.class.getName().equals(fragmentName);
+                || QueryPreferenceFragment.class.getName().equals(fragmentName)
+                || SMSPreferenceFragment.class.getName().equals(fragmentName);
     }
 
     /**
@@ -212,9 +213,11 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             // to their values. When their values change, their summaries are
             // updated to reflect the new value, per the Android Design
             // guidelines.
-            bindPreferenceSummaryToValue(findPreference("pref_prebalance_regex"));
-            bindPreferenceSummaryToValue(findPreference("pref_postbalance_due_regex"));
-            bindPreferenceSummaryToValue(findPreference("pref_postbalance_credit_regex"));
+            bindPreferenceSummaryToValue(findPreference("pref_pre_balance_regex"));
+            bindPreferenceSummaryToValue(findPreference("pref_post_balance_due_regex"));
+            bindPreferenceSummaryToValue(findPreference("pref_post_balance_credit_regex"));
+            bindPreferenceSummaryToValue(findPreference("pref_sms_pack_info_regex"));
+            bindPreferenceSummaryToValue(findPreference("pref_sms_pack_no_regex"));
             bindPreferenceSummaryToValue(findPreference("pref_stitch_update_func"));
         }
 
@@ -244,6 +247,36 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             bindPreferenceSummaryToValue(findPreference("pref_sms_source"));
             bindPreferenceSummaryToValue(findPreference("pref_balance_query_prepaid"));
             bindPreferenceSummaryToValue(findPreference("pref_balance_query_postpaid"));
+        }
+
+        @Override
+        public boolean onOptionsItemSelected(MenuItem item) {
+            int id = item.getItemId();
+            if (id == android.R.id.home) {
+                startActivity(new Intent(getActivity(), SettingsActivity.class));
+                return true;
+            }
+            return super.onOptionsItemSelected(item);
+        }
+    }
+
+    public static class SMSPreferenceFragment extends PreferenceFragment {
+        @Override
+        public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            addPreferencesFromResource(R.xml.pref_smspacks);
+            setHasOptionsMenu(true);
+
+            // Bind the summaries of EditText/List/Dialog/Ringtone preferences
+            // to their values. When their values change, their summaries are
+            // updated to reflect the new value, per the Android Design
+            // guidelines.
+            bindPreferenceSummaryToValue(findPreference("pref_sms_pack_destination"));
+            bindPreferenceSummaryToValue(findPreference("pref_sms_pack_source"));
+            bindPreferenceSummaryToValue(findPreference("pref_sms_query"));
+            bindPreferenceSummaryToValue(findPreference("pref_sms_min"));
+            bindPreferenceSummaryToValue(findPreference("pref_sms_bal_min"));
+            bindPreferenceSummaryToValue(findPreference("pref_sms_sub"));
         }
 
         @Override

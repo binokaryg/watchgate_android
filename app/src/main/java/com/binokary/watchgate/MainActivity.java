@@ -116,6 +116,7 @@ public class MainActivity extends AppCompatActivity {
         PreferenceManager.setDefaultValues(this, R.xml.pref_interval, false);
         PreferenceManager.setDefaultValues(this, R.xml.pref_variables, false);
         PreferenceManager.setDefaultValues(this, R.xml.pref_network, false);
+        PreferenceManager.setDefaultValues(this, R.xml.pref_smspacks, false);
         mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
         //setTitle("Keep BroadcastReceiver Running After App Exit.");

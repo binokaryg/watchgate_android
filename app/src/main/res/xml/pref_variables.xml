@@ -3,23 +3,35 @@
     <!-- NOTE: EditTextPreference accepts EditText attributes. -->
     <!-- NOTE: EditTextPreference's summary should be set to its value by the activity code. -->
         <EditTextPreference
-        android:defaultValue="@string/pref_prebalance_regex_default"
-        android:key="pref_prebalance_regex"
+        android:defaultValue="@string/pref_pre_balance_regex_default"
+        android:key="pref_pre_balance_regex"
         android:selectAllOnFocus="true"
         android:singleLine="true"
         android:title="Prepaid Balance Regex" />
     <EditTextPreference
-        android:defaultValue="@string/pref_postbalance_due_regex_default"
-        android:key="pref_postbalance_due_regex"
+        android:defaultValue="@string/pref_post_balance_due_regex_default"
+        android:key="pref_post_balance_due_regex"
         android:selectAllOnFocus="true"
         android:singleLine="true"
         android:title="Postpaid Balance Due Regex" />
     <EditTextPreference
-        android:defaultValue="@string/pref_postbalance_credit_regex_default"
-        android:key="pref_postbalance_credit_regex"
+        android:defaultValue="@string/pref_post_balance_credit_regex_default"
+        android:key="pref_post_balance_credit_regex"
         android:selectAllOnFocus="true"
         android:singleLine="true"
         android:title="Postpaid Balance Credit Regex" />
+    <EditTextPreference
+        android:defaultValue="@string/pref_sms_pack_info_regex_default"
+        android:key="pref_sms_pack_info_regex"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="SMS Pack Info Regex" />
+    <EditTextPreference
+        android:defaultValue="@string/pref_sms_pack_null_regex_default"
+        android:key="pref_sms_pack_no_regex"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="SMS Pack Null Regex" />
     <EditTextPreference
         android:defaultValue="@string/pref_stitch_update_func_default"
         android:key="pref_stitch_update_func"
