@@ -61,13 +61,32 @@ public class SMSReceiver extends BroadcastReceiver {
                     stats.putLong(PrefStrings.LAST_SMS_IN_DATE, lastUserSMSInTime);
                     stats.apply();
                 }
+                String smsSource = mSharedPreferences.getString("pref_sms_source", "0");
+                if (smsSource == "0") {
+                    Log.e(TAG, "Getting default value for pref_sms_source");
+                }
                 if (smsSender.equals(mSharedPreferences.getString("pref_sms_source", "1415"))) {
 
-                    String prepaidBalanceRegexp = mSharedPreferences.getString("pref_pre_balance_regex", ".*current balance.*?([0-9,]+).*)");
-                    String postpaidBalanceDueRegexp = mSharedPreferences.getString("pref_post_balance_due_regex", ".*your due.*?([0-9,]+).*");
-                    String postpaidBalanceCreditRegexp = mSharedPreferences.getString("pref_post_balance_credit_regex", ".*available credit.*?([0-9,]+).*");
-                    String smsPackQuery = mSharedPreferences.getString("pref_sms_query", "FR");
-                    String smsRecipient = mSharedPreferences.getString("pref_sms_pack_destination", "1415");
+                    String prepaidBalanceRegexp = mSharedPreferences.getString("pref_pre_balance_regex", "0");//".*current balance.*?([0-9,]+).*");
+                    if (prepaidBalanceRegexp == "0") {
+                        Log.e(TAG, "Getting default value for pref_pre_balance_regex");
+                    }
+                    String postpaidBalanceDueRegexp = mSharedPreferences.getString("pref_post_balance_due_regex", "0");// ".*your due.*?([0-9,]+).*");
+                    if (postpaidBalanceDueRegexp == "0") {
+                        Log.e(TAG, "Getting default value for pref_post_balance_due_regex");
+                    }
+                    String postpaidBalanceCreditRegexp = mSharedPreferences.getString("pref_post_balance_credit_regex", "0");// ".*available credit.*?([0-9,]+).*");
+                    if (postpaidBalanceCreditRegexp == "0") {
+                        Log.e(TAG, "Getting default value for pref_post_balance_credit_regex");
+                    }
+                    String smsPackQuery = mSharedPreferences.getString("pref_sms_query", "0");// "FR");
+                    if (smsPackQuery == "0") {
+                        Log.e(TAG, "Getting default value for pref_sms_query");
+                    }
+                    String smsRecipient = mSharedPreferences.getString("pref_sms_pack_destination", "0");// "1415");
+                    if (smsRecipient == "0") {
+                        Log.e(TAG, "Getting default value for pref_sms_pack_destination");
+                    }
 
                     if (SMSHelper.patternMatches(smsBody, prepaidBalanceRegexp)
                             || SMSHelper.patternMatches(smsBody, postpaidBalanceCreditRegexp)) {
@@ -106,7 +125,7 @@ public class SMSReceiver extends BroadcastReceiver {
                         }
 
                         //if SMS Pack is enabled, check
-                        if(checkSMSPack) {
+                        if (checkSMSPack) {
                             Log.d(TAG, "Enqueuing SMS for SMS pack query");
                             WorkerUtils.enqueueOneTimeSMSSendingWork(smsRecipient, smsPackQuery);
                         }
@@ -116,7 +135,7 @@ public class SMSReceiver extends BroadcastReceiver {
                 }//msg from telecom for balance
 
                 //SMS pack info source
-                if (smsSender.equals(mSharedPreferences.getString("pref_sms_pack_source", "")) && checkSMSPack) {
+                if (smsSender.equals(mSharedPreferences.getString("pref_sms_pack_source", "1415")) && checkSMSPack) {
                     String smsPackInfoRegexp = mSharedPreferences.getString("pref_sms_pack_info_regex", ".*free sms.*?([0-9,]+).*");
                     String smsPackNullRegexp = mSharedPreferences.getString("pref_sms_pack_null_regex", ".*no free resource.*");
                     String smsRecipient = mSharedPreferences.getString("pref_sms_pack_destination", "1415");
@@ -126,8 +145,7 @@ public class SMSReceiver extends BroadcastReceiver {
                     try {
                         criticalSMSRemaining = Integer.parseInt(mSharedPreferences.getString("pref_sms_min", "100"));
                         criticalBalanceRemaining = Integer.parseInt(mSharedPreferences.getString("pref_sms_bal_min", "100"));
-                    }
-                    catch(Exception ex){
+                    } catch (Exception ex) {
                         Log.e(TAG, "Error when reading integer values for critical SMS and balance remaining");
 
                     }
@@ -139,11 +157,14 @@ public class SMSReceiver extends BroadcastReceiver {
                             smsRemaining = SMSHelper.getIntFromMsgBodyRegex(smsBody, smsPackInfoRegexp);
                             stats.putInt(PrefStrings.SMS_PACK_INFO, smsRemaining);
                             stats.apply();
+
+                            /*
                             //SMS remaining should be below critical and balance should be equal or above critical
                             if (smsRemaining < criticalSMSRemaining && mainBalance >= criticalBalanceRemaining) {
                                 Log.d(TAG, "Enqueuing SMS for SMS Pack subscription.");
                                 WorkerUtils.enqueueOneTimeSMSSendingWork(smsRecipient, smsPackMsg);
                             }
+                            */
                         } catch (Exception ex) {
                             Log.e(TAG, "Error when reading SMS pack info: " + smsBody + " Error: " + ex.getMessage());
                         }
@@ -152,14 +173,16 @@ public class SMSReceiver extends BroadcastReceiver {
                         stats.putInt(PrefStrings.SMS_PACK_INFO, 0);
                         stats.apply();
 
+                        /*
                         //SMS remaining should be below critical and balance should be equal or above critical
                         if (smsRemaining < criticalSMSRemaining && mainBalance >= criticalBalanceRemaining) {
                             WorkerUtils.enqueueOneTimeSMSSendingWork(smsRecipient, smsPackMsg);
                         }
+                        */
                     }
                 }
                 //Make one time update report after getting message from Balance or SMS Pack info
-                if(isBalanceInfo || isSmsPackInfo) {
+                if (isBalanceInfo || isSmsPackInfo) {
                     String instanceName = mSharedPreferences.getString("instance_name", "none");
                     String reportOneIntervalMinString = mSharedPreferences.getString("pref_interval_report_one_min", "3");
                     int reportOneIntervalMin = 3;
@@ -171,7 +194,7 @@ public class SMSReceiver extends BroadcastReceiver {
 
                     //Disabling interval check for SMS Pack info reporting because it will immediately occur
                     // after balance info reporting
-                    if(isSmsPackInfo) {
+                    if (isSmsPackInfo) {
                         reportOneIntervalMin = 0;
                     }
                     WorkerUtils.enqueueOneTimeStitchReportingWork(instanceName, reportOneIntervalMin);

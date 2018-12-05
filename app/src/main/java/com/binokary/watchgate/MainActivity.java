@@ -112,11 +112,11 @@ public class MainActivity extends AppCompatActivity {
         Button stopButton = (Button) findViewById(R.id.buttonStop);
         Button infoButton = (Button) findViewById(R.id.buttonInfo);
 
-        PreferenceManager.setDefaultValues(this, R.xml.pref_general, false);
-        PreferenceManager.setDefaultValues(this, R.xml.pref_interval, false);
-        PreferenceManager.setDefaultValues(this, R.xml.pref_variables, false);
-        PreferenceManager.setDefaultValues(this, R.xml.pref_network, false);
-        PreferenceManager.setDefaultValues(this, R.xml.pref_smspacks, false);
+        PreferenceManager.setDefaultValues(this, R.xml.pref_general, true);
+        PreferenceManager.setDefaultValues(this, R.xml.pref_interval, true);
+        PreferenceManager.setDefaultValues(this, R.xml.pref_variables, true);
+        PreferenceManager.setDefaultValues(this, R.xml.pref_network, true);
+        PreferenceManager.setDefaultValues(this, R.xml.pref_smspacks, true);
         mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
         //setTitle("Keep BroadcastReceiver Running After App Exit.");
