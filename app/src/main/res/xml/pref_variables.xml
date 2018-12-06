@@ -21,6 +21,12 @@
         android:singleLine="true"
         android:title="Postpaid Balance Credit Regex" />
     <EditTextPreference
+        android:defaultValue="@string/pref_balance_topup_regex_default"
+        android:key="pref_balance_topup_regex"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="Balance Top Up Message Regex" />
+    <EditTextPreference
         android:defaultValue="@string/pref_sms_pack_info_regex_default"
         android:key="pref_sms_pack_info_regex"
         android:selectAllOnFocus="true"
@@ -32,6 +38,12 @@
         android:selectAllOnFocus="true"
         android:singleLine="true"
         android:title="SMS Pack Null Regex" />
+    <EditTextPreference
+        android:defaultValue="@string/pref_sms_pack_active_default"
+        android:key="pref_sms_pack_active"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="SMS Pack Activated Message Regex" />
     <EditTextPreference
         android:defaultValue="@string/pref_stitch_update_func_default"
         android:key="pref_stitch_update_func"
