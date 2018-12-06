@@ -34,7 +34,8 @@
         android:singleLine="true"
         android:summary="Body of SMS to be sent for querying SMS balance"
         android:title="SMS Query Message" />
-    <EditTextPreference
+    <!--Preferences below is for subscribing an SMS pack, TODO_MAYBE_LATER-->
+    <!--<EditTextPreference
         android:defaultValue="@integer/pref_sms_pack_min_bal_default"
         android:dependency="switch_sms_preference"
         android:key="pref_sms_min"
@@ -60,7 +61,7 @@
         android:singleLine="true"
         android:summary="SMS code to subscribe to a SMS pack"
         android:title="SMS Pack Subscription Code"
-        android:visibility="invisible" />
+        android:visibility="invisible" />-->
 
     <!-- NOTE: Hide buttons to simplify the UI. Users can touch outside the dialog to
          dismiss it. -->
