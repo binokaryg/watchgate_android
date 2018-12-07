@@ -216,7 +216,8 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             bindPreferenceSummaryToValue(findPreference("pref_pre_balance_regex"));
             bindPreferenceSummaryToValue(findPreference("pref_post_balance_due_regex"));
             bindPreferenceSummaryToValue(findPreference("pref_post_balance_credit_regex"));
-            bindPreferenceSummaryToValue(findPreference("pref_balance_topup_regex"));
+            bindPreferenceSummaryToValue(findPreference("pref_pre_balance_top_up_regex"));
+            bindPreferenceSummaryToValue(findPreference("pref_post_balance_top_up_regex"));
             bindPreferenceSummaryToValue(findPreference("pref_sms_pack_info_regex"));
             bindPreferenceSummaryToValue(findPreference("pref_sms_pack_no_regex"));
             bindPreferenceSummaryToValue((findPreference(("pref_sms_pack_active"))));

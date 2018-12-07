@@ -261,6 +261,23 @@
         </TableRow>
 
         <TableRow
+            android:id="@+id/SMSPackMsg"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1">
+
+            <TextView
+                android:id="@+id/textViewSMSPack"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:layout_marginTop="4dp"
+                android:layout_weight="1"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/tableLayout" />
+        </TableRow>
+
+        <TableRow
             android:id="@+id/SMSMsg"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -276,6 +293,8 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/tableLayout" />
         </TableRow>
+
+
 
     </TableLayout>
 

@@ -36,7 +36,8 @@
     <string name="pref_pre_balance_regex_default">.*current balance.*?([0-9,]+).*</string>
     <string name="pref_post_balance_due_regex_default">.*your due.*?([0-9,]+).*</string>
     <string name="pref_post_balance_credit_regex_default">.*available credit.*?([0-9,]+).*</string>
-    <string name="pref_balance_topup_regex_default">.*new balance.*?([0-9,]+).*</string>
+    <string name="pref_pre_balance_top_up_regex_default">.*new balance.*?([0-9,]+).*</string>
+    <string name="pref_post_balance_top_up_regex_default">.*has been credited.*</string>
     <string name="pref_sms_pack_info_regex_default">.*free sms.*?([0-9,]+).*</string>
     <string name="pref_sms_pack_active_default">.*SMS.*activated.*</string>
     <string name="pref_sms_pack_null_regex_default">.*no free resource.*</string>
