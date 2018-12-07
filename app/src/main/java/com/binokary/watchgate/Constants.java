@@ -33,6 +33,7 @@ public final class Constants {
     public static final String REPORTTAG = "REPORT";
     public static final String SMSONETAG = "SMS.ONE";
     public static final String REPORTONETAG = "REPORT.ONE";
+    public static final String REPORTONEWAITTAG = "REPORT.ONE.WAIT";
     public static final int STITCH_REPORT_DELAY_INTERVAL_MINS = 15;
     public static final int SEND_SMS_MIN_INTERVAL_MINS = 15;
     public static final String PREF_STATS = "gate_stats";

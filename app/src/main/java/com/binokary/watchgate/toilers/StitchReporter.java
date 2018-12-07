@@ -102,14 +102,16 @@ public class StitchReporter extends Worker {
                     Date lastSMSInDate = new Date(lastSMSInDateL);
 
                     bObj.append("date", date);
-                    bObj.append("balanceDate", balanceDate);
                     bObj.append("lastSMSInDate", lastSMSInDate);
                     bObj.append("id", instance);
-                    if (isPostpaid) {
-                        bObj.append("balanceDue", balanceDue);
-                        bObj.append("balanceCredit", balanceCredit);
-                    } else {
-                        bObj.append("balance", balance);
+                    if(balanceDateL > 0) { //Only if there is balance date
+                        bObj.append("balanceDate", balanceDate);
+                        if (isPostpaid) {
+                            bObj.append("balanceDue", balanceDue);
+                            bObj.append("balanceCredit", balanceCredit);
+                        } else {
+                            bObj.append("balance", balance);
+                        }
                     }
 
                     bObj.append("battery",battery);
