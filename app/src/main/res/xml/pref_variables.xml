@@ -21,11 +21,17 @@
         android:singleLine="true"
         android:title="Postpaid Balance Credit Regex" />
     <EditTextPreference
-        android:defaultValue="@string/pref_balance_topup_regex_default"
-        android:key="pref_balance_topup_regex"
+        android:defaultValue="@string/pref_pre_balance_top_up_regex_default"
+        android:key="pref_pre_balance_top_up_regex"
         android:selectAllOnFocus="true"
         android:singleLine="true"
-        android:title="Balance Top Up Message Regex" />
+        android:title="Prepaid Balance Top Up Message Regex" />
+    <EditTextPreference
+        android:defaultValue="@string/pref_post_balance_top_up_regex_default"
+        android:key="pref_post_balance_top_up_regex"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="Postpaid Balance Top Up Message Regex" />
     <EditTextPreference
         android:defaultValue="@string/pref_sms_pack_info_regex_default"
         android:key="pref_sms_pack_info_regex"

@@ -134,7 +134,7 @@ public class MainActivity extends AppCompatActivity {
                 StatsHelper.CheckAndUpdateStats(getApplicationContext());
                 UpdateViews();
                 String smsQueryMsg = mSharedPreferences.getBoolean("switch_preference_1", false)
-                        ? mSharedPreferences.getString("pref_balance_query_postpaid", "CL")
+                        ? mSharedPreferences.getString("pref_balance_query_postpaid", "CB")
                         : mSharedPreferences.getString("pref_balance_query_prepaid", "BL");
                 SMSHelper.sendSms(mSharedPreferences.getString("pref_sms_destination", "1415"), smsQueryMsg);
                 Toast.makeText(getApplicationContext(), R.string.toast_sending_sms + (mSharedPreferences.getBoolean("switch_preference_1", true) ? "Postpaid" : "Prepaid"), Toast.LENGTH_SHORT).show();
@@ -203,7 +203,7 @@ public class MainActivity extends AppCompatActivity {
                             Log.d(TAG, "Work state of gatewatch" + i + " : " + listOfWorkStatuses.get(i).getState());
                         }
                     });
-                    int clearStatus = WorkerUtils.ClearTasks(Constants.SMSTAG);
+                    int clearStatus = WorkerUtils.clearTasks(Constants.SMSTAG);
                     Log.d(TAG, " SMS sending tasks cleared " + clearStatus);
 
                     mWorkLiveData = mWorkManager.getStatusesByTag(Constants.REPORTTAG);
@@ -212,7 +212,7 @@ public class MainActivity extends AppCompatActivity {
                             Log.d(TAG, "Work state of gatewatch" + i + " : " + listOfWorkStatuses.get(i).getState());
                         }
                     });
-                    clearStatus = WorkerUtils.ClearTasks(Constants.SMSTAG);
+                    clearStatus = WorkerUtils.clearTasks(Constants.REPORTTAG);
                     Log.d(TAG, " Stitch reporting tasks cleared " + clearStatus);
                 }
             }
@@ -281,6 +281,20 @@ public class MainActivity extends AppCompatActivity {
                         for (int i = 0; i < listOfWorkStatuses.size(); i++) {
                             Log.d(TAG, "Work state of Stitch Reporters " + i + " : " + listOfWorkStatuses.get(i).getState());
                             infoBuilder.append("S1R" + i);
+                            infoBuilder.append(": ");
+                            infoBuilder.append(listOfWorkStatuses.get(i).getState());
+                            infoBuilder.append("\n");
+                        }
+                        textView.setText(infoBuilder);
+                    });
+
+                    //One Time Report Workers with Wait time
+                    Log.d(TAG, "Getting workers with Tag: " + Constants.REPORTONEWAITTAG + "\n");
+                    mWorkLiveData = mWorkManager.getStatusesByTag(Constants.REPORTONEWAITTAG);
+                    mWorkLiveData.observe(MainActivity.this, listOfWorkStatuses -> {
+                        for (int i = 0; i < listOfWorkStatuses.size(); i++) {
+                            Log.d(TAG, "Work state of Stitch Reporters " + i + " : " + listOfWorkStatuses.get(i).getState());
+                            infoBuilder.append("S1WR" + i);
                             infoBuilder.append(": ");
                             infoBuilder.append(listOfWorkStatuses.get(i).getState());
                             infoBuilder.append("\n");
@@ -572,6 +586,13 @@ public class MainActivity extends AppCompatActivity {
             textV1.setText("Last SMS in: " + msg);
         });
     }
+    public void updateSMSPackView(final String msg) {
+        MainActivity.this.runOnUiThread(() -> {
+            TextView textV1 = findViewById(R.id.textViewSMSPack);
+            textV1.setText("SMS Pack: " + msg);
+        });
+    }
+
 
 
 }

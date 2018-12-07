@@ -31,6 +31,7 @@ import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
 
 import static com.binokary.watchgate.Constants.REPORTONETAG;
+import static com.binokary.watchgate.Constants.REPORTONEWAITTAG;
 import static com.binokary.watchgate.Constants.REPORTTAG;
 import static com.binokary.watchgate.Constants.SMSONETAG;
 import static com.binokary.watchgate.Constants.SMSTAG;
@@ -100,7 +101,7 @@ public final class WorkerUtils {
 
     }
 
-    public static void enqueueOneTimeStitchReportingWork(String instance, Integer minOneMinutes) {
+    public static void enqueueOneTimeStitchReportingWork(String instance, Integer minOneMinutes, Integer initialDelayInSeconds) {
 
         Data stitchReportData = new Data.Builder()
                 .putString("INSTANCE", instance)
@@ -112,18 +113,21 @@ public final class WorkerUtils {
                 .setRequiredNetworkType(NetworkType.CONNECTED)
                 .build();
 
+        //Use waiting tag if initial Delay is more than 0
+        String tag = initialDelayInSeconds > 0 ? REPORTONEWAITTAG : REPORTONETAG;
+
         final OneTimeWorkRequest stitchReportingRequest =
                 new OneTimeWorkRequest.Builder(StitchReporter.class)
                         .setConstraints(stitchReportingConstraints)
                         .setInputData(stitchReportData)
-                        .addTag(REPORTONETAG)
+                        .setInitialDelay(initialDelayInSeconds, TimeUnit.SECONDS)
+                        .addTag(tag)
                         .build();
         Log.d(TAG, "Enqueuing One Time Stitch Reporting Task for instance " + instance + " with TAG: " + REPORTONETAG);
         WorkManager.getInstance().enqueue(stitchReportingRequest);
-
     }
 
-    public static int ClearTasks(String taskTAG) {
+    public static int clearTasks(String taskTAG) {
         try {
             WorkManager.getInstance().cancelAllWorkByTag(taskTAG);
             WorkManager.getInstance().pruneWork();
