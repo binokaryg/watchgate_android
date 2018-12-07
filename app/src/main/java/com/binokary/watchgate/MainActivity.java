@@ -203,7 +203,7 @@ public class MainActivity extends AppCompatActivity {
                             Log.d(TAG, "Work state of gatewatch" + i + " : " + listOfWorkStatuses.get(i).getState());
                         }
                     });
-                    int clearStatus = WorkerUtils.ClearTasks(Constants.SMSTAG);
+                    int clearStatus = WorkerUtils.clearTasks(Constants.SMSTAG);
                     Log.d(TAG, " SMS sending tasks cleared " + clearStatus);
 
                     mWorkLiveData = mWorkManager.getStatusesByTag(Constants.REPORTTAG);
@@ -212,7 +212,7 @@ public class MainActivity extends AppCompatActivity {
                             Log.d(TAG, "Work state of gatewatch" + i + " : " + listOfWorkStatuses.get(i).getState());
                         }
                     });
-                    clearStatus = WorkerUtils.ClearTasks(Constants.SMSTAG);
+                    clearStatus = WorkerUtils.clearTasks(Constants.SMSTAG);
                     Log.d(TAG, " Stitch reporting tasks cleared " + clearStatus);
                 }
             }
@@ -281,6 +281,20 @@ public class MainActivity extends AppCompatActivity {
                         for (int i = 0; i < listOfWorkStatuses.size(); i++) {
                             Log.d(TAG, "Work state of Stitch Reporters " + i + " : " + listOfWorkStatuses.get(i).getState());
                             infoBuilder.append("S1R" + i);
+                            infoBuilder.append(": ");
+                            infoBuilder.append(listOfWorkStatuses.get(i).getState());
+                            infoBuilder.append("\n");
+                        }
+                        textView.setText(infoBuilder);
+                    });
+
+                    //One Time Report Workers with Wait time
+                    Log.d(TAG, "Getting workers with Tag: " + Constants.REPORTONEWAITTAG + "\n");
+                    mWorkLiveData = mWorkManager.getStatusesByTag(Constants.REPORTONEWAITTAG);
+                    mWorkLiveData.observe(MainActivity.this, listOfWorkStatuses -> {
+                        for (int i = 0; i < listOfWorkStatuses.size(); i++) {
+                            Log.d(TAG, "Work state of Stitch Reporters " + i + " : " + listOfWorkStatuses.get(i).getState());
+                            infoBuilder.append("S1WR" + i);
                             infoBuilder.append(": ");
                             infoBuilder.append(listOfWorkStatuses.get(i).getState());
                             infoBuilder.append("\n");
@@ -572,6 +586,13 @@ public class MainActivity extends AppCompatActivity {
             textV1.setText("Last SMS in: " + msg);
         });
     }
+    public void updateSMSPackView(final String msg) {
+        MainActivity.this.runOnUiThread(() -> {
+            TextView textV1 = findViewById(R.id.textViewSMSPack);
+            textV1.setText("SMS Pack: " + msg);
+        });
+    }
+
 
 
 }

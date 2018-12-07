@@ -20,6 +20,7 @@ public final class PrefStrings {
     public static final String COUNT_SMS_IN = "countSMSIn";
     public static final String LAST_SMS_IN_DATE = "lastSMSInDate";
     public static final String SMS_PACK_INFO = "smsPackInfo";
+    public static final String SMS_PACK_INFO_DATE = "smsPackInfoDate";
 
     private PrefStrings() {
     }
