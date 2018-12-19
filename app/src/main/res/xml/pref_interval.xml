@@ -40,6 +40,14 @@
         android:selectAllOnFocus="true"
         android:singleLine="true"
         android:title="One Time Reporting Minimum Interval (minutes)" />
+    <EditTextPreference
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:defaultValue="@integer/one_time_report_wait"
+        android:key="pref_wait_report_one_time"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="One Time Reporting Waiting Time (seconds)" />
 
     <!-- NOTE: Hide buttons to simplify the UI. Users can touch outside the dialog to
          dismiss it. -->

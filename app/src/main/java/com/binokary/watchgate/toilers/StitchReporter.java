@@ -75,6 +75,7 @@ public class StitchReporter extends Worker {
 
                     String instance = getInputData().getString("INSTANCE");
                     Long balanceDateL = prefs.getLong(PrefStrings.BALANCE_DATE, 0);
+                    Long smsPackInfoDate = prefs.getLong(PrefStrings.SMS_PACK_INFO_DATE, 0);
 
                     boolean isPostpaid = mPrefs.getBoolean("switch_preference_1", false);
                     Log.d(TAG, "Is Postpaid ? " + isPostpaid);
@@ -123,6 +124,7 @@ public class StitchReporter extends Worker {
                     bObj.append("carrier", carrierName);
                     if(remainingSMS > -1) {
                         bObj.append("remainingSMS", remainingSMS);
+                        bObj.append("smsPackInfoDate", smsPackInfoDate);
                     }
 
                     arg.add(bObj);
