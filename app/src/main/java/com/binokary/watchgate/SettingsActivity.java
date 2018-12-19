@@ -189,6 +189,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             bindPreferenceSummaryToValue(findPreference("pref_interval_report"));
             bindPreferenceSummaryToValue(findPreference("pref_interval_report_min"));
             bindPreferenceSummaryToValue(findPreference("pref_interval_report_one_min"));
+            bindPreferenceSummaryToValue(findPreference("pref_wait_report_one_time"));
         }
 
         @Override

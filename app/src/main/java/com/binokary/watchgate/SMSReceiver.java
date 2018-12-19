@@ -225,18 +225,22 @@ public class SMSReceiver extends BroadcastReceiver {
                 if (isBalanceInfo || isSmsPackInfo) {
                     String instanceName = mSharedPreferences.getString("instance_name", "none");
                     String reportOneIntervalMinString = mSharedPreferences.getString("pref_interval_report_one_min", "3");
+                    String reportOneWaitMinString = mSharedPreferences.getString("pref_wait_report_one_time", "180");
                     int reportOneIntervalMin = 3;
+                    int reportOneWaitTime = 180;
                     int initialDelayInSeconds = 0;
                     try {
                         reportOneIntervalMin = Integer.parseInt(reportOneIntervalMinString);
+                        reportOneWaitTime = Integer.parseInt(reportOneWaitMinString);
+
                     } catch (Exception ex) {
                         Log.e("Error parsing integer: ", ex.getMessage());
                     }
 
                     if (checkSMSPack) { //If SMS Pack check is enabled
                         if (isBalanceInfo || isTopUpInfo) { //If it is balance info or top up info
-                            //Wait for 180 seconds for new SMS Pack message or new Balance info message before reporting
-                            initialDelayInSeconds = 180;
+                            //Wait for 180 seconds for new SMS Pack message or new Balance info message before reporting,
+                            initialDelayInSeconds = reportOneWaitTime;
                         }
                     }
 
