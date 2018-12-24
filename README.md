@@ -29,17 +29,29 @@ Install the generated apk in the phone that you want to monitor (should be Andro
 - Reporting Interval (minutes, default: 30): How often you want to report your stats to the server. Minimum is 15 minutes.
 - Periodic Reporting Minimum Interval (minutes, default: 10): The app will not allow scheduled update requests to the server until these many minutes have passed after the previous request. Sometimes, if the phone has been offline for a long time, many periodic (scheduled) update requests may start one after another as soon as the phone gets online. We keep this interval so that the server is not overwhelmed.
 - One Time Reporting Minimum Interval (minutes, default: 3): The app will not allow any update request to the server until these many minutes have passed after the previous request. One time reporting happens when user specifically updates (using button with refresh icon), or new balance info is available.
+- One Time Reporting Initial Wait Time (seconds, default: 180): The app will wait for the specified seconds before starting the task of one time reporting messages under certain conditions, such as SMS pack check is enabled and a new message is identfied as a balance information or a sms pack information (determined using regex check, see [Advanced](#advanced)).
 
-#### Query Settings
+#### Balance Query Settings
 - Query SMS Destination: The number (usually shortcode), where you want to send balance query SMS to.
 - Balance Info SMS Source: The number (usually shortcode), from where you get the balance information.
-- Balance Query Message (Prepaid): The message to be sent to query SMS for prepaid mobiles.
-- Balance Query Message (Postpaid): The message to be sent to query SMS for postpaid mobiles.
+- Balance Query Message (Prepaid): The message to be sent to query SMS for prepaid mobiles. (e.g. BL)
+- Balance Query Message (Postpaid): The message to be sent to query SMS for postpaid mobiles. (e.g. CB)
+
+#### SMS Pack Settings
+- SMS Packs: Enable if you want to check and report the status of SMS packs.
+- Query SMS Destination: The number (usually shortcode), where you want to send SMS pack query SMS to.
+- SMS Info SMS Source: The number (usually shortcode), from where you get the SMS pack information.
+- SMS Query Message: The message to be sent to query SMS pack for prepaid mobiles. (e.g. SMS300)
 
 #### Advanced
-- Prepaid Balance Regex: Regex for balance amount to be matched against the balance message on a prepaid system.
-- Postpaid Balance Due Regex: Regex for balance due amount to be matched against the balance message on a postpaid system.
-- Postpaid Balance Credit Regex: Regex for balance credit available amount to be matched against the balance message on a postpaid system.
+- Prepaid Balance Regex: Regex for balance amount to be matched against the balance message on a prepaid plan.
+- Postpaid Balance Due Regex: Regex for balance due amount to be matched against the balance message on a postpaid plan.
+- Postpaid Balance Credit Regex: Regex for balance credit available amount to be matched against the balance message on a postpaid plan.
+- Prepaid Balance Top Up Message Regex: Regex for new balance amount as specified in the top up success message on a prepaid plan.
+- Postpaid Balance Top Up Message Regex: Regex for identifying that topup was successful (without new balance information), on a postpaid plan.
+- SMS Pack Info Regex: Regex for number of SMS available in a SMS pack info message.
+- SMS Pack Null Regex: Regex for identifying that there is no SMS pack plan active or available.
+- SMS Pack Activated Message Regex: Regex for identifying that SMS pack subscription was successful.
 - Stitch Update Function: In case you have named your stitch app function name differently, update it here.
 
 ### iv. Start Reporting
