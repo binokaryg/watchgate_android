@@ -211,8 +211,18 @@ public class SMSReceiver extends BroadcastReceiver {
                         }
                     } else if (SMSHelper.patternMatches(smsBody, smsPackActiveRegexp)) {
                         Log.d(TAG, "Found SMS with SMS Pack activation info");
-                        Log.d(TAG, "Enqueuing SMS for SMS pack query");
-                        WorkerUtils.enqueueOneTimeSMSSendingWork(smsRecipient, smsPackQuery);
+                        Log.d(TAG, "Enqueuing SMS for Balance query, which should check SMS pack later");
+                        if(isPostpaid) {
+                            String postpaidBalanceQueryDestination = mSharedPreferences.getString("pref_sms_destination", "1415");
+                            String postpaidBalanceQuery = mSharedPreferences.getString("pref_balance_query_postpaid", "CB");
+                            WorkerUtils.enqueueOneTimeSMSSendingWork(postpaidBalanceQueryDestination, postpaidBalanceQuery);
+                        }
+                        else
+                        {
+                            String prepaidBalanceQueryDestination = mSharedPreferences.getString("pref_sms_destination", "1415");
+                            String prepaidBalanceQuery = mSharedPreferences.getString("pref_balance_query_prepaid", "BL");
+                            WorkerUtils.enqueueOneTimeSMSSendingWork(prepaidBalanceQueryDestination, prepaidBalanceQuery);
+                        }
 
                         try {
                             MainActivity.getInstance().updateSMSPackView("Subscribed");
