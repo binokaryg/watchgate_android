@@ -4,6 +4,7 @@ import android.annotation.TargetApi;
 import android.app.DownloadManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
@@ -16,6 +17,7 @@ import android.preference.PreferenceActivity;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.preference.RingtonePreference;
+import android.preference.SwitchPreference;
 import android.support.v7.app.ActionBar;
 import android.text.TextUtils;
 import android.view.MenuItem;
@@ -139,7 +141,8 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                 || IntervalPreferenceFragment.class.getName().equals(fragmentName)
                 || VariablePreferenceFragment.class.getName().equals(fragmentName)
                 || QueryPreferenceFragment.class.getName().equals(fragmentName)
-                || SMSPreferenceFragment.class.getName().equals(fragmentName);
+                || SMSPreferenceFragment.class.getName().equals(fragmentName)
+                || NotificationsPreferenceFragment.class.getName().equals(fragmentName);
     }
 
     /**
@@ -261,6 +264,43 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                 return true;
             }
             return super.onOptionsItemSelected(item);
+        }
+    }
+
+    public static class NotificationsPreferenceFragment extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener {
+        @Override
+        public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            addPreferencesFromResource(R.xml.pref_notifications);
+            setHasOptionsMenu(true);
+
+        }
+
+        @Override
+        public void onResume() {
+            super.onResume();
+            // Set up a listener whenever a key changes
+            getPreferenceScreen().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
+        }
+
+        @Override
+        public void onPause() {
+            super.onPause();
+            // Set up a listener whenever a key changes
+            getPreferenceScreen().getSharedPreferences().unregisterOnSharedPreferenceChangeListener(this);
+        }
+
+        @Override
+        public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+            // just update all
+            SwitchPreference sp = (SwitchPreference) findPreference("switch_preference_notification");
+            if(sp.isChecked()) {
+                sp.setSummary("on");
+            }
+            else {
+                sp.setSummary("off");// required or will not update
+            }            //lp.setSummary(getString(R.string.pref_yourKey) + ": %s");
+
         }
     }
 

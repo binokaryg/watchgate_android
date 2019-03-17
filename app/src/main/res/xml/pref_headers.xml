@@ -22,5 +22,9 @@
         android:fragment="com.binokary.watchgate.SettingsActivity$VariablePreferenceFragment"
         android:icon="@drawable/ic_code_black_24dp"
         android:title="@string/pref_header_variable" />
+    <header
+        android:fragment="com.binokary.watchgate.SettingsActivity$NotificationsPreferenceFragment"
+        android:icon="@drawable/ic_notifications_black_24dp"
+        android:title="Notifications" />
 
 </preference-headers>

@@ -2,7 +2,10 @@ package com.binokary.watchgate;
 
 import android.Manifest;
 import android.app.AlertDialog;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.arch.lifecycle.LiveData;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -23,11 +26,25 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.binokary.watchgate.toilers.WorkerUtils;
+import com.google.android.gms.tasks.Continuation;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
+import com.google.firebase.messaging.FirebaseMessaging;
+import com.mongodb.lang.NonNull;
+import com.mongodb.stitch.android.core.Stitch;
+import com.mongodb.stitch.android.core.StitchAppClient;
+import com.mongodb.stitch.android.core.auth.StitchUser;
+import com.mongodb.stitch.android.services.fcm.FcmServicePushClient;
+import com.mongodb.stitch.core.auth.providers.anonymous.AnonymousCredential;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -64,6 +81,8 @@ public class MainActivity extends AppCompatActivity {
 
     static final String API_URL = "http://10.0.2.2:3000/api/";
     private long lastSmsInTime = 0;
+
+    private StitchAppClient stitchClient;
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -314,6 +333,58 @@ public class MainActivity extends AppCompatActivity {
             showRequestPermissionsInfoAlertDialog();
         }
         mUserMobilePhone = mSharedPreferences.getString(PREF_USER_MOBILE_PHONE, "");
+
+
+        this.stitchClient = Stitch.getDefaultAppClient();
+
+        final FcmServicePushClient pushClient =
+                this.stitchClient.getPush().getClient(FcmServicePushClient.factory, "gcm");
+
+        progressBar = (ProgressBar) findViewById(R.id.progressBar);
+        progressBar.setIndeterminate(true);
+
+        if (android.os.Build.VERSION.SDK_INT >= 26) {
+            // For Android SDK 26 and above, it is necessary to create a channel to create notifications.
+            NotificationManager manager =
+                    (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            NotificationChannel channel = new NotificationChannel("channel_id",
+                    "channel_name", NotificationManager.IMPORTANCE_HIGH);
+            manager.createNotificationChannel(channel);
+        }
+
+        FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(MainActivity.this, new OnSuccessListener<InstanceIdResult>() {
+
+
+            @Override
+            public void onSuccess(InstanceIdResult instanceIdResult) {
+                String mToken = instanceIdResult.getToken();
+                Log.d("Token", mToken);
+
+                stitchClient.getAuth().loginWithCredential(new AnonymousCredential()
+                ).continueWithTask(new Continuation<StitchUser, Task<Void>>() {
+                    @Override
+                    public Task<Void> then(@NonNull Task<StitchUser> task) throws Exception {
+
+
+                        return pushClient.register(mToken);
+                    }
+                }).addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull final Task<Void> task) {
+                        if (!task.isSuccessful()) {
+                            Log.d(TAG, "Registration failed: " + task.getException());
+                            Toast.makeText(getApplicationContext(), "Error registering client for Firebase.", Toast.LENGTH_LONG).show();
+                            return;
+                        }
+
+                        Log.d(TAG, "Registration completed");
+                        Toast.makeText(getApplicationContext(), "Successfully registered client for Firebase.", Toast.LENGTH_SHORT).show();
+                        progressBar.setVisibility(View.INVISIBLE);
+                    }
+                });
+            }
+        });
+
     }
 
     protected void onDestroy() {
@@ -586,6 +657,7 @@ public class MainActivity extends AppCompatActivity {
             textV1.setText("Last SMS in: " + msg);
         });
     }
+
     public void updateSMSPackView(final String msg) {
         MainActivity.this.runOnUiThread(() -> {
             TextView textV1 = findViewById(R.id.textViewSMSPack);
@@ -593,6 +665,52 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Called when the user subscribes to specific push notification topics.
+     * The method is the onClick method.
+     *
+     * @param view
+     */
+    public void toggleSubscription(View view) {
+
+        if (!stitchClient.getAuth().isLoggedIn()) {
+            Log.e(TAG, "Not Logged In.");
+            Toast.makeText(getApplicationContext(), "Error: Not logged in.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        CheckBox checkBox = (CheckBox) view;
+        final String topic = "topic1";
+        Log.d(TAG, (String) checkBox.getText());
+
+        if (checkBox.isChecked()) {
+            FirebaseMessaging.getInstance().subscribeToTopic(topic).addOnCompleteListener(new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull final Task<Void> task) {
+                    if (!task.isSuccessful()) {
+                        Log.d(TAG, "Error subscribing to topic " + task.getException());
+                        return;
+                    }
+
+                    Log.d(TAG, "Subscribed to topic " + topic);
+                    Toast.makeText(getApplicationContext(), "Subscribed to topic " + topic, Toast.LENGTH_LONG).show();
+                }
+            });
+        } else {
+            FirebaseMessaging.getInstance().unsubscribeFromTopic(topic).addOnCompleteListener(new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull final Task<Void> task) {
+                    if (!task.isSuccessful()) {
+                        Log.d(TAG, "Error unsubscribing from topic " + task.getException());
+                        return;
+                    }
+
+                    Log.d(TAG, "Unsubscribed from topic " + topic);
+                    Toast.makeText(getApplicationContext(), "Unsubscribed from topic " + topic, Toast.LENGTH_LONG).show();
+                }
+            });
+        }
+    }
 
 
 }

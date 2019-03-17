@@ -364,6 +364,14 @@
             android:layout_weight="1"
             android:text="INFO" />
 
+        <CheckBox
+            android:id="@+id/checkBox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:onClick="toggleSubscription"
+            android:text="Subscribe" />
+
     </LinearLayout>
 
 </android.support.constraint.ConstraintLayout>
