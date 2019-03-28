@@ -680,8 +680,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         CheckBox checkBox = (CheckBox) view;
-        final String topic = "topic1";
-        Log.d(TAG, (String) checkBox.getText());
+        final String topic = mSharedPreferences.getString("instance_name", "none");
 
         if (checkBox.isChecked()) {
             FirebaseMessaging.getInstance().subscribeToTopic(topic).addOnCompleteListener(new OnCompleteListener<Void>() {

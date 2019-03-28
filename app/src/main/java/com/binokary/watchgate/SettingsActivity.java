@@ -1,14 +1,10 @@
 package com.binokary.watchgate;
 
 import android.annotation.TargetApi;
-import android.app.DownloadManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
-import android.media.Ringtone;
-import android.media.RingtoneManager;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.ListPreference;
@@ -16,11 +12,16 @@ import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
-import android.preference.RingtonePreference;
 import android.preference.SwitchPreference;
 import android.support.v7.app.ActionBar;
-import android.text.TextUtils;
+import android.util.Log;
 import android.view.MenuItem;
+import android.widget.Toast;
+
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.messaging.FirebaseMessaging;
+import com.mongodb.lang.NonNull;
 
 import java.util.List;
 
@@ -35,7 +36,9 @@ import java.util.List;
  * href="http://developer.android.com/guide/topics/ui/settings.html">Settings
  * API Guide</a> for more information on developing a Settings UI.
  */
-public class SettingsActivity extends AppCompatPreferenceActivity {
+public class SettingsActivity extends AppCompatPreferenceActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
+
+    private final String TAG = Constants.MAINTAG + "Settings";
 
     /**
      * A preference value change listener that updates the preference's summary
@@ -101,6 +104,59 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setupActionBar();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Set up a listener whenever a key changes
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
+        pref.registerOnSharedPreferenceChangeListener(this);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        // Unregister the listener whenever a key changes
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
+        pref.unregisterOnSharedPreferenceChangeListener(this);
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        // do stuff
+        if (key.equals("switch_preference_notification")) {
+            final String topic = sharedPreferences.getString("instance_name", "none");
+            Boolean subscribe = sharedPreferences.getBoolean("switch_preference_notification", false);
+
+            if (subscribe) {
+                FirebaseMessaging.getInstance().subscribeToTopic(topic).addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull final Task<Void> task) {
+                        if (!task.isSuccessful()) {
+                            Log.d(TAG, "Error subscribing to topic " + task.getException());
+                            return;
+                        }
+
+                        Log.d(TAG, "Subscribed to topic " + topic);
+                        Toast.makeText(getApplicationContext(), "Subscribed to topic " + topic, Toast.LENGTH_LONG).show();
+                    }
+                });
+            } else {
+                FirebaseMessaging.getInstance().unsubscribeFromTopic(topic).addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull final Task<Void> task) {
+                        if (!task.isSuccessful()) {
+                            Log.d(TAG, "Error unsubscribing from topic " + task.getException());
+                            return;
+                        }
+
+                        Log.d(TAG, "Unsubscribed from topic " + topic);
+                        Toast.makeText(getApplicationContext(), "Unsubscribed from topic " + topic, Toast.LENGTH_LONG).show();
+                    }
+                });
+            }
+        }
     }
 
     /**
@@ -274,6 +330,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             addPreferencesFromResource(R.xml.pref_notifications);
             setHasOptionsMenu(true);
 
+            bindPreferenceSummaryToValue(findPreference("edit_text_preference_package"));
         }
 
         @Override
@@ -294,10 +351,9 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
         public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
             // just update all
             SwitchPreference sp = (SwitchPreference) findPreference("switch_preference_notification");
-            if(sp.isChecked()) {
+            if (sp.isChecked()) {
                 sp.setSummary("on");
-            }
-            else {
+            } else {
                 sp.setSummary("off");// required or will not update
             }            //lp.setSummary(getString(R.string.pref_yourKey) + ": %s");
 

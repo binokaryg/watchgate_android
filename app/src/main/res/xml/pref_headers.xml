@@ -12,7 +12,7 @@
         android:title="@string/pref_header_interval" />
     <header
         android:fragment="com.binokary.watchgate.SettingsActivity$QueryPreferenceFragment"
-        android:icon="@drawable/ic_sms_black_24dp"
+        android:icon="@drawable/ic_sync_black_24dp"
         android:title="@string/pref_header_query" />
     <header
         android:fragment="com.binokary.watchgate.SettingsActivity$SMSPreferenceFragment"
