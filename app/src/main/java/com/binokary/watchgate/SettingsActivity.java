@@ -218,7 +218,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity implements Sha
             // updated to reflect the new value, per the Android Design
             // guidelines.
             bindPreferenceSummaryToValue(findPreference("instance_name"));
-            bindPreferenceSummaryToValue(findPreference("edit_number_preference"));
+            bindPreferenceSummaryToValue(findPreference("country_code"));
         }
 
         @Override
@@ -330,7 +330,10 @@ public class SettingsActivity extends AppCompatPreferenceActivity implements Sha
             addPreferencesFromResource(R.xml.pref_notifications);
             setHasOptionsMenu(true);
 
+            bindPreferenceSummaryToValue(findPreference("sms_notification_interval"));
+            bindPreferenceSummaryToValue(findPreference("edit_balance_limit"));
             bindPreferenceSummaryToValue(findPreference("edit_text_preference_package"));
+            bindPreferenceSummaryToValue(findPreference("edit_number_preference"));
         }
 
         @Override

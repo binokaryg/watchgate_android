@@ -3,7 +3,7 @@
     <!-- NOTE: EditTextPreference accepts EditText attributes. -->
     <!-- NOTE: EditTextPreference's summary should be set to its value by the activity code. -->
     <EditTextPreference
-        android:capitalize="words"
+        android:capitalize="none"
         android:defaultValue="@string/pref_instance_value"
         android:inputType="textCapWords"
         android:key="instance_name"
@@ -11,18 +11,21 @@
         android:selectAllOnFocus="true"
         android:singleLine="true"
         android:title="@string/pref_instance" />
-    <EditTextPreference
-        android:defaultValue="@string/own_number"
-        android:key="edit_number_preference"
-        android:selectAllOnFocus="true"
-        android:singleLine="true"
-        android:title="@string/own_number_label" />
     <SwitchPreference
         android:defaultValue="false"
         android:key="switch_preference_1"
         android:summaryOff="Prepaid"
         android:summaryOn="Postpaid"
         android:title="@string/postpaid_switch_title" />
+    <EditTextPreference
+        android:defaultValue="+977"
+        android:digits="+0123456789"
+        android:inputType="numberDecimal"
+        android:key="country_code"
+        android:maxLines="1"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="Country Code" />
 
     <!-- NOTE: Hide buttons to simplify the UI. Users can touch outside the dialog to
          dismiss it. -->

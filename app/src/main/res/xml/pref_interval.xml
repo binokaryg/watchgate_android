@@ -2,11 +2,12 @@
 
     <!-- NOTE: EditTextPreference accepts EditText attributes. -->
     <!-- NOTE: EditTextPreference's summary should be set to its value by the activity code. -->
-        <EditTextPreference
+    <EditTextPreference
         android:defaultValue="@integer/default_sms_interval"
+        android:digits="0123456789"
+        android:inputType="numberDecimal"
         android:key="pref_interval_sms"
         android:selectAllOnFocus="true"
-        android:singleLine="true"
         android:title="Balance Query Interval (minutes)" />
     <EditTextPreference
         android:layout_width="wrap_content"
@@ -14,7 +15,8 @@
         android:defaultValue="@integer/min_sms_interval"
         android:key="pref_interval_sms_min"
         android:selectAllOnFocus="true"
-        android:singleLine="true"
+        android:digits="0123456789"
+        android:inputType="numberDecimal"
         android:title="Balance Query Minimum Interval (minutes)" />
     <EditTextPreference
         android:layout_width="wrap_content"
@@ -22,7 +24,8 @@
         android:defaultValue="@integer/default_report_interval"
         android:key="pref_interval_report"
         android:selectAllOnFocus="true"
-        android:singleLine="true"
+        android:digits="0123456789"
+        android:inputType="numberDecimal"
         android:title="Reporting Interval (minutes)" />
     <EditTextPreference
         android:layout_width="wrap_content"
@@ -30,23 +33,26 @@
         android:defaultValue="@integer/min_report_interval"
         android:key="pref_interval_report_min"
         android:selectAllOnFocus="true"
-        android:singleLine="true"
+        android:digits="0123456789"
+        android:inputType="numberDecimal"
         android:title="Periodic Reporting Minimum Interval (minutes)" />
     <EditTextPreference
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:defaultValue="@integer/min_one_report_interval"
         android:key="pref_interval_report_one_min"
+        android:digits="0123456789"
+        android:inputType="numberDecimal"
         android:selectAllOnFocus="true"
-        android:singleLine="true"
         android:title="One Time Reporting Minimum Interval (minutes)" />
     <EditTextPreference
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:defaultValue="@integer/one_time_report_wait"
         android:key="pref_wait_report_one_time"
+        android:digits="0123456789"
+        android:inputType="numberDecimal"
         android:selectAllOnFocus="true"
-        android:singleLine="true"
         android:title="One Time Reporting Waiting Time (seconds)" />
 
     <!-- NOTE: Hide buttons to simplify the UI. Users can touch outside the dialog to

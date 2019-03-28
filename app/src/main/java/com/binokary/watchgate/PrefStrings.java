@@ -21,6 +21,7 @@ public final class PrefStrings {
     public static final String LAST_SMS_IN_DATE = "lastSMSInDate";
     public static final String SMS_PACK_INFO = "smsPackInfo";
     public static final String SMS_PACK_INFO_DATE = "smsPackInfoDate";
+    public static final String SMS_NOTIFICATION_DATE = "smsNotificationDate";
 
     private PrefStrings() {
     }

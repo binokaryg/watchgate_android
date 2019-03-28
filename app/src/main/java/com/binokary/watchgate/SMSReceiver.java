@@ -13,6 +13,7 @@ import android.widget.Toast;
 import com.binokary.watchgate.toilers.WorkerUtils;
 
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.util.Date;
 
 import static android.content.Context.MODE_PRIVATE;
@@ -22,6 +23,7 @@ public class SMSReceiver extends BroadcastReceiver {
     private static final String PREF_STATS = "gate_stats";
     private SharedPreferences mSharedPreferences;
     private SharedPreferences prefs;
+    private SharedPreferences.Editor stats;
     private boolean checkSMSPack = false;
     private boolean isBalanceInfo = false;
     private boolean isSmsPackInfo = false;
@@ -35,7 +37,7 @@ public class SMSReceiver extends BroadcastReceiver {
         if (intent.getAction().equals(Telephony.Sms.Intents.SMS_RECEIVED_ACTION)) {
 
             Log.d(TAG, "sReceiver: Broadcast received");
-            SharedPreferences.Editor stats = context.getSharedPreferences(PREF_STATS, MODE_PRIVATE).edit();
+            stats = context.getSharedPreferences(PREF_STATS, MODE_PRIVATE).edit();
             mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
             checkSMSPack = mSharedPreferences.getBoolean("switch_sms_preference", false);
             isPostpaid = mSharedPreferences.getBoolean("switch_preference_1", false);
@@ -51,7 +53,8 @@ public class SMSReceiver extends BroadcastReceiver {
             int smsRemaining = -1;
             prefs = context.getSharedPreferences(Constants.PREF_STATS, MODE_PRIVATE);
             countSMSIn = prefs.getInt(PrefStrings.COUNT_SMS_IN, 0);
-
+            String countryCode = mSharedPreferences.getString("country_code", "+00");
+            Log.d(TAG, "trying to read msg details");
             try {
                 for (SmsMessage smsMessage : Telephony.Sms.Intents.getMessagesFromIntent(intent)) {
                     smsBody += smsMessage.getMessageBody();
@@ -68,10 +71,10 @@ public class SMSReceiver extends BroadcastReceiver {
                 }
                 String smsSource = mSharedPreferences.getString("pref_sms_source", "0");
                 if (smsSource == "0") {
-                    Log.e(TAG, "Getting default value for pref_sms_source");
+                    Log.w(TAG, "Getting default value for pref_sms_source!");
                 }
-                if (smsSender.equals(mSharedPreferences.getString("pref_sms_source", "1415"))) {
-
+                Log.d(TAG, "SMS source: " + smsSource + ", SMS sender: " + smsSender);
+                if (smsSender.equals(smsSource) || smsSender.equals(countryCode + smsSource)) {
                     String prepaidBalanceRegexp = mSharedPreferences.getString("pref_pre_balance_regex", ".*current balance.*?([0-9,]+).*");
                     String postpaidBalanceDueRegexp = mSharedPreferences.getString("pref_post_balance_due_regex", ".*your due.*?([0-9,]+).*");
                     String postpaidBalanceCreditRegexp = mSharedPreferences.getString("pref_post_balance_credit_regex", ".*available credit.*?([0-9,]+).*");
@@ -95,7 +98,7 @@ public class SMSReceiver extends BroadcastReceiver {
                     if (SMSHelper.patternMatches(smsBody, prepaidBalanceRegexp) ||
                             SMSHelper.patternMatches(smsBody, postpaidBalanceCreditRegexp) ||
                             (isTopUpInfo && !isPostpaid) //Only prepaid top up sms has new balance information
-                            ) {
+                    ) {
 
                         isBalanceInfo = true;
                         Toast.makeText(context, "Balance Info SMS Received: " + smsBody, Toast.LENGTH_LONG).show();
@@ -113,16 +116,21 @@ public class SMSReceiver extends BroadcastReceiver {
                                 stats.putLong(PrefStrings.BALANCE_DATE, lastBalanceSMSInTime);
                                 stats.putInt(PrefStrings.POSTPAID_BALANCE_DUE, balanceDue);
                                 stats.putInt(PrefStrings.POSTPAID_BALANCE_CREDIT, balanceCredit);
+                                Log.d(TAG, "Balance is " + balanceCredit);
+                                SMSNotification(balanceCredit);
                             } else //Prepaid
                             {
                                 if (isTopUpInfo) { //Top up message with new balance information
                                     balance = SMSHelper.getIntFromMsgBodyRegex(smsBody, prepaidBalanceTopUpRegexp);
+
+                                    Log.d(TAG, "Balance is " + balance);
                                 } else {
                                     balance = SMSHelper.getIntFromMsgBodyRegex(smsBody, prepaidBalanceRegexp);
                                 }
                                 lastBalanceSMSInTime = System.currentTimeMillis();
                                 stats.putLong(PrefStrings.BALANCE_DATE, lastBalanceSMSInTime);
                                 stats.putInt(PrefStrings.PREPAID_BALANCE, balance);
+                                SMSNotification(balance);
                             }
                         } catch (Exception ex) {
                             Log.e(TAG, "Error when reading balance info from SMS: " + smsBody + " Error: " + ex.getMessage());
@@ -134,7 +142,7 @@ public class SMSReceiver extends BroadcastReceiver {
                         try {
                             MainActivity.getInstance().updateBalanceView(balanceMsg);
                         } catch (Exception ex) {
-                            Log.e(TAG, "Error when updating Main Activity view from SMS Receiver");
+                            Log.e(TAG, "Error when updating Main Activity view from SMS Receiver: " + ex.getMessage());
                         }
 
                         //if SMS Pack is enabled, check remaining SMS
@@ -148,7 +156,8 @@ public class SMSReceiver extends BroadcastReceiver {
                 }//msg from telecom for balance
 
                 //SMS pack info source
-                if (smsSender.equals(mSharedPreferences.getString("pref_sms_pack_source", "1415")) && checkSMSPack) {
+                String smsPackSource = mSharedPreferences.getString("pref_sms_pack_source", "1415");
+                if ((smsSender.equals(smsPackSource) || smsSender.equals(countryCode + smsPackSource)) && checkSMSPack) {
                     String smsPackInfoRegexp = mSharedPreferences.getString("pref_sms_pack_info_regex", ".*free sms.*?([0-9,]+).*");
                     String smsPackNullRegexp = mSharedPreferences.getString("pref_sms_pack_null_regex", ".*no free resource.*");
                     String smsPackActiveRegexp = mSharedPreferences.getString("pref_sms_pack_active", ".*SMS.*activated.*");
@@ -190,7 +199,7 @@ public class SMSReceiver extends BroadcastReceiver {
                         try {
                             MainActivity.getInstance().updateSMSPackView(smsRemaining + " remaining");
                         } catch (Exception ex) {
-                            Log.e(TAG, "Error when updating SMS Pack in Main Activity view from SMS Receiver");
+                            Log.e(TAG, "Error when updating SMS Pack in Main Activity view from SMS Receiver: " + ex.getMessage());
                         }
                     } else if (SMSHelper.patternMatches(smsBody, smsPackNullRegexp)) {//No SMS Pack subscribed
                         Log.d(TAG, "Found SMS with SMS pack info null.");
@@ -207,18 +216,16 @@ public class SMSReceiver extends BroadcastReceiver {
                         try {
                             MainActivity.getInstance().updateSMSPackView("N/A");
                         } catch (Exception ex) {
-                            Log.e(TAG, "Error when updating SMS Pack in Main Activity view from SMS Receiver");
+                            Log.e(TAG, "Error when updating SMS Pack in Main Activity view from SMS Receiver: " + ex.getMessage());
                         }
                     } else if (SMSHelper.patternMatches(smsBody, smsPackActiveRegexp)) {
                         Log.d(TAG, "Found SMS with SMS Pack activation info");
                         Log.d(TAG, "Enqueuing SMS for Balance query, which should check SMS pack later");
-                        if(isPostpaid) {
+                        if (isPostpaid) {
                             String postpaidBalanceQueryDestination = mSharedPreferences.getString("pref_sms_destination", "1415");
                             String postpaidBalanceQuery = mSharedPreferences.getString("pref_balance_query_postpaid", "CB");
                             WorkerUtils.enqueueOneTimeSMSSendingWork(postpaidBalanceQueryDestination, postpaidBalanceQuery);
-                        }
-                        else
-                        {
+                        } else {
                             String prepaidBalanceQueryDestination = mSharedPreferences.getString("pref_sms_destination", "1415");
                             String prepaidBalanceQuery = mSharedPreferences.getString("pref_balance_query_prepaid", "BL");
                             WorkerUtils.enqueueOneTimeSMSSendingWork(prepaidBalanceQueryDestination, prepaidBalanceQuery);
@@ -227,7 +234,7 @@ public class SMSReceiver extends BroadcastReceiver {
                         try {
                             MainActivity.getInstance().updateSMSPackView("Subscribed");
                         } catch (Exception ex) {
-                            Log.e(TAG, "Error when updating SMS Pack in Main Activity view from SMS Receiver");
+                            Log.e(TAG, "Error when updating SMS Pack in Main Activity view from SMS Receiver: " + ex.getMessage());
                         }
                     }
                 }
@@ -263,6 +270,8 @@ public class SMSReceiver extends BroadcastReceiver {
                     //Clear any waiting tasks before enqueuing new one
                     WorkerUtils.clearTasks(Constants.REPORTONEWAITTAG);
                     WorkerUtils.enqueueOneTimeStitchReportingWork(instanceName, reportOneIntervalMin, initialDelayInSeconds);
+
+
                 }
 
                 String lastSMSInTimeMsg = DateFormat.getDateTimeInstance().format(lastUserSMSInTime);
@@ -271,12 +280,49 @@ public class SMSReceiver extends BroadcastReceiver {
                 } catch (Exception ex) {
                     Log.e(TAG, "Error when updating Main Activity view from SMS Receiver");
                 }
-            } catch (Exception e) {
-                Log.e(TAG, "Error when processing broadcast" + e.getMessage());
+            } catch (Exception ex) {
+                Log.e(TAG, "Error when processing broadcast" + ex.getMessage());
             }
 
             stats.apply();
         }
 
+    }
+
+    public void SMSNotification(int balanceInRs) {
+        //TODO: Send SMS to user if balance is low than critical level
+        Boolean sendSMS = mSharedPreferences.getBoolean("switch_sms_notification", false);
+        if (sendSMS) {
+            try {
+                Log.d(TAG, "Preparing to send sms notification");
+                String smsRecipient = mSharedPreferences.getString("edit_number_preference", "");
+                String smsIntervalStr = mSharedPreferences.getString("sms_notification_interval", "4");
+                String criticalBalanceStr = mSharedPreferences.getString("edit_balance_limit", "500");
+                String instanceName = mSharedPreferences.getString("instance_name", "none");
+                Long lastNotificationTime = prefs.getLong(PrefStrings.SMS_NOTIFICATION_DATE, 0);
+                Long currentTime = System.currentTimeMillis();
+                String smsMsg = String.format("Balance in %s is %d.", instanceName, balanceInRs);
+                Integer smsInterval = 2;
+                Integer criticalBalance = 100;
+                try {
+                    smsInterval = Integer.parseInt(smsIntervalStr);
+                    criticalBalance = Integer.parseInt(criticalBalanceStr);
+                } catch (Exception ex) {
+                    Log.e(TAG, "Error parsing smsInterval and criticalBalance: " + ex.getMessage());
+                }
+
+                Log.d(TAG, "Critical balance: " + criticalBalance + ", Actual balance: " + balanceInRs);
+                if (balanceInRs <= criticalBalance) {
+                    if (smsInterval < currentTime - lastNotificationTime) {
+                        Log.d(TAG, "Interval OK, enqueuing SMS");
+                        WorkerUtils.enqueueOneTimeSMSSendingWork(smsRecipient, smsMsg);
+                        stats.putLong(PrefStrings.SMS_NOTIFICATION_DATE, currentTime);
+                        stats.apply();
+                    }
+                }
+            } catch (Exception ex) {
+                Log.e(TAG, "Error on SMS notification to user: " + ex.getMessage());
+            }
+        }
     }
 }

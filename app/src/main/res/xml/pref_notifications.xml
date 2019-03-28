@@ -11,11 +11,36 @@
     <SwitchPreference
         android:defaultValue="false"
         android:key="switch_preference_notification"
-        android:title="Subscribe" />
+        android:title="Subscribe to FCM" />
+    <SwitchPreference
+        android:defaultValue="false"
+        android:key="switch_sms_notification"
+        android:title="SMS Notification" />
+    <EditTextPreference
+        android:defaultValue="2"
+        android:key="sms_notification_interval"
+        android:selectAllOnFocus="true"
+        android:inputType="numberDecimal"
+        android:digits="0123456789"
+        android:title="SMS Notification Interval (hours)" />
+    <EditTextPreference
+        android:defaultValue="500"
+        android:key="edit_balance_limit"
+        android:selectAllOnFocus="true"
+        android:inputType="numberDecimal"
+        android:digits="0123456789"
+        android:title="Critical Balance Limit" />
     <EditTextPreference
         android:defaultValue="medic.gateway.alert"
         android:key="edit_text_preference_package"
         android:selectAllOnFocus="true"
         android:singleLine="true"
         android:title="Package" />
+    <EditTextPreference
+        android:defaultValue="@string/own_number"
+        android:key="edit_number_preference"
+        android:selectAllOnFocus="true"
+        android:inputType="numberDecimal"
+        android:digits="0123456789"
+        android:title="@string/own_number_label" />
 </PreferenceScreen>
