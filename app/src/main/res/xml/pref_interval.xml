@@ -5,7 +5,7 @@
     <EditTextPreference
         android:defaultValue="@integer/default_sms_interval"
         android:digits="0123456789"
-        android:inputType="numberDecimal"
+        android:inputType="number"
         android:key="pref_interval_sms"
         android:selectAllOnFocus="true"
         android:title="Balance Query Interval (minutes)" />
@@ -16,7 +16,7 @@
         android:key="pref_interval_sms_min"
         android:selectAllOnFocus="true"
         android:digits="0123456789"
-        android:inputType="numberDecimal"
+        android:inputType="number"
         android:title="Balance Query Minimum Interval (minutes)" />
     <EditTextPreference
         android:layout_width="wrap_content"
@@ -25,7 +25,7 @@
         android:key="pref_interval_report"
         android:selectAllOnFocus="true"
         android:digits="0123456789"
-        android:inputType="numberDecimal"
+        android:inputType="number"
         android:title="Reporting Interval (minutes)" />
     <EditTextPreference
         android:layout_width="wrap_content"
@@ -34,7 +34,7 @@
         android:key="pref_interval_report_min"
         android:selectAllOnFocus="true"
         android:digits="0123456789"
-        android:inputType="numberDecimal"
+        android:inputType="number"
         android:title="Periodic Reporting Minimum Interval (minutes)" />
     <EditTextPreference
         android:layout_width="wrap_content"
@@ -42,7 +42,7 @@
         android:defaultValue="@integer/min_one_report_interval"
         android:key="pref_interval_report_one_min"
         android:digits="0123456789"
-        android:inputType="numberDecimal"
+        android:inputType="number"
         android:selectAllOnFocus="true"
         android:title="One Time Reporting Minimum Interval (minutes)" />
     <EditTextPreference
@@ -51,7 +51,7 @@
         android:defaultValue="@integer/one_time_report_wait"
         android:key="pref_wait_report_one_time"
         android:digits="0123456789"
-        android:inputType="numberDecimal"
+        android:inputType="number"
         android:selectAllOnFocus="true"
         android:title="One Time Reporting Waiting Time (seconds)" />
 

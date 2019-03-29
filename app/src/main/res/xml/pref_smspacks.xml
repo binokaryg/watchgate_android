@@ -11,6 +11,7 @@
     <EditTextPreference
         android:defaultValue="@string/pref_sms_destination_default"
         android:key="pref_sms_pack_destination"
+        android:inputType="phone"
         android:dependency="switch_sms_preference"
         android:selectAllOnFocus="true"
         android:singleLine="true"
@@ -21,6 +22,7 @@
         android:layout_height="wrap_content"
         android:defaultValue="@string/pref_sms_source_default"
         android:key="pref_sms_pack_source"
+        android:inputType="phone"
         android:dependency="switch_sms_preference"
         android:selectAllOnFocus="true"
         android:singleLine="true"

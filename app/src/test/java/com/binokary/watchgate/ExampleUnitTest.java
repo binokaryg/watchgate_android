@@ -5,6 +5,7 @@ import android.util.Log;
 import org.junit.Test;
 
 import java.util.Date;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -138,6 +139,24 @@ public class ExampleUnitTest {
         {
             //System.out.println(matcher.group(1));
             assertEquals(matcher.group(1),"1357");
+        }
+    }
+
+    @Test
+    public void getNumbersFromList() throws Exception {
+        String numbers = "9841424262;9841213243";
+        String[] list = numbers.split(";");
+        for (String x : list) {
+            System.out.println(x.trim());
+        }
+    }
+
+    @Test
+    public void getNumbersFromListSingleItem() throws Exception {
+        String numbers = "9841424262";
+        String[] list = numbers.split(";");
+        for (String x : list) {
+            System.out.println(x.trim());
         }
     }
 }

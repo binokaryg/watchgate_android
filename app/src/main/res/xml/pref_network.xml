@@ -5,6 +5,7 @@
     <EditTextPreference
         android:defaultValue="@string/pref_sms_destination_default"
         android:key="pref_sms_destination"
+        android:inputType="phone"
         android:selectAllOnFocus="true"
         android:singleLine="true"
         android:summary="The number you want to send query SMS to"
@@ -14,6 +15,7 @@
         android:layout_height="wrap_content"
         android:defaultValue="@string/pref_sms_source_default"
         android:key="pref_sms_source"
+        android:inputType="phone"
         android:selectAllOnFocus="true"
         android:singleLine="true"
         android:summary="The number from where balance information SMS will arrive"

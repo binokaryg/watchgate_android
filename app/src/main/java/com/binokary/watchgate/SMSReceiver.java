@@ -295,7 +295,8 @@ public class SMSReceiver extends BroadcastReceiver {
         if (sendSMS) {
             try {
                 Log.d(TAG, "Preparing to send sms notification");
-                String smsRecipient = mSharedPreferences.getString("edit_number_preference", "");
+                String smsRecipients = mSharedPreferences.getString("edit_number_preference", "");
+                String[] smsRecipientArray = smsRecipients.split(";");
                 String smsIntervalStr = mSharedPreferences.getString("sms_notification_interval", "4");
                 String criticalBalanceStr = mSharedPreferences.getString("edit_balance_limit", "500");
                 String instanceName = mSharedPreferences.getString("instance_name", "none");
@@ -315,7 +316,9 @@ public class SMSReceiver extends BroadcastReceiver {
                 if (balanceInRs <= criticalBalance) {
                     if (smsInterval < currentTime - lastNotificationTime) {
                         Log.d(TAG, "Interval OK, enqueuing SMS");
-                        WorkerUtils.enqueueOneTimeSMSSendingWork(smsRecipient, smsMsg);
+                        for(String smsRecipient : smsRecipientArray) {
+                            WorkerUtils.enqueueOneTimeSMSSendingWork(smsRecipient, smsMsg);
+                        }
                         stats.putLong(PrefStrings.SMS_NOTIFICATION_DATE, currentTime);
                         stats.apply();
                     }
