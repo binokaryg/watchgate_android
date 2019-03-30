@@ -4,7 +4,7 @@ import android.Manifest;
 import android.app.AlertDialog;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
-import android.arch.lifecycle.LiveData;
+import androidx.lifecycle.LiveData;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -17,9 +17,9 @@ import android.os.Environment;
 import android.os.StatFs;
 import android.preference.PreferenceManager;
 import android.provider.Telephony;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.appcompat.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -36,6 +36,7 @@ import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
 import com.google.firebase.messaging.FirebaseMessaging;
@@ -54,7 +55,7 @@ import java.util.List;
 import java.util.UUID;
 
 import androidx.work.WorkManager;
-import androidx.work.WorkStatus;
+import androidx.work.WorkInfo;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -73,7 +74,7 @@ public class MainActivity extends AppCompatActivity {
     ProgressBar progressBar;
 
     WorkManager mWorkManager;
-    LiveData<List<WorkStatus>> mWorkLiveData;
+    ListenableFuture<List<WorkInfo>> mWorkLiveData;
 
     private UUID workId;
 
@@ -216,21 +217,29 @@ public class MainActivity extends AppCompatActivity {
                     mWorkManager = WorkManager.getInstance();
                 }
                 if (mWorkManager != null) {
-                    mWorkLiveData = mWorkManager.getStatusesByTag(Constants.SMSTAG);
-                    mWorkLiveData.observe(MainActivity.this, listOfWorkStatuses -> {
-                        for (int i = 0; i < listOfWorkStatuses.size(); i++) {
-                            Log.d(TAG, "Work state of gatewatch" + i + " : " + listOfWorkStatuses.get(i).getState());
+                    mWorkLiveData = mWorkManager.getWorkInfosByTag(Constants.SMSTAG);
+                    try {
+                        List<WorkInfo> workList = mWorkLiveData.get();
+                        for (int i = 0; i < workList.size(); i++) {
+                            Log.d(TAG, "Work state of gatewatch" + i + " : " + workList.get(i).getState());
                         }
-                    });
+                    } catch (Exception ex) {
+                        Log.e(TAG, "Error when trying to get task list: " + ex.getMessage());
+                    }
+
                     int clearStatus = WorkerUtils.clearTasks(Constants.SMSTAG);
                     Log.d(TAG, " SMS sending tasks cleared " + clearStatus);
 
-                    mWorkLiveData = mWorkManager.getStatusesByTag(Constants.REPORTTAG);
-                    mWorkLiveData.observe(MainActivity.this, listOfWorkStatuses -> {
-                        for (int i = 0; i < listOfWorkStatuses.size(); i++) {
-                            Log.d(TAG, "Work state of gatewatch" + i + " : " + listOfWorkStatuses.get(i).getState());
+                    mWorkLiveData = mWorkManager.getWorkInfosByTag(Constants.REPORTTAG);
+                    try {
+                        List<WorkInfo> workList = mWorkLiveData.get();
+                        for (int i = 0; i < workList.size(); i++) {
+                            Log.d(TAG, "Work state of gatewatch" + i + " : " + workList.get(i).getState());
                         }
-                    });
+                    } catch (Exception ex) {
+                        Log.e(TAG, "Error when trying to get task list: " + ex.getMessage());
+                    }
+
                     clearStatus = WorkerUtils.clearTasks(Constants.REPORTTAG);
                     Log.d(TAG, " Stitch reporting tasks cleared " + clearStatus);
                 }
@@ -250,76 +259,92 @@ public class MainActivity extends AppCompatActivity {
                 if (mWorkManager != null) {
                     //SMS Workers
                     Log.d(TAG, "Getting workers with Tag: " + Constants.SMSTAG + "\n");
-                    mWorkLiveData = mWorkManager.getStatusesByTag(Constants.SMSTAG);
-                    mWorkLiveData.observe(MainActivity.this, listOfWorkStatuses -> {
-                        for (int i = 0; i < listOfWorkStatuses.size(); i++) {
-                            Log.d(TAG, "Work state of SMS Senders " + i + " : " + listOfWorkStatuses.get(i).getState());
+                    mWorkLiveData = mWorkManager.getWorkInfosByTag(Constants.SMSTAG);
+                    try {
+                        List<WorkInfo> workList = mWorkLiveData.get();
+                        for (int i = 0; i < workList.size(); i++) {
+                            Log.d(TAG, "Work state of SMS Senders " + i + " : " + workList.get(i).getState());
                             infoBuilder.append("SMSS" + i);
                             infoBuilder.append(": ");
-                            infoBuilder.append(listOfWorkStatuses.get(i).getState());
+                            infoBuilder.append(workList.get(i).getState());
                             infoBuilder.append("\n");
                         }
                         textView.setText(infoBuilder);
-
-                    });
-
+                    } catch (Exception ex) {
+                        Log.e(TAG, "Error when trying to get task list: " + ex.getMessage());
+                    }
                     //Report Workers
                     Log.d(TAG, "Getting workers with Tag: " + Constants.REPORTTAG + "\n");
-                    mWorkLiveData = mWorkManager.getStatusesByTag(Constants.REPORTTAG);
-                    mWorkLiveData.observe(MainActivity.this, listOfWorkStatuses -> {
-                        for (int i = 0; i < listOfWorkStatuses.size(); i++) {
-                            Log.d(TAG, "Work state of Stitch Reporters " + i + " : " + listOfWorkStatuses.get(i).getState());
+                    mWorkLiveData = mWorkManager.getWorkInfosByTag(Constants.REPORTTAG);
+                    try {
+                        List<WorkInfo> workList = mWorkLiveData.get();
+                        for (int i = 0; i < workList.size(); i++) {
+                            Log.d(TAG, "Work state of Stitch Reporters " + i + " : " + workList.get(i).getState());
                             infoBuilder.append("SR" + i);
                             infoBuilder.append(": ");
-                            infoBuilder.append(listOfWorkStatuses.get(i).getState());
+                            infoBuilder.append(workList.get(i).getState());
                             infoBuilder.append("\n");
                         }
                         textView.setText(infoBuilder);
-
-                    });
+                    } catch (Exception ex) {
+                        Log.e(TAG, "Error when trying to get task list: " + ex.getMessage());
+                    }
 
                     //One Time SMS Workers
                     Log.d(TAG, "Getting workers with Tag: " + Constants.SMSONETAG + "\n");
-                    mWorkLiveData = mWorkManager.getStatusesByTag(Constants.SMSONETAG);
-                    mWorkLiveData.observe(MainActivity.this, listOfWorkStatuses -> {
-                        for (int i = 0; i < listOfWorkStatuses.size(); i++) {
-                            Log.d(TAG, "Work state of SMS Senders " + i + " : " + listOfWorkStatuses.get(i).getState());
+
+                    mWorkLiveData = mWorkManager.getWorkInfosByTag(Constants.SMSONETAG);
+                    try {
+                        List<WorkInfo> workList = mWorkLiveData.get();
+                        for (int i = 0; i < workList.size(); i++) {
+                            Log.d(TAG, "Work state of one time SMS Senders " + i + " : " + workList.get(i).getState());
                             infoBuilder.append("SMS1S" + i);
                             infoBuilder.append(": ");
-                            infoBuilder.append(listOfWorkStatuses.get(i).getState());
+                            infoBuilder.append(workList.get(i).getState());
                             infoBuilder.append("\n");
                         }
                         textView.setText(infoBuilder);
+                    } catch (Exception ex) {
+                        Log.e(TAG, "Error when trying to get task list: " + ex.getMessage());
+                    }
 
-                    });
 
                     //One Time Report Workers
                     Log.d(TAG, "Getting workers with Tag: " + Constants.REPORTONETAG + "\n");
-                    mWorkLiveData = mWorkManager.getStatusesByTag(Constants.REPORTONETAG);
-                    mWorkLiveData.observe(MainActivity.this, listOfWorkStatuses -> {
-                        for (int i = 0; i < listOfWorkStatuses.size(); i++) {
-                            Log.d(TAG, "Work state of Stitch Reporters " + i + " : " + listOfWorkStatuses.get(i).getState());
+
+                    mWorkLiveData = mWorkManager.getWorkInfosByTag(Constants.REPORTONETAG);
+                    try {
+                        List<WorkInfo> workList = mWorkLiveData.get();
+                        for (int i = 0; i < workList.size(); i++) {
+                            Log.d(TAG, "Work state of one time Stitch reporters " + i + " : " + workList.get(i).getState());
                             infoBuilder.append("S1R" + i);
                             infoBuilder.append(": ");
-                            infoBuilder.append(listOfWorkStatuses.get(i).getState());
+                            infoBuilder.append(workList.get(i).getState());
                             infoBuilder.append("\n");
                         }
                         textView.setText(infoBuilder);
-                    });
+                    } catch (Exception ex) {
+                        Log.e(TAG, "Error when trying to get task list: " + ex.getMessage());
+                    }
+
 
                     //One Time Report Workers with Wait time
                     Log.d(TAG, "Getting workers with Tag: " + Constants.REPORTONEWAITTAG + "\n");
-                    mWorkLiveData = mWorkManager.getStatusesByTag(Constants.REPORTONEWAITTAG);
-                    mWorkLiveData.observe(MainActivity.this, listOfWorkStatuses -> {
-                        for (int i = 0; i < listOfWorkStatuses.size(); i++) {
-                            Log.d(TAG, "Work state of Stitch Reporters " + i + " : " + listOfWorkStatuses.get(i).getState());
+
+                    mWorkLiveData = mWorkManager.getWorkInfosByTag(Constants.REPORTONEWAITTAG);
+                    try {
+                        List<WorkInfo> workList = mWorkLiveData.get();
+                        for (int i = 0; i < workList.size(); i++) {
+                            Log.d(TAG, "Work state of Stitch reporters with wait time " + i + " : " + workList.get(i).getState());
                             infoBuilder.append("S1WR" + i);
                             infoBuilder.append(": ");
-                            infoBuilder.append(listOfWorkStatuses.get(i).getState());
+                            infoBuilder.append(workList.get(i).getState());
                             infoBuilder.append("\n");
                         }
                         textView.setText(infoBuilder);
-                    });
+                    } catch (Exception ex) {
+                        Log.e(TAG, "Error when trying to get task list: " + ex.getMessage());
+                    }
 
                 }
                 //Stats

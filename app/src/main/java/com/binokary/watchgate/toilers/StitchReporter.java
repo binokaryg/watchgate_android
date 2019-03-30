@@ -16,18 +16,15 @@ import com.mongodb.stitch.android.core.StitchAppClient;
 import com.mongodb.stitch.android.core.auth.StitchUser;
 import com.mongodb.stitch.core.auth.providers.anonymous.AnonymousCredential;
 
-import org.bson.BSONObject;
 import org.bson.BasicBSONObject;
-import org.bson.BsonArray;
-import org.bson.BsonInt64;
 import org.bson.BsonValue;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import androidx.work.Worker;
+import androidx.work.WorkerParameters;
 
 import static android.content.Context.MODE_PRIVATE;
 
@@ -39,6 +36,10 @@ public class StitchReporter extends Worker {
     List<Object> arg = new ArrayList<>();
     BasicBSONObject bObj= new BasicBSONObject();
     static StitchAppClient client;
+
+    public StitchReporter(@androidx.annotation.NonNull Context context, @androidx.annotation.NonNull WorkerParameters workerParams) {
+        super(context, workerParams);
+    }
 
     @Override
     public Worker.Result doWork() {
@@ -58,7 +59,7 @@ public class StitchReporter extends Worker {
                             " last attempt was on %s and and now it is %s", oneTime ? "One Time" : "Periodic",
                     StatsHelper.DateStringFromMS(lastReportAttemptDate), StatsHelper.DateStringFromMS(now)));
 
-            return Result.SUCCESS; //or FAILURE or RETRY?
+            return Result.success(); //or FAILURE or RETRY?
 
         } else {
             stats.putLong(PrefStrings.REPORT_ATTEMPT_DATE, now);
@@ -68,7 +69,7 @@ public class StitchReporter extends Worker {
                 Log.d(TAG, String.format("Not allowing to update because" +
                                 " last update was on %s and and now it is %s",
                         StatsHelper.DateStringFromMS(lastReportUpdateDate), StatsHelper.DateStringFromMS(now)));
-                return Result.SUCCESS;
+                return Result.success();
             } else {
                 try {
                     StatsHelper.CheckAndUpdateStats(applicationContext);
@@ -145,7 +146,7 @@ public class StitchReporter extends Worker {
                                         client.callFunction(stitchUpdateFunctionName, arg, BsonValue.class)
                                                 .addOnCompleteListener(new OnCompleteListener<BsonValue>() {
                                                     @Override
-                                                    public void onComplete(@android.support.annotation.NonNull Task<BsonValue> upTask) {
+                                                    public void onComplete(@androidx.annotation.NonNull Task<BsonValue> upTask) {
                                                         if (upTask.isSuccessful()) {
                                                             Log.d(TAG, "Updated instance");
                                                             Log.d(TAG, upTask.getResult().toString());
@@ -177,10 +178,10 @@ public class StitchReporter extends Worker {
                     } catch (Exception ex) {
                         Log.e(TAG, "Error Closing Stitch Client after error, new error: " + ex.getMessage());
                     }
-                    return Result.FAILURE;
+                    return Result.failure();
 
                 }
-                return Result.SUCCESS;
+                return Result.success();
             }
         }
     }

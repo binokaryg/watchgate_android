@@ -1,26 +1,14 @@
 package com.binokary.watchgate;
 
-import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
-import android.net.Network;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.BatteryManager;
-import android.os.Build;
-import android.os.Looper;
-import android.support.v4.app.ActivityCompat;
-import android.telephony.CellInfoGsm;
-import android.telephony.CellInfoLte;
-import android.telephony.CellInfoWcdma;
-import android.telephony.CellLocation;
-import android.telephony.PhoneStateListener;
-import android.telephony.SignalStrength;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
@@ -31,7 +19,6 @@ import org.bson.BsonNull;
 import org.bson.BsonString;
 import org.bson.BsonValue;
 
-import java.lang.reflect.Method;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -40,7 +27,6 @@ import java.util.TimeZone;
 import static android.content.Context.MODE_PRIVATE;
 import static android.content.Context.TELEPHONY_SERVICE;
 import static android.content.Context.WIFI_SERVICE;
-import static android.telephony.CellSignalStrength.SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
 import static com.binokary.watchgate.Constants.PREF_STATS;
 
 public final class StatsHelper {

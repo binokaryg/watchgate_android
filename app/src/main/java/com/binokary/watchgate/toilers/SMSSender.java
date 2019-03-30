@@ -9,8 +9,10 @@ import com.binokary.watchgate.Constants;
 import com.binokary.watchgate.PrefStrings;
 import com.binokary.watchgate.StatsHelper;
 
+import androidx.annotation.NonNull;
 import androidx.work.WorkManager;
 import androidx.work.Worker;
+import androidx.work.WorkerParameters;
 
 import static android.content.Context.MODE_PRIVATE;
 
@@ -20,6 +22,10 @@ public class SMSSender extends Worker {
     public static final String KEY_RECIPIENT_ARG = "RECIPIENT";
     public static final String KEY_MSG_ARG = "MSG";
     SharedPreferences prefs;
+
+    public SMSSender(@NonNull Context context, @NonNull WorkerParameters workerParams) {
+        super(context, workerParams);
+    }
 
     @Override
     public Worker.Result doWork() {
@@ -39,12 +45,12 @@ public class SMSSender extends Worker {
                 smsManager.sendTextMessage(recipient, null, msg, null, null);
             } else {
                 Log.d(TAG, "Not sending as SMS was recently sent at: " + StatsHelper.DateStringFromMS(lastBalanceDate) + " and now it is " + StatsHelper.DateStringFromMS(date));
-                return Result.SUCCESS;
+                return Result.success();
             }
-            return Worker.Result.SUCCESS;
+            return Worker.Result.success();
         } catch (Throwable throwable) {
             Log.e(TAG, "Error sending SMS", throwable);
-            return Worker.Result.FAILURE;
+            return Worker.Result.failure();
         }
     }
 }
