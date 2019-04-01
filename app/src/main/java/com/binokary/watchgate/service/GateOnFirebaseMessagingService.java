@@ -40,14 +40,36 @@ public class GateOnFirebaseMessagingService extends FirebaseMessagingService {
         if (task.equals("KILL")) {
             Log.d(TAG, "Attempting KILL");
             ActivityManager activityManager = (ActivityManager) this.getSystemService(ACTIVITY_SERVICE);
-            activityManager.killBackgroundProcesses("medic.gateway.alert");
+            activityManager.killBackgroundProcesses(package_name);
             Log.d(TAG, "Attempted KILL");
             //Toast.makeText(getApplicationContext(), "Killed!", Toast.LENGTH_LONG).show();
-        } else if (task.equals("RESTART")) {
+        }/* else if (task.equals("RESTART")) {
             Log.d(TAG, "Attempting RESTART");
             ComponentName componentName = getPackageManager().getLaunchIntentForPackage(package_name).getComponent();
             Intent.makeRestartActivityTask(componentName);
             Log.d(TAG, "Attempted RESTART: " + componentName.toString());
+        }*/
+
+        else if (task.equals("START")) {
+            Log.d(TAG, "Attempting START");
+            Intent launchIntent = getPackageManager().getLaunchIntentForPackage(package_name);
+            if (launchIntent != null) {
+                startActivity(launchIntent);//null pointer check in case package name was not found
+                Log.d(TAG, "Attempted START : " + launchIntent.toString());
+            }
+            Log.e(TAG, "Could not attempt START: " + "intent is null");
+        }
+
+        else if (task.equals("RESTART")) {
+            Log.d(TAG, "Attempting RESTART");
+            ActivityManager activityManager = (ActivityManager) this.getSystemService(ACTIVITY_SERVICE);
+            activityManager.killBackgroundProcesses(package_name);
+            Intent launchIntent = getPackageManager().getLaunchIntentForPackage(package_name);
+            if (launchIntent != null) {
+                startActivity(launchIntent);//null pointer check in case package name was not found
+                Log.d(TAG, "Attempted RESTART : " + launchIntent.toString());
+            }
+            Log.e(TAG, "Could not attempt RESTART: " + "intent is null");
         }
 
         // Create a new notification here to show in case the app is in the foreground.
