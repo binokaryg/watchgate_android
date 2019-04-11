@@ -377,6 +377,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity implements Sha
             bindPreferenceSummaryToValue(findPreference("pref_sms_pack_destination"));
             bindPreferenceSummaryToValue(findPreference("pref_sms_pack_source"));
             bindPreferenceSummaryToValue(findPreference("pref_sms_query"));
+            bindPreferenceSummaryToValue(findPreference("pref_sms_sub"));
             //bindPreferenceSummaryToValue(findPreference("pref_sms_min"));
             //bindPreferenceSummaryToValue(findPreference("pref_sms_bal_min"));
             //bindPreferenceSummaryToValue(findPreference("pref_sms_sub"));
