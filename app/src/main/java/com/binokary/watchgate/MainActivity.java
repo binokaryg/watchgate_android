@@ -705,34 +705,45 @@ public class MainActivity extends AppCompatActivity {
         }
 
         CheckBox checkBox = (CheckBox) view;
-        final String topic = mSharedPreferences.getString("instance_name", "none");
+        final String single_topic = mSharedPreferences.getString("instance_name", "none");
+        String[] topics = mSharedPreferences.getString("pref_all_instances", "").split(",");
+        Boolean monitorOnly = mSharedPreferences.getBoolean("switch_monitor_mode", false);
 
-        if (checkBox.isChecked()) {
-            FirebaseMessaging.getInstance().subscribeToTopic(topic).addOnCompleteListener(new OnCompleteListener<Void>() {
-                @Override
-                public void onComplete(@NonNull final Task<Void> task) {
-                    if (!task.isSuccessful()) {
-                        Log.d(TAG, "Error subscribing to topic " + task.getException());
-                        return;
+        //Only allow multiple subscriptions in monitor mode
+        if(!monitorOnly){
+            topics = new String[1];
+            topics[0] = single_topic;
+
+        }
+        for(String topic: topics)
+        {
+            if (checkBox.isChecked()) {
+                FirebaseMessaging.getInstance().subscribeToTopic(topic).addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull final Task<Void> task) {
+                        if (!task.isSuccessful()) {
+                            Log.d(TAG, "Error subscribing to topic " + task.getException());
+                            return;
+                        }
+
+                        Log.d(TAG, "Subscribed to topic " + topic);
+                        Toast.makeText(getApplicationContext(), "Subscribed to topic " + topic, Toast.LENGTH_LONG).show();
                     }
+                });
+            } else {
+                FirebaseMessaging.getInstance().unsubscribeFromTopic(topic).addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull final Task<Void> task) {
+                        if (!task.isSuccessful()) {
+                            Log.d(TAG, "Error unsubscribing from topic " + task.getException());
+                            return;
+                        }
 
-                    Log.d(TAG, "Subscribed to topic " + topic);
-                    Toast.makeText(getApplicationContext(), "Subscribed to topic " + topic, Toast.LENGTH_LONG).show();
-                }
-            });
-        } else {
-            FirebaseMessaging.getInstance().unsubscribeFromTopic(topic).addOnCompleteListener(new OnCompleteListener<Void>() {
-                @Override
-                public void onComplete(@NonNull final Task<Void> task) {
-                    if (!task.isSuccessful()) {
-                        Log.d(TAG, "Error unsubscribing from topic " + task.getException());
-                        return;
+                        Log.d(TAG, "Unsubscribed from topic " + topic);
+                        Toast.makeText(getApplicationContext(), "Unsubscribed from topic " + topic, Toast.LENGTH_LONG).show();
                     }
-
-                    Log.d(TAG, "Unsubscribed from topic " + topic);
-                    Toast.makeText(getApplicationContext(), "Unsubscribed from topic " + topic, Toast.LENGTH_LONG).show();
-                }
-            });
+                });
+            }
         }
     }
 

@@ -52,4 +52,5 @@
     <string name="pref_sms_source_default">1415</string>
     <string name="pref_sms_sub_default">SMS300</string>
     <string name="country_code_default">+977</string>
+    <string name="pref_all_instances_default">baglung,baitadi,bajura,banke,dadeldhura,dhading,gorkha,kanchanpur,pyuthan,rasuwa,sindhuli,sindhupalchowk,sunsari</string>
 </resources>

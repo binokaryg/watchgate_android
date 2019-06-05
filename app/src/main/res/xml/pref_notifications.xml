@@ -48,4 +48,9 @@
         android:digits="1234567890;"
         android:title="@string/own_number_label"
         android:summary="Mobile number to sent SMS notifications. Multiple numbers can be separated by semicolon."/>
+    <SwitchPreference
+        android:defaultValue="false"
+        android:key="switch_monitor_mode"
+        android:title="Monitor Mode"
+        android:summary="Only Monitor Notifications"/>
 </PreferenceScreen>

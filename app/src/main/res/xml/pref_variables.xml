@@ -56,6 +56,12 @@
         android:selectAllOnFocus="true"
         android:singleLine="true"
         android:title="Stitch Update Function" />
+    <EditTextPreference
+        android:defaultValue="@string/pref_all_instances_default"
+        android:key="pref_all_instances"
+        android:selectAllOnFocus="true"
+        android:singleLine="false"
+        android:title="All Instances" />
 
     <!-- NOTE: Hide buttons to simplify the UI. Users can touch outside the dialog to
          dismiss it. -->
