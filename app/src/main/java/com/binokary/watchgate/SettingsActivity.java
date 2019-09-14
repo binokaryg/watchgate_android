@@ -282,6 +282,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity implements Sha
             bindPreferenceSummaryToValue(findPreference("pref_sms_pack_no_regex"));
             bindPreferenceSummaryToValue((findPreference(("pref_sms_pack_active"))));
             bindPreferenceSummaryToValue(findPreference("pref_stitch_update_func"));
+            bindPreferenceSummaryToValue(findPreference("pref_all_instances"));
         }
 
         @Override
