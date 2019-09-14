@@ -1,11 +1,14 @@
 package com.binokary.watchgate.service;
 
 import android.app.ActivityManager;
+import android.app.Application;
 import android.app.NotificationManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Handler;
+import android.os.SystemClock;
 import android.preference.PreferenceManager;
 
 import androidx.core.app.NotificationCompat;
@@ -13,6 +16,7 @@ import androidx.core.app.NotificationCompat;
 import android.util.Log;
 
 import com.binokary.watchgate.Constants;
+import com.binokary.watchgate.MainActivity;
 import com.binokary.watchgate.NotificationID;
 import com.binokary.watchgate.R;
 import com.binokary.watchgate.toilers.WorkerUtils;
@@ -26,6 +30,8 @@ public class GateOnFirebaseMessagingService extends FirebaseMessagingService {
     private SharedPreferences mSharedPreferences;
     private String TAG = Constants.MAINTAG + "NOTIFY";
 
+    Handler handler = new Handler();
+
     @Override
     public void onCreate() {
         mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
@@ -38,19 +44,22 @@ public class GateOnFirebaseMessagingService extends FirebaseMessagingService {
         Map data = message.getData();
         String task = data.get("task").toString();
         String body = data.get("body").toString();
-        String package_name = mSharedPreferences.getString("edit_text_preference_package", "none");
+        String packageNameFromMsg = data.get("package").toString();
+        String regex = "^([A-Za-z]{1}[A-Za-z\\d_]*\\.)+[A-Za-z][A-Za-z\\d_]*$";
+        String packageName = packageNameFromMsg.matches(regex) ?
+                packageNameFromMsg : mSharedPreferences.getString("edit_text_preference_package", "none");
         Boolean isPostpaid = mSharedPreferences.getBoolean("switch_preference_1", false);
 
         Log.d(TAG, task);
         if (task.equals("KILL")) {
             Log.d(TAG, "Attempting KILL");
             ActivityManager activityManager = (ActivityManager) this.getSystemService(ACTIVITY_SERVICE);
-            activityManager.killBackgroundProcesses(package_name);
+            activityManager.killBackgroundProcesses(packageName);
             Log.d(TAG, "Attempted KILL");
             //Toast.makeText(getApplicationContext(), "Killed!", Toast.LENGTH_LONG).show();
         } else if (task.equals("START")) {
             Log.d(TAG, "Attempting START");
-            Intent launchIntent = getPackageManager().getLaunchIntentForPackage(package_name);
+            Intent launchIntent = getPackageManager().getLaunchIntentForPackage(packageName);
             if (launchIntent != null) {
                 startActivity(launchIntent);//null pointer check in case package name was not found
                 Log.d(TAG, "Attempted START : " + launchIntent.toString());
@@ -58,16 +67,23 @@ public class GateOnFirebaseMessagingService extends FirebaseMessagingService {
                 Log.e(TAG, "Could not attempt START: " + "intent is null");
             }
         } else if (task.equals("RESTART")) {
-            Log.d(TAG, "Attempting RESTART");
+            Log.d(TAG, "Attempting RESTART " + packageName);
+            bringAppToFront();
+            SystemClock.sleep(2000);//risky?
             ActivityManager activityManager = (ActivityManager) this.getSystemService(ACTIVITY_SERVICE);
-            activityManager.killBackgroundProcesses(package_name);
-            Intent launchIntent = getPackageManager().getLaunchIntentForPackage(package_name);
+            activityManager.killBackgroundProcesses(packageName);
+            Intent launchIntent = getPackageManager().getLaunchIntentForPackage(packageName);
             if (launchIntent != null) {
                 startActivity(launchIntent);//null pointer check in case package name was not found
                 Log.d(TAG, "Attempted RESTART : " + launchIntent.toString());
             } else {
-                Log.e(TAG, "Could not attempt RESTART: " + "intent is null");
+                Log.e(TAG, "Could not attempt RESTART: " + packageName + " : intent is null");
             }
+            handler.postDelayed(new Runnable() {
+                public void run() {
+                    bringAppToFront();
+                }
+            }, 5000);   //5 seconds
         } else if (task.equals("CHECK")) {
             if (isPostpaid) {
                 String postpaidBalanceQueryDestination = mSharedPreferences.getString("pref_sms_destination", "1415");
@@ -88,9 +104,9 @@ public class GateOnFirebaseMessagingService extends FirebaseMessagingService {
         NotificationCompat.Builder notificationBuilder;
         NotificationManager manager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationBuilder = new NotificationCompat.Builder(getApplicationContext(), "channel_id");
+        notificationBuilder = new NotificationCompat.Builder(getApplicationContext(), "channel_fcm");
 
-        notificationBuilder.setContentTitle("Attempted: " + task)
+        notificationBuilder.setContentTitle("Attempted: " + task + " " + packageName)
                 .setContentText(body)
                 .setSmallIcon(R.drawable.ic_notifications_black_24dp)
                 .setShowWhen(true);
@@ -117,6 +133,17 @@ public class GateOnFirebaseMessagingService extends FirebaseMessagingService {
         super.onNewToken(s);
         String deviceToken = s;
         Log.d("Token", deviceToken);
+    }
+
+    public void bringAppToFront() {
+        Log.d(TAG, "Bringing watchgate to front");
+        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK); // You need this if starting
+        //  the activity from a service
+        intent.setAction(Intent.ACTION_MAIN);
+        intent.addCategory(Intent.CATEGORY_LAUNCHER);
+        startActivity(intent);
+        Log.d(TAG, "Brought watchgate to front");
     }
 
 }

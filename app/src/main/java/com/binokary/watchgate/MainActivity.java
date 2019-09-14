@@ -2,24 +2,32 @@ package com.binokary.watchgate;
 
 import android.Manifest;
 import android.app.AlertDialog;
+import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
-import androidx.lifecycle.LiveData;
+
+import androidx.core.app.NotificationCompat;
+
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.graphics.BitmapFactory;
 import android.os.BatteryManager;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.StatFs;
+import android.preference.PreferenceGroup;
 import android.preference.PreferenceManager;
 import android.provider.Telephony;
+
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.appcompat.app.AppCompatActivity;
+
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -51,9 +59,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import androidx.core.content.pm.PackageInfoCompat;
 import androidx.work.WorkManager;
 import androidx.work.WorkInfo;
 
@@ -69,7 +80,8 @@ public class MainActivity extends AppCompatActivity {
     private static MainActivity mainActivityInstance;
     private String mUserMobilePhone;
     private SharedPreferences mSharedPreferences;
-
+    private NotificationManager notificationManager;
+    private NotificationCompat.Builder persistentNotificationBuilder;
     TextView textView;
     ProgressBar progressBar;
 
@@ -370,11 +382,11 @@ public class MainActivity extends AppCompatActivity {
 
         if (android.os.Build.VERSION.SDK_INT >= 26) {
             // For Android SDK 26 and above, it is necessary to create a channel to create notifications.
-            NotificationManager manager =
+            notificationManager =
                     (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-            NotificationChannel channel = new NotificationChannel("channel_id",
-                    "channel_name", NotificationManager.IMPORTANCE_HIGH);
-            manager.createNotificationChannel(channel);
+            NotificationChannel channel = new NotificationChannel("channel_fcm",
+                    "FCM", NotificationManager.IMPORTANCE_HIGH);
+            notificationManager.createNotificationChannel(channel);
         }
 
         FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(MainActivity.this, new OnSuccessListener<InstanceIdResult>() {
@@ -410,6 +422,31 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+
+        notificationManager =
+                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        if (android.os.Build.VERSION.SDK_INT >= 26) {
+            // For Android SDK 26 and above, it is necessary to create a channel to create notifications.
+            NotificationChannel channel = new NotificationChannel("channel_persistent",
+                    "PERSISTENT", NotificationManager.IMPORTANCE_HIGH);
+            notificationManager.createNotificationChannel(channel);
+        }
+        String versionName = BuildConfig.VERSION_NAME;
+        persistentNotificationBuilder = new NotificationCompat.Builder(getApplicationContext(), "channel_persistent");
+
+        persistentNotificationBuilder.setAutoCancel(false)
+                .setDefaults(Notification.DEFAULT_ALL)
+                .setWhen(System.currentTimeMillis())
+                .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_i_see))
+                .setSmallIcon(R.drawable.ic_remove_red_eye_black_24dp)
+                .setTicker("Watchgate")
+                .setPriority(Notification.PRIORITY_MAX) // this is deprecated in API 26 but you can still use for below 26
+                .setContentTitle("Watchgate on Duty (" + versionName + ")")
+                .setContentText("Relax")
+                .setContentInfo("Info")
+                .setOngoing(true);
+
+        notificationManager.notify(1, persistentNotificationBuilder.build());
     }
 
     protected void onDestroy() {
@@ -674,6 +711,14 @@ public class MainActivity extends AppCompatActivity {
             textV1.setText(msg);
             progressBar.setVisibility(View.INVISIBLE);
         });
+        notificationManager =
+                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        int smsPack = mSharedPreferences.getInt(PrefStrings.SMS_PACK_INFO, -1);
+        long smsPackDate = mSharedPreferences.getLong(PrefStrings.SMS_PACK_INFO_DATE, -1);
+        SimpleDateFormat formatter = new SimpleDateFormat("MMM d HH:mm");
+        String dateString = formatter.format(new Date(smsPackDate));
+        persistentNotificationBuilder.setContentText(msg + "\n SMS: " + smsPack + " (" + dateString + ")");
+        notificationManager.notify(1, persistentNotificationBuilder.build());
     }
 
     public void updateLastSMSInView(final String msg) {
@@ -688,6 +733,23 @@ public class MainActivity extends AppCompatActivity {
             TextView textV1 = findViewById(R.id.textViewSMSPack);
             textV1.setText("SMS Pack: " + msg);
         });
+        Boolean postPaid = mSharedPreferences.getBoolean(PrefStrings.IS_POSTPAID, false);
+        StringBuilder balanceText  = new StringBuilder("");
+        if(postPaid) {
+            int postPaidBalanceCredit = mSharedPreferences.getInt(PrefStrings.POSTPAID_BALANCE_CREDIT, -1);
+            balanceText.append("Rs " + postPaidBalanceCredit + "*");
+        }
+        else{
+            int prePaidBalance = mSharedPreferences.getInt(PrefStrings.PREPAID_BALANCE, -1);
+            balanceText.append("Rs " + prePaidBalance);
+        }
+        long balanceDate = mSharedPreferences.getLong(PrefStrings.BALANCE_DATE, -1);
+        SimpleDateFormat formatter = new SimpleDateFormat("MMM d HH:mm");
+        String dateString = formatter.format(new Date(balanceDate));
+        balanceText.append(" (" + dateString + "); ");
+        balanceText.append(msg);
+        persistentNotificationBuilder.setContentText(balanceText.toString());
+        notificationManager.notify(1, persistentNotificationBuilder.build());
     }
 
     /**

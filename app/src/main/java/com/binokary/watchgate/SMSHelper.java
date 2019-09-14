@@ -8,7 +8,9 @@ import android.telephony.SmsManager;
 import android.util.Log;
 
 import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -76,11 +78,12 @@ public class SMSHelper {
     }
 
     public static String getBalanceMsgFromParts(boolean isPostpaid, int balance, int balanceDue, int balanceCredit, long dateinMS) {
-        String dateTimeString = DateFormat.getDateTimeInstance().format(dateinMS);
+        SimpleDateFormat formatter = new SimpleDateFormat("MMM d HH:mm");
+        String dateTimeString = formatter.format(new Date(dateinMS));
         if (isPostpaid) {
             return String.format("Due: Rs %d, Credit: Rs %d", balanceDue, balanceCredit, dateTimeString);
         } else {
-            return String.format("Rs %d @ %s", balance, dateTimeString);
+            return String.format("Rs %d (%s)", balance, dateTimeString);
         }
     }
 

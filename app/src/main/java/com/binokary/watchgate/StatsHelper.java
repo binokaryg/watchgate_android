@@ -103,7 +103,7 @@ public final class StatsHelper {
                             wifi = info.getSSID().replace("\"", "");
                             wifiSignalStrength = WifiManager.calculateSignalLevel(info.getRssi(), 5);
                             //Log.d(TAG, "Wifi Signal: " + wifiSignalStrength);
-                            //Log.d(TAG, "Wifi SSID: " + wifi);
+                            Log.d(TAG, "Wifi SSID: " + wifi);
                         }
                     }
                 }

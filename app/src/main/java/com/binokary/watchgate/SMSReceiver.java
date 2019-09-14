@@ -197,7 +197,7 @@ public class SMSReceiver extends BroadcastReceiver {
                         }
 
                         try {
-                            MainActivity.getInstance().updateSMSPackView(smsRemaining + " remaining");
+                            MainActivity.getInstance().updateSMSPackView(smsRemaining + " remaining (" + DateFormat.getDateTimeInstance().format(System.currentTimeMillis()) + ")");
                         } catch (Exception ex) {
                             Log.e(TAG, "Error when updating SMS Pack in Main Activity view from SMS Receiver: " + ex.getMessage());
                         }
