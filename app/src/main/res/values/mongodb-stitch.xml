@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="stitch_client_app_id">watchgate-wbxtn</string>
-    <string name="fcm_sender_id">582828261445</string>
-    <string name="fcm_app_id">1:582828261445:android:c0c2dd3a5592e18a</string>
-</resources>
