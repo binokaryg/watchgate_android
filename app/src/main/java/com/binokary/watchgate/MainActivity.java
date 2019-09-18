@@ -83,6 +83,7 @@ public class MainActivity extends AppCompatActivity {
     private NotificationManager notificationManager;
     private NotificationCompat.Builder persistentNotificationBuilder;
     TextView textView;
+    TextView titleView;
     ProgressBar progressBar;
 
     WorkManager mWorkManager;
@@ -124,6 +125,8 @@ public class MainActivity extends AppCompatActivity {
         mainActivityInstance = this;
         setContentView(R.layout.activity_main);
         textView = (TextView) findViewById(R.id.textView);
+        titleView = (TextView) findViewById(R.id.textViewTitle);
+        titleView.setText(BuildConfig.VERSION_NAME);
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
 
         levelView = (TextView) findViewById(R.id.textViewLevel);
@@ -441,8 +444,8 @@ public class MainActivity extends AppCompatActivity {
                 .setSmallIcon(R.drawable.ic_remove_red_eye_black_24dp)
                 .setTicker("Watchgate")
                 .setPriority(Notification.PRIORITY_MAX) // this is deprecated in API 26 but you can still use for below 26
-                .setContentTitle("Watchgate on Duty (" + versionName + ")")
-                .setContentText("Relax")
+                .setContentTitle("WG" + versionName)
+                .setContentText("Waiting")
                 .setContentInfo("Info")
                 .setOngoing(true);
 
@@ -711,10 +714,11 @@ public class MainActivity extends AppCompatActivity {
             textV1.setText(msg);
             progressBar.setVisibility(View.INVISIBLE);
         });
+        SharedPreferences prefs = getSharedPreferences(PREF_STATS, MODE_PRIVATE);
         notificationManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        int smsPack = mSharedPreferences.getInt(PrefStrings.SMS_PACK_INFO, -1);
-        long smsPackDate = mSharedPreferences.getLong(PrefStrings.SMS_PACK_INFO_DATE, -1);
+        int smsPack = prefs.getInt(PrefStrings.SMS_PACK_INFO, -1);
+        long smsPackDate = prefs.getLong(PrefStrings.SMS_PACK_INFO_DATE, -1);
         SimpleDateFormat formatter = new SimpleDateFormat("MMM d HH:mm");
         String dateString = formatter.format(new Date(smsPackDate));
         persistentNotificationBuilder.setContentText(msg + "\n SMS: " + smsPack + " (" + dateString + ")");
@@ -733,17 +737,18 @@ public class MainActivity extends AppCompatActivity {
             TextView textV1 = findViewById(R.id.textViewSMSPack);
             textV1.setText("SMS Pack: " + msg);
         });
-        Boolean postPaid = mSharedPreferences.getBoolean(PrefStrings.IS_POSTPAID, false);
+        SharedPreferences prefs = getSharedPreferences(PREF_STATS, MODE_PRIVATE);
+        Boolean postPaid = prefs.getBoolean(PrefStrings.IS_POSTPAID, false);
         StringBuilder balanceText  = new StringBuilder("");
         if(postPaid) {
-            int postPaidBalanceCredit = mSharedPreferences.getInt(PrefStrings.POSTPAID_BALANCE_CREDIT, -1);
+            int postPaidBalanceCredit = prefs.getInt(PrefStrings.POSTPAID_BALANCE_CREDIT, -1);
             balanceText.append("Rs " + postPaidBalanceCredit + "*");
         }
         else{
-            int prePaidBalance = mSharedPreferences.getInt(PrefStrings.PREPAID_BALANCE, -1);
+            int prePaidBalance = prefs.getInt(PrefStrings.PREPAID_BALANCE, -1);
             balanceText.append("Rs " + prePaidBalance);
         }
-        long balanceDate = mSharedPreferences.getLong(PrefStrings.BALANCE_DATE, -1);
+        long balanceDate = prefs.getLong(PrefStrings.BALANCE_DATE, -1);
         SimpleDateFormat formatter = new SimpleDateFormat("MMM d HH:mm");
         String dateString = formatter.format(new Date(balanceDate));
         balanceText.append(" (" + dateString + "); ");

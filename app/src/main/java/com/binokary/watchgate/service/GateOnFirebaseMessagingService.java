@@ -109,23 +109,23 @@ public class GateOnFirebaseMessagingService extends FirebaseMessagingService {
                 String sms_pack_sub_code = mSharedPreferences.getString("pref_sms_sub", "SMS20");
                 WorkerUtils.enqueueOneTimeSMSSendingWork(sms_pack_destination, sms_pack_sub_code);
             }
-
-            // Create a new notification here to show in case the app is in the foreground.
-            NotificationCompat.Builder notificationBuilder;
-            NotificationManager manager =
-                    (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-            notificationBuilder = new NotificationCompat.Builder(getApplicationContext(), "channel_fcm");
-
-            notificationBuilder.setContentTitle("Attempted: " + task + " " + packageName)
-                    .setContentText(body)
-                    .setSmallIcon(R.drawable.ic_notifications_black_24dp)
-                    .setShowWhen(true);
-
-            notificationBuilder.setAutoCancel(true)
-                    .setDefaults(NotificationCompat.DEFAULT_ALL);
-
-            manager.notify(NotificationID.getID(), notificationBuilder.build());
         }
+
+        // Create a new notification here to show in case the app is in the foreground.
+        NotificationCompat.Builder notificationBuilder;
+        NotificationManager manager =
+                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationBuilder = new NotificationCompat.Builder(getApplicationContext(), "channel_fcm");
+
+        notificationBuilder.setContentTitle("Attempted: " + (task.equals("RESTART") ? task + " " + packageName : task) + " " + (monitorOnly ? " in " + topic: ""))
+                .setContentText(body)
+                .setSmallIcon(R.drawable.ic_notifications_black_24dp)
+                .setShowWhen(true);
+
+        notificationBuilder.setAutoCancel(true)
+                .setDefaults(NotificationCompat.DEFAULT_ALL);
+
+        manager.notify(NotificationID.getID(), notificationBuilder.build());
     }
 
     public int getNotificationIDByTask(String task) {
