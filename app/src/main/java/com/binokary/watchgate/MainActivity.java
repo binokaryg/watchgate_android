@@ -8,6 +8,7 @@ import android.app.NotificationManager;
 
 import androidx.core.app.NotificationCompat;
 
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -126,7 +127,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         textView = (TextView) findViewById(R.id.textView);
         titleView = (TextView) findViewById(R.id.textViewTitle);
-        titleView.setText(BuildConfig.VERSION_NAME);
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
 
         levelView = (TextView) findViewById(R.id.textViewLevel);
@@ -154,7 +154,7 @@ public class MainActivity extends AppCompatActivity {
         PreferenceManager.setDefaultValues(this, R.xml.pref_smspacks, true);
         mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
-        //setTitle("Keep BroadcastReceiver Running After App Exit.");
+        setTitle("WatchGate " + BuildConfig.VERSION_NAME);
 
         //Intent backgroundService = new Intent(getApplicationContext(), GateBackgroundService.class);
         //startService(backgroundService);
@@ -435,6 +435,9 @@ public class MainActivity extends AppCompatActivity {
             notificationManager.createNotificationChannel(channel);
         }
         String versionName = BuildConfig.VERSION_NAME;
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
         persistentNotificationBuilder = new NotificationCompat.Builder(getApplicationContext(), "channel_persistent");
 
         persistentNotificationBuilder.setAutoCancel(false)
@@ -445,8 +448,9 @@ public class MainActivity extends AppCompatActivity {
                 .setTicker("Watchgate")
                 .setPriority(Notification.PRIORITY_MAX) // this is deprecated in API 26 but you can still use for below 26
                 .setContentTitle("WG" + versionName)
-                .setContentText("Waiting")
+                .setContentText(getNotificationSummaryText())
                 .setContentInfo("Info")
+                .setContentIntent(pendingIntent)
                 .setOngoing(true);
 
         notificationManager.notify(1, persistentNotificationBuilder.build());
@@ -675,7 +679,7 @@ public class MainActivity extends AppCompatActivity {
         Integer balance = prefs.getInt(PrefStrings.PREPAID_BALANCE, -1);
         Integer balanceDue = prefs.getInt(PrefStrings.POSTPAID_BALANCE_DUE, -1);
         Integer balanceCredit = prefs.getInt(PrefStrings.POSTPAID_BALANCE_CREDIT, -1);
-
+         titleView.setText(mSharedPreferences.getString("instance_name", "unnamed").toUpperCase());
         String wifi = prefs.getString(PrefStrings.WIFI_SSID, "N/A");
         Boolean data = prefs.getBoolean(PrefStrings.MOBILE_DATA, false);
         Integer temp = prefs.getInt(PrefStrings.TEMPERATURE, -1);
@@ -708,21 +712,40 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    public String getNotificationSummaryText() {
+        SharedPreferences prefs = getSharedPreferences(PREF_STATS, MODE_PRIVATE);
+        Boolean postPaid = prefs.getBoolean(PrefStrings.IS_POSTPAID, false);
+        StringBuilder summaryText  = new StringBuilder("");
+        if(postPaid) {
+            int postPaidBalanceCredit = prefs.getInt(PrefStrings.POSTPAID_BALANCE_CREDIT, -1);
+            summaryText.append("Rs " + postPaidBalanceCredit + "*");
+        }
+        else{
+            int prePaidBalance = prefs.getInt(PrefStrings.PREPAID_BALANCE, -1);
+            summaryText.append("Rs " + prePaidBalance);
+        }
+        long balanceDate = prefs.getLong(PrefStrings.BALANCE_DATE, -1);
+        SimpleDateFormat formatter = new SimpleDateFormat("MMM d HH:mm");
+        String dateStringBalance = formatter.format(new Date(balanceDate));
+        summaryText.append(" (" + dateStringBalance + "); ");
+        int smsPack = prefs.getInt(PrefStrings.SMS_PACK_INFO, -1);
+        long smsPackDate = prefs.getLong(PrefStrings.SMS_PACK_INFO_DATE, -1);
+        String dateStringMsg = formatter.format(new Date(smsPackDate));
+        summaryText.append("SMS: " + smsPack + " (" + dateStringMsg + ")");
+        return summaryText.toString();
+    }
+
+    public void updateNotificationSummary(String summaryText) {
+        persistentNotificationBuilder.setContentText(summaryText);
+        notificationManager.notify(1, persistentNotificationBuilder.build());
+    }
+
     public void updateBalanceView(final String msg) {
         MainActivity.this.runOnUiThread(() -> {
             TextView textV1 = findViewById(R.id.textViewBalance);
             textV1.setText(msg);
             progressBar.setVisibility(View.INVISIBLE);
         });
-        SharedPreferences prefs = getSharedPreferences(PREF_STATS, MODE_PRIVATE);
-        notificationManager =
-                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        int smsPack = prefs.getInt(PrefStrings.SMS_PACK_INFO, -1);
-        long smsPackDate = prefs.getLong(PrefStrings.SMS_PACK_INFO_DATE, -1);
-        SimpleDateFormat formatter = new SimpleDateFormat("MMM d HH:mm");
-        String dateString = formatter.format(new Date(smsPackDate));
-        persistentNotificationBuilder.setContentText(msg + "\n SMS: " + smsPack + " (" + dateString + ")");
-        notificationManager.notify(1, persistentNotificationBuilder.build());
     }
 
     public void updateLastSMSInView(final String msg) {
@@ -730,6 +753,7 @@ public class MainActivity extends AppCompatActivity {
             TextView textV1 = findViewById(R.id.textViewSMSInTime);
             textV1.setText("Last SMS in: " + msg);
         });
+        updateNotificationSummary(getNotificationSummaryText());
     }
 
     public void updateSMSPackView(final String msg) {
@@ -737,24 +761,7 @@ public class MainActivity extends AppCompatActivity {
             TextView textV1 = findViewById(R.id.textViewSMSPack);
             textV1.setText("SMS Pack: " + msg);
         });
-        SharedPreferences prefs = getSharedPreferences(PREF_STATS, MODE_PRIVATE);
-        Boolean postPaid = prefs.getBoolean(PrefStrings.IS_POSTPAID, false);
-        StringBuilder balanceText  = new StringBuilder("");
-        if(postPaid) {
-            int postPaidBalanceCredit = prefs.getInt(PrefStrings.POSTPAID_BALANCE_CREDIT, -1);
-            balanceText.append("Rs " + postPaidBalanceCredit + "*");
-        }
-        else{
-            int prePaidBalance = prefs.getInt(PrefStrings.PREPAID_BALANCE, -1);
-            balanceText.append("Rs " + prePaidBalance);
-        }
-        long balanceDate = prefs.getLong(PrefStrings.BALANCE_DATE, -1);
-        SimpleDateFormat formatter = new SimpleDateFormat("MMM d HH:mm");
-        String dateString = formatter.format(new Date(balanceDate));
-        balanceText.append(" (" + dateString + "); ");
-        balanceText.append(msg);
-        persistentNotificationBuilder.setContentText(balanceText.toString());
-        notificationManager.notify(1, persistentNotificationBuilder.build());
+        updateNotificationSummary(getNotificationSummaryText());
     }
 
     /**
