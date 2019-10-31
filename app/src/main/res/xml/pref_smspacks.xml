@@ -43,8 +43,7 @@
         android:selectAllOnFocus="true"
         android:singleLine="true"
         android:summary="SMS code to subscribe to a SMS pack"
-        android:title="SMS Pack Subscription Code"
-        android:visibility="invisible" />
+        android:title="SMS Pack Subscription Code"/>
     <!--Preferences below is for conditionally subscribing an SMS pack, TODO_MAYBE_LATER-->
     <!--<EditTextPreference
         android:defaultValue="@integer/pref_sms_pack_min_bal_default"
