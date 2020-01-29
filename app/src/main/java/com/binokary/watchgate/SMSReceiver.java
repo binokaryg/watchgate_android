@@ -12,6 +12,9 @@ import android.widget.Toast;
 
 import com.binokary.watchgate.toilers.WorkerUtils;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.Date;
@@ -131,6 +134,20 @@ public class SMSReceiver extends BroadcastReceiver {
                                 stats.putLong(PrefStrings.BALANCE_DATE, lastBalanceSMSInTime);
                                 stats.putInt(PrefStrings.PREPAID_BALANCE, balance);
                                 SMSNotification(balance);
+                            }
+
+                            //Push to Slack Channel
+                            if (mSharedPreferences.getBoolean("switch_slack", false)) {
+                                JSONObject jsonBody = new JSONObject();
+                                try {
+                                    jsonBody.put(
+                                            "text",
+                                            mSharedPreferences.getString("instance_name", "none").toUpperCase() + " :red_circle: Balance is Rs. " + (isPostpaid ? balanceCredit : balance));
+                                    SlackHelper.sendMessage(context, jsonBody);
+                                } catch (
+                                        JSONException e) {
+                                    Log.e(TAG, e.getMessage());
+                                }
                             }
                         } catch (Exception ex) {
                             Log.e(TAG, "Error when reading balance info from SMS: " + smsBody + " Error: " + ex.getMessage());
@@ -302,7 +319,7 @@ public class SMSReceiver extends BroadcastReceiver {
                 String instanceName = mSharedPreferences.getString("instance_name", "none");
                 Long lastNotificationTime = prefs.getLong(PrefStrings.SMS_NOTIFICATION_DATE, 0);
                 Long currentTime = System.currentTimeMillis();
-                String smsMsg = String.format("Balance in %s is %d.", instanceName, balanceInRs);
+                String smsMsg = String.format("Balance in %s is %d.", instanceName.toUpperCase(), balanceInRs);
                 Integer smsInterval = 2;
                 Integer criticalBalance = 100;
                 try {
@@ -316,7 +333,7 @@ public class SMSReceiver extends BroadcastReceiver {
                 if (balanceInRs <= criticalBalance) {
                     if (smsInterval < currentTime - lastNotificationTime) {
                         Log.d(TAG, "Interval OK, enqueuing SMS");
-                        for(String smsRecipient : smsRecipientArray) {
+                        for (String smsRecipient : smsRecipientArray) {
                             WorkerUtils.enqueueOneTimeSMSSendingWork(smsRecipient, smsMsg);
                         }
                         stats.putLong(PrefStrings.SMS_NOTIFICATION_DATE, currentTime);

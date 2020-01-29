@@ -6,8 +6,8 @@ android {
         applicationId "com.binokary.watchgate"
         minSdkVersion 21
         targetSdkVersion 28
-        versionCode 20
-        versionName "0.8.5"
+        versionCode 21
+        versionName "0.8.6"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
     }
@@ -48,6 +48,8 @@ dependencies {
     implementation 'org.mongodb:stitch-android-services-fcm:4.2.1'
     implementation 'com.google.firebase:firebase-core:16.0.7'
     implementation 'com.google.firebase:firebase-messaging:17.4.0'
+
+    implementation 'com.android.volley:volley:1.1.1'
 }
 configurations {
     all*.exclude group: 'com.google.guava', module: 'listenablefuture'

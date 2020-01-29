@@ -1,9 +1,7 @@
 package com.binokary.watchgate.service;
 
 import android.app.ActivityManager;
-import android.app.Application;
 import android.app.NotificationManager;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -19,15 +17,20 @@ import com.binokary.watchgate.Constants;
 import com.binokary.watchgate.MainActivity;
 import com.binokary.watchgate.NotificationID;
 import com.binokary.watchgate.R;
+import com.binokary.watchgate.SlackHelper;
 import com.binokary.watchgate.toilers.WorkerUtils;
 import com.google.firebase.messaging.RemoteMessage;
 import com.google.firebase.messaging.FirebaseMessagingService;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.Map;
 
 public class GateOnFirebaseMessagingService extends FirebaseMessagingService {
 
     private SharedPreferences mSharedPreferences;
+    private String SLACK_HOOK;
     private String TAG = Constants.MAINTAG + "NOTIFY";
 
     Handler handler = new Handler();
@@ -35,6 +38,7 @@ public class GateOnFirebaseMessagingService extends FirebaseMessagingService {
     @Override
     public void onCreate() {
         mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        SLACK_HOOK = getResources().getString(R.string.slack_url);
     }
 
     @Override
@@ -117,7 +121,7 @@ public class GateOnFirebaseMessagingService extends FirebaseMessagingService {
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         notificationBuilder = new NotificationCompat.Builder(getApplicationContext(), "channel_fcm");
 
-        notificationBuilder.setContentTitle("Attempted: " + (task.equals("RESTART") ? task + " " + packageName : task) + " " + (monitorOnly ? " in " + topic: ""))
+        notificationBuilder.setContentTitle("Attempted: " + (task.equals("RESTART") ? task + " " + packageName : task) + " " + (monitorOnly ? " in " + topic : ""))
                 .setContentText(body)
                 .setSmallIcon(R.drawable.ic_notifications_black_24dp)
                 .setShowWhen(true);
@@ -126,18 +130,22 @@ public class GateOnFirebaseMessagingService extends FirebaseMessagingService {
                 .setDefaults(NotificationCompat.DEFAULT_ALL);
 
         manager.notify(NotificationID.getID(), notificationBuilder.build());
-    }
 
-    public int getNotificationIDByTask(String task) {
-        switch (task) {
-            case "KILL":
-                return 1;
-            case "RESTART":
-                return 2;
-            default:
-                return 0;
+        //Push to Slack Channel
+        if (mSharedPreferences.getBoolean("switch_slack", false)) {
+
+            JSONObject jsonBody = new JSONObject();
+
+            try {
+                jsonBody.put("text", topic.toUpperCase() + ": " + ((task.equals("RESTART") ? task + " :blue_circle: " + packageName : task) + " (" + body + ")"));
+                SlackHelper.sendMessage(getApplicationContext(), jsonBody);
+            } catch (
+                    JSONException e) {
+                Log.e(TAG, e.getMessage());
+            }
         }
     }
+
 
     @Override
     public void onNewToken(String s) {

@@ -53,4 +53,9 @@
         android:key="switch_monitor_mode"
         android:title="Monitor Mode"
         android:summary="Only Monitor Notifications"/>
+    <SwitchPreference
+        android:defaultValue="false"
+        android:key="switch_slack"
+        android:title="Push to Slack"
+        android:summary="Send Messages to Slack Channel"/>
 </PreferenceScreen>
