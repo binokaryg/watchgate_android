@@ -137,7 +137,7 @@ public class GateOnFirebaseMessagingService extends FirebaseMessagingService {
             JSONObject jsonBody = new JSONObject();
 
             try {
-                jsonBody.put("text", topic.toUpperCase() + ": " + ((task.equals("RESTART") ? task + " :blue_circle: " + packageName : task) + " (" + body + ")"));
+                jsonBody.put("text", topic.toUpperCase() + ": " + ((task.equals("RESTART") ? task + " :large_blue_circle: " + packageName : task) + " (" + body + ")"));
                 SlackHelper.sendMessage(getApplicationContext(), jsonBody);
             } catch (
                     JSONException e) {
