@@ -95,6 +95,20 @@ public class SMSReceiver extends BroadcastReceiver {
                         String postpaidBalanceQueryDestination = mSharedPreferences.getString("pref_sms_destination", "1415");
                         String postpaidBalanceQuery = mSharedPreferences.getString("pref_balance_query_postpaid", "CB");
                         WorkerUtils.enqueueOneTimeSMSSendingWork(postpaidBalanceQueryDestination, postpaidBalanceQuery);
+
+                        if (mSharedPreferences.getBoolean("switch_slack", false)) {
+                            JSONObject jsonBody = new JSONObject();
+                            try {
+                                jsonBody.put(
+                                        "text",
+                                        mSharedPreferences.getString("instance_name", "none").toUpperCase() +
+                                                " :green_circle: Topped Up");
+                                SlackHelper.sendMessage(context, jsonBody);
+                            } catch (
+                                    JSONException e) {
+                                Log.e(TAG, e.getMessage());
+                            }
+                        }
                     }
 
 
@@ -120,12 +134,24 @@ public class SMSReceiver extends BroadcastReceiver {
                                 stats.putInt(PrefStrings.POSTPAID_BALANCE_DUE, balanceDue);
                                 stats.putInt(PrefStrings.POSTPAID_BALANCE_CREDIT, balanceCredit);
                                 Log.d(TAG, "Balance is " + balanceCredit);
-                                SMSNotification(balanceCredit);
+                                CheckCriticalBalanceAndSendNotifications(context, balanceCredit);
                             } else //Prepaid
                             {
                                 if (isTopUpInfo) { //Top up message with new balance information
                                     balance = SMSHelper.getIntFromMsgBodyRegex(smsBody, prepaidBalanceTopUpRegexp);
-
+                                    if (mSharedPreferences.getBoolean("switch_slack", false)) {
+                                        JSONObject jsonBody = new JSONObject();
+                                        try {
+                                            jsonBody.put(
+                                                    "text",
+                                                    mSharedPreferences.getString("instance_name", "none").toUpperCase() +
+                                                            " :green_circle: Topped Up. New balance is Rs. " + balance);
+                                            SlackHelper.sendMessage(context, jsonBody);
+                                        } catch (
+                                                JSONException e) {
+                                            Log.e(TAG, e.getMessage());
+                                        }
+                                    }
                                     Log.d(TAG, "Balance is " + balance);
                                 } else {
                                     balance = SMSHelper.getIntFromMsgBodyRegex(smsBody, prepaidBalanceRegexp);
@@ -133,22 +159,9 @@ public class SMSReceiver extends BroadcastReceiver {
                                 lastBalanceSMSInTime = System.currentTimeMillis();
                                 stats.putLong(PrefStrings.BALANCE_DATE, lastBalanceSMSInTime);
                                 stats.putInt(PrefStrings.PREPAID_BALANCE, balance);
-                                SMSNotification(balance);
+                                CheckCriticalBalanceAndSendNotifications(context, balance);
                             }
 
-                            //Push to Slack Channel
-                            if (mSharedPreferences.getBoolean("switch_slack", false)) {
-                                JSONObject jsonBody = new JSONObject();
-                                try {
-                                    jsonBody.put(
-                                            "text",
-                                            mSharedPreferences.getString("instance_name", "none").toUpperCase() + " :red_circle: Balance is Rs. " + (isPostpaid ? balanceCredit : balance));
-                                    SlackHelper.sendMessage(context, jsonBody);
-                                } catch (
-                                        JSONException e) {
-                                    Log.e(TAG, e.getMessage());
-                                }
-                            }
                         } catch (Exception ex) {
                             Log.e(TAG, "Error when reading balance info from SMS: " + smsBody + " Error: " + ex.getMessage());
                         }
@@ -306,43 +319,64 @@ public class SMSReceiver extends BroadcastReceiver {
 
     }
 
-    public void SMSNotification(int balanceInRs) {
-        //TODO: Send SMS to user if balance is low than critical level
-        Boolean sendSMS = mSharedPreferences.getBoolean("switch_sms_notification", false);
-        if (sendSMS) {
-            try {
-                Log.d(TAG, "Preparing to send sms notification");
-                String smsRecipients = mSharedPreferences.getString("edit_number_preference", "");
-                String[] smsRecipientArray = smsRecipients.split(";");
-                String smsIntervalStr = mSharedPreferences.getString("sms_notification_interval", "4");
-                String criticalBalanceStr = mSharedPreferences.getString("edit_balance_limit", "500");
-                String instanceName = mSharedPreferences.getString("instance_name", "none");
-                Long lastNotificationTime = prefs.getLong(PrefStrings.SMS_NOTIFICATION_DATE, 0);
-                Long currentTime = System.currentTimeMillis();
-                String smsMsg = String.format("Balance in %s is %d.", instanceName.toUpperCase(), balanceInRs);
-                Integer smsInterval = 2;
-                Integer criticalBalance = 100;
-                try {
-                    smsInterval = Integer.parseInt(smsIntervalStr);
-                    criticalBalance = Integer.parseInt(criticalBalanceStr);
-                } catch (Exception ex) {
-                    Log.e(TAG, "Error parsing smsInterval and criticalBalance: " + ex.getMessage());
-                }
+    public void CheckCriticalBalanceAndSendNotifications(Context context, int balanceInRs) {
+        String criticalBalanceStr = mSharedPreferences.getString("edit_balance_limit", "500");
+        Integer criticalBalance = 100;
+        try {
+            criticalBalance = Integer.parseInt(criticalBalanceStr);
+        } catch (Exception ex) {
+            Log.e(TAG, "Error parsing criticalBalance: " + ex.getMessage());
+        }
 
-                Log.d(TAG, "Critical balance: " + criticalBalance + ", Actual balance: " + balanceInRs);
-                if (balanceInRs <= criticalBalance) {
-                    if (smsInterval < currentTime - lastNotificationTime) {
-                        Log.d(TAG, "Interval OK, enqueuing SMS");
-                        for (String smsRecipient : smsRecipientArray) {
-                            WorkerUtils.enqueueOneTimeSMSSendingWork(smsRecipient, smsMsg);
-                        }
-                        stats.putLong(PrefStrings.SMS_NOTIFICATION_DATE, currentTime);
-                        stats.apply();
-                    }
+        if (balanceInRs <= criticalBalance) {
+            //Push to Slack Channel
+            if (mSharedPreferences.getBoolean("switch_slack", false)) {
+                JSONObject jsonBody = new JSONObject();
+                try {
+                    jsonBody.put(
+                            "text",
+                            mSharedPreferences.getString("instance_name", "none").toUpperCase() + " :red_circle: Balance is Rs. " + balanceInRs);
+                    SlackHelper.sendMessage(context, jsonBody);
+                } catch (
+                        JSONException e) {
+                    Log.e(TAG, e.getMessage());
                 }
-            } catch (Exception ex) {
-                Log.e(TAG, "Error on SMS notification to user: " + ex.getMessage());
             }
+            if (mSharedPreferences.getBoolean("switch_sms_notification", false)) {
+                SMSNotification(balanceInRs);
+            }
+        }
+
+
+    }
+
+    public void SMSNotification(int balanceInRs) {
+        try {
+            Log.d(TAG, "Preparing to send sms notification");
+            String smsRecipients = mSharedPreferences.getString("edit_number_preference", "");
+            String[] smsRecipientArray = smsRecipients.split(";");
+            String smsIntervalStr = mSharedPreferences.getString("sms_notification_interval", "4");
+            String instanceName = mSharedPreferences.getString("instance_name", "none");
+            Long lastNotificationTime = prefs.getLong(PrefStrings.SMS_NOTIFICATION_DATE, 0);
+            Long currentTime = System.currentTimeMillis();
+            String smsMsg = String.format("Balance in %s is %d.", instanceName.toUpperCase(), balanceInRs);
+            Integer smsInterval = 2;
+            try {
+                smsInterval = Integer.parseInt(smsIntervalStr);
+            } catch (Exception ex) {
+                Log.e(TAG, "Error parsing smsInterval " + ex.getMessage());
+            }
+
+            if (smsInterval < currentTime - lastNotificationTime) {
+                Log.d(TAG, "Interval OK, enqueuing SMS");
+                for (String smsRecipient : smsRecipientArray) {
+                    WorkerUtils.enqueueOneTimeSMSSendingWork(smsRecipient, smsMsg);
+                }
+                stats.putLong(PrefStrings.SMS_NOTIFICATION_DATE, currentTime);
+                stats.apply();
+            }
+        } catch (Exception ex) {
+            Log.e(TAG, "Error on SMS notification to user: " + ex.getMessage());
         }
     }
 }
