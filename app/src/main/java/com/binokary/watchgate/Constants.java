@@ -20,24 +20,13 @@ public final class Constants {
 
     // Notification Channel constants
 
-    // Name of Notification Channel for verbose notifications of background work
-    public static final CharSequence VERBOSE_NOTIFICATION_CHANNEL_NAME =
-            "Verbose WorkManager Notifications";
-    public static String VERBOSE_NOTIFICATION_CHANNEL_DESCRIPTION =
-            "Shows notifications whenever work starts";
-    public static final CharSequence NOTIFICATION_TITLE = "WorkRequest Starting";
-    public static final String CHANNEL_ID = "VERBOSE_NOTIFICATION";
-    public static final int NOTIFICATION_ID = 1;
-    public static final String API_URL = "http://10.0.2.2:3000/api/";
-    public static final String SMSTAG = "SMS";
-    public static final String REPORTTAG = "REPORT";
-    public static final String SMSONETAG = "SMS.ONE";
-    public static final String REPORTONETAG = "REPORT.ONE";
-    public static final String REPORTONEWAITTAG = "REPORT.ONE.WAIT";
-    public static final int STITCH_REPORT_DELAY_INTERVAL_MINS = 15;
-    public static final int SEND_SMS_MIN_INTERVAL_MINS = 15;
+    public static final String SMS_TAG = "SMS";
+    public static final String REPORT_TAG = "REPORT";
+    public static final String SMS_ONE_TAG = "SMS.ONE";
+    public static final String REPORT_ONE_TAG = "REPORT.ONE";
+    public static final String REPORT_ONE_WAIT_TAG = "REPORT.ONE.WAIT";
     public static final String PREF_STATS = "gate_stats";
-    public static final String MAINTAG = "gatewatch_";
+    public static final String MAIN_TAG = "gatewatch_";
 
     // Ensures this class is never instantiated
     private Constants() {

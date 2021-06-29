@@ -13,17 +13,13 @@ import android.preference.PreferenceActivity;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.preference.SwitchPreference;
-
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.ActionBar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
+import androidx.appcompat.app.ActionBar;
+
 import com.google.firebase.messaging.FirebaseMessaging;
-//import com.mongodb.lang.NonNull;
 
 import java.util.List;
 
@@ -40,37 +36,33 @@ import java.util.List;
  */
 public class SettingsActivity extends AppCompatPreferenceActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
 
-    private final String TAG = Constants.MAINTAG + "Settings";
-
     /**
      * A preference value change listener that updates the preference's summary
      * to reflect its new value.
      */
-    private static Preference.OnPreferenceChangeListener sBindPreferenceSummaryToValueListener = new Preference.OnPreferenceChangeListener() {
-        @Override
-        public boolean onPreferenceChange(Preference preference, Object value) {
-            String stringValue = value.toString();
+    private static final Preference.OnPreferenceChangeListener sBindPreferenceSummaryToValueListener = (preference, value) -> {
+        String stringValue = value.toString();
 
-            if (preference instanceof ListPreference) {
-                // For list preferences, look up the correct display value in
-                // the preference's 'entries' list.
-                ListPreference listPreference = (ListPreference) preference;
-                int index = listPreference.findIndexOfValue(stringValue);
+        if (preference instanceof ListPreference) {
+            // For list preferences, look up the correct display value in
+            // the preference's 'entries' list.
+            ListPreference listPreference = (ListPreference) preference;
+            int index = listPreference.findIndexOfValue(stringValue);
 
-                // Set the summary to reflect the new value.
-                preference.setSummary(
-                        index >= 0
-                                ? listPreference.getEntries()[index]
-                                : null);
+            // Set the summary to reflect the new value.
+            preference.setSummary(
+                    index >= 0
+                            ? listPreference.getEntries()[index]
+                            : null);
 
-            } else {
-                // For all other preferences, set the summary to the value's
-                // simple string representation.
-                preference.setSummary(stringValue);
-            }
-            return true;
+        } else {
+            // For all other preferences, set the summary to the value's
+            // simple string representation.
+            preference.setSummary(stringValue);
         }
+        return true;
     };
+    private final String TAG = Constants.MAIN_TAG + "Settings";
 
     /**
      * Helper method to determine if the device has an extra-large screen. For
@@ -129,33 +121,27 @@ public class SettingsActivity extends AppCompatPreferenceActivity implements Sha
         // do stuff
         if (key.equals("switch_preference_notification")) {
             final String topic = sharedPreferences.getString("instance_name", "none");
-            Boolean subscribe = sharedPreferences.getBoolean("switch_preference_notification", false);
+            boolean subscribe = sharedPreferences.getBoolean("switch_preference_notification", false);
 
             if (subscribe) {
-                FirebaseMessaging.getInstance().subscribeToTopic(topic).addOnCompleteListener(new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull final Task<Void> task) {
-                        if (!task.isSuccessful()) {
-                            Log.d(TAG, "Error subscribing to topic " + task.getException());
-                            return;
-                        }
-
-                        Log.d(TAG, "Subscribed to topic " + topic);
-                        Toast.makeText(getApplicationContext(), "Subscribed to topic " + topic, Toast.LENGTH_LONG).show();
+                FirebaseMessaging.getInstance().subscribeToTopic(topic).addOnCompleteListener(task -> {
+                    if (!task.isSuccessful()) {
+                        Log.d(TAG, "Error subscribing to topic " + task.getException());
+                        return;
                     }
+
+                    Log.d(TAG, "Subscribed to topic " + topic);
+                    Toast.makeText(getApplicationContext(), "Subscribed to topic " + topic, Toast.LENGTH_LONG).show();
                 });
             } else {
-                FirebaseMessaging.getInstance().unsubscribeFromTopic(topic).addOnCompleteListener(new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull final Task<Void> task) {
-                        if (!task.isSuccessful()) {
-                            Log.d(TAG, "Error unsubscribing from topic " + task.getException());
-                            return;
-                        }
-
-                        Log.d(TAG, "Unsubscribed from topic " + topic);
-                        Toast.makeText(getApplicationContext(), "Unsubscribed from topic " + topic, Toast.LENGTH_LONG).show();
+                FirebaseMessaging.getInstance().unsubscribeFromTopic(topic).addOnCompleteListener(task -> {
+                    if (!task.isSuccessful()) {
+                        Log.d(TAG, "Error unsubscribing from topic " + task.getException());
+                        return;
                     }
+
+                    Log.d(TAG, "Unsubscribed from topic " + topic);
+                    Toast.makeText(getApplicationContext(), "Unsubscribed from topic " + topic, Toast.LENGTH_LONG).show();
                 });
             }
         }

@@ -12,13 +12,6 @@ import android.os.BatteryManager;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
-import org.bson.BsonDateTime;
-import org.bson.BsonInt32;
-import org.bson.BsonInt64;
-import org.bson.BsonNull;
-import org.bson.BsonString;
-import org.bson.BsonValue;
-
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -30,8 +23,7 @@ import static android.content.Context.WIFI_SERVICE;
 import static com.binokary.watchgate.Constants.PREF_STATS;
 
 public final class StatsHelper {
-    public static final String TAG = Constants.MAINTAG + StatsHelper.class.getSimpleName();
-    private static Context applicationContext;
+    public static final String TAG = Constants.MAIN_TAG + StatsHelper.class.getSimpleName();
     protected static ConnectivityManager cm;
     protected static TelephonyManager tm;
     static SharedPreferences.Editor stats;
@@ -40,25 +32,21 @@ public final class StatsHelper {
     }
 
     public static void CheckAndUpdateStats(Context appContext) {
-        applicationContext = appContext;
 
-        stats = applicationContext.getSharedPreferences(PREF_STATS, MODE_PRIVATE).edit();
-        Long date = System.currentTimeMillis();
-        int battery = -1;
-        boolean plugged = false;
-        boolean data = false;
-        int temp = -1;
-        int health = -1;
+        stats = appContext.getSharedPreferences(PREF_STATS, MODE_PRIVATE).edit();
+        int battery;
+        boolean plugged;
+        int temp;
+        int health;
         String wifi = "N/A";
-        String carrierName = "";
+        String carrierName;
         int wifiSignalStrength = -1;
-        int mobileSignalStrength = -1;
 
         try {
             //battery
             IntentFilter intentFilter = new IntentFilter();
             intentFilter.addAction(Intent.ACTION_BATTERY_CHANGED);
-            Intent batteryStatus = applicationContext.registerReceiver(null, intentFilter);
+            Intent batteryStatus = appContext.registerReceiver(null, intentFilter);
             // Are we charging / charged?
             int pluggedStatus = batteryStatus.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1);
             plugged = pluggedStatus != 0; // 0 means it is on battery, other constants are different types of power sources
@@ -85,17 +73,15 @@ public final class StatsHelper {
         //Connection
         try {
             cm =
-                    (ConnectivityManager) applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+                    (ConnectivityManager) appContext.getSystemService(Context.CONNECTIVITY_SERVICE);
 
             NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
             if (activeNetwork != null) {
-                boolean isConnected = activeNetwork != null &&
-                        activeNetwork.isConnectedOrConnecting();
                 boolean isWiFi = activeNetwork.getType() == ConnectivityManager.TYPE_WIFI;
                 boolean isData = activeNetwork.getType() == ConnectivityManager.TYPE_MOBILE;
                 //Wifi
                 if (isWiFi) {
-                    WifiManager wifiManager = (WifiManager) applicationContext.getApplicationContext().getSystemService(WIFI_SERVICE);
+                    WifiManager wifiManager = (WifiManager) appContext.getApplicationContext().getSystemService(WIFI_SERVICE);
                     int wifiState = wifiManager.getWifiState();
                     if (wifiState == WifiManager.WIFI_STATE_ENABLED) {
                         WifiInfo info = wifiManager.getConnectionInfo();
@@ -117,34 +103,10 @@ public final class StatsHelper {
 
         //Mobile Network
         try {
-            tm = (TelephonyManager) applicationContext.getSystemService(TELEPHONY_SERVICE);
+            tm = (TelephonyManager) appContext.getSystemService(TELEPHONY_SERVICE);
             carrierName = tm.getNetworkOperatorName();
             //Log.d(TAG, "Carrier: " + carrierName);
             stats.putString(PrefStrings.MOBILE_CARRIER, carrierName);
-
-            //Mobile Signal Strength not working in Huawei phone (checked Huawei LMO-N31)
-            // using PhoneStateListener & onSignalStrengthsChanged, signalStrength gave
-            // value of 0 in getGsmSignalStrength. Signal value was given by mWcdmaRscpasu but may be
-            // applicable to WCDMA network only
-            /*
-            if (ActivityCompat.checkSelfPermission(applicationContext, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                // do nothing
-                Log.d(TAG, "No Location Access");
-            } else if(tm.getAllCellInfo().size() > 0){
-                if (tm.getAllCellInfo().get(0).getClass() == CellInfoGsm.class) {
-                    mobileSignalStrength = (((CellInfoGsm) tm.getAllCellInfo().get(0)).getCellSignalStrength().getLevel());
-                } else if (tm.getAllCellInfo().get(0).getClass() == CellInfoWcdma.class) {
-                    mobileSignalStrength = (((CellInfoWcdma) tm.getAllCellInfo().get(0)).getCellSignalStrength().getLevel());
-                } else if (tm.getAllCellInfo().get(0).getClass() == CellInfoLte.class) {
-                    mobileSignalStrength = (((CellInfoLte) tm.getAllCellInfo().get(0)).getCellSignalStrength().getLevel());
-                }
-                stats.putInt(PrefStrings.MOBILE_STRENGTH, mobileSignalStrength);
-                //Log.d(TAG, "Mobile Signal:" + mobileSignalStrength);
-            }
-            else {
-                Log.d(TAG, "Can not read cell info");
-            }
-            */
         } catch (Exception ex) {
             Log.e(TAG, "Error checking mobile network: " + ex.getMessage());
         }
@@ -155,27 +117,7 @@ public final class StatsHelper {
         Date d = new Date(ld);
         DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         df.setTimeZone(TimeZone.getTimeZone("Asia/Kathmandu"));
-        String dateString = df.format(d);
-        return dateString;
-    }
-
-    public static BsonValue objToBsonValue(Object obj) {
-        if (obj instanceof Integer) {
-            return new BsonInt32((Integer) obj);
-        }
-
-        if (obj instanceof String) {
-            return new BsonString((String) obj);
-        }
-
-        if (obj instanceof Long) {
-            return new BsonInt64((Long) obj);
-        }
-
-        if (obj instanceof Date) {
-            return new BsonDateTime(((Date) obj).getTime());
-        }
-        return new BsonNull();
+        return df.format(d);
     }
 
 }

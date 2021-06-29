@@ -5,31 +5,20 @@ import android.app.AlertDialog;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
-
-import androidx.annotation.NonNull;
-import androidx.core.app.NotificationCompat;
-
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.BitmapFactory;
 import android.os.BatteryManager;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.StatFs;
-import android.preference.PreferenceGroup;
 import android.preference.PreferenceManager;
 import android.provider.Telephony;
-
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -41,19 +30,19 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
+import androidx.core.content.ContextCompat;
+import androidx.work.WorkInfo;
+import androidx.work.WorkManager;
+
 import com.binokary.watchgate.toilers.WorkerUtils;
-//import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
-//import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.common.util.concurrent.ListenableFuture;
-//import com.google.firebase.iid.FirebaseInstanceId;
-//import com.google.firebase.iid.InstanceIdResult;
 import com.google.firebase.messaging.FirebaseMessaging;
-import io.realm.Realm;
-import io.realm.mongodb.App;
-import io.realm.mongodb.AppConfiguration;
-//import io.realm.mongodb.push.Push;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -64,37 +53,30 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-import androidx.core.content.pm.PackageInfoCompat;
-import androidx.work.WorkManager;
-import androidx.work.WorkInfo;
-
 
 public class MainActivity extends AppCompatActivity {
-    private static final String TAG = Constants.MAINTAG + "MainActivity";
-    public static final String PREF_FILE_NAME = "pref_general";
+    private static final String TAG = Constants.MAIN_TAG + "MainActivity";
     private static final String PREF_USER_MOBILE_PHONE = "edit_number_preference";
     private static final String PREF_STATS = "gate_stats";
     private static final int SMS_PERMISSION_CODE = 0;
     private static final int MY_PERMISSIONS_REQUEST_READ_PHONE_STATE = 1;
-
     private static MainActivity mainActivityInstance;
+    TextView textView;
+    TextView titleView;
+    ProgressBar progressBar;
+    WorkManager mWorkManager;
+    ListenableFuture<List<WorkInfo>> mWorkLiveData;
+    TextView levelView, healthView, tempView, pluggedView, wifiView, mobileView, networkView, spaceView, balanceView;
     private String mUserMobilePhone;
     private SharedPreferences mSharedPreferences;
     private NotificationManager notificationManager;
     private NotificationCompat.Builder persistentNotificationBuilder;
-    TextView textView;
-    TextView titleView;
-    ProgressBar progressBar;
-
-    WorkManager mWorkManager;
-    ListenableFuture<List<WorkInfo>> mWorkLiveData;
-
     private UUID workId;
+    private final long lastSmsInTime = 0;
 
-    TextView levelView, healthView, tempView, pluggedView, wifiView, mobileView, networkView, spaceView, balanceView;
-
-    static final String API_URL = "http://10.0.2.2:3000/api/";
-    private long lastSmsInTime = 0;
+    public static MainActivity getInstance() {
+        return mainActivityInstance;
+    }
 
     //private StitchAppClient stitchClient;
     //private App app;
@@ -118,7 +100,6 @@ public class MainActivity extends AppCompatActivity {
                 return super.onOptionsItemSelected(item);
         }
     }
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -232,7 +213,7 @@ public class MainActivity extends AppCompatActivity {
                     mWorkManager = WorkManager.getInstance();
                 }
                 if (mWorkManager != null) {
-                    mWorkLiveData = mWorkManager.getWorkInfosByTag(Constants.SMSTAG);
+                    mWorkLiveData = mWorkManager.getWorkInfosByTag(Constants.SMS_TAG);
                     try {
                         List<WorkInfo> workList = mWorkLiveData.get();
                         for (int i = 0; i < workList.size(); i++) {
@@ -242,10 +223,10 @@ public class MainActivity extends AppCompatActivity {
                         Log.e(TAG, "Error when trying to get task list: " + ex.getMessage());
                     }
 
-                    int clearStatus = WorkerUtils.clearTasks(Constants.SMSTAG);
+                    int clearStatus = WorkerUtils.clearTasks(Constants.SMS_TAG);
                     Log.d(TAG, " SMS sending tasks cleared " + clearStatus);
 
-                    mWorkLiveData = mWorkManager.getWorkInfosByTag(Constants.REPORTTAG);
+                    mWorkLiveData = mWorkManager.getWorkInfosByTag(Constants.REPORT_TAG);
                     try {
                         List<WorkInfo> workList = mWorkLiveData.get();
                         for (int i = 0; i < workList.size(); i++) {
@@ -255,7 +236,7 @@ public class MainActivity extends AppCompatActivity {
                         Log.e(TAG, "Error when trying to get task list: " + ex.getMessage());
                     }
 
-                    clearStatus = WorkerUtils.clearTasks(Constants.REPORTTAG);
+                    clearStatus = WorkerUtils.clearTasks(Constants.REPORT_TAG);
                     Log.d(TAG, " Stitch reporting tasks cleared " + clearStatus);
                 }
             }
@@ -273,8 +254,8 @@ public class MainActivity extends AppCompatActivity {
                 }
                 if (mWorkManager != null) {
                     //SMS Workers
-                    Log.d(TAG, "Getting workers with Tag: " + Constants.SMSTAG + "\n");
-                    mWorkLiveData = mWorkManager.getWorkInfosByTag(Constants.SMSTAG);
+                    Log.d(TAG, "Getting workers with Tag: " + Constants.SMS_TAG + "\n");
+                    mWorkLiveData = mWorkManager.getWorkInfosByTag(Constants.SMS_TAG);
                     try {
                         List<WorkInfo> workList = mWorkLiveData.get();
                         for (int i = 0; i < workList.size(); i++) {
@@ -289,8 +270,8 @@ public class MainActivity extends AppCompatActivity {
                         Log.e(TAG, "Error when trying to get task list: " + ex.getMessage());
                     }
                     //Report Workers
-                    Log.d(TAG, "Getting workers with Tag: " + Constants.REPORTTAG + "\n");
-                    mWorkLiveData = mWorkManager.getWorkInfosByTag(Constants.REPORTTAG);
+                    Log.d(TAG, "Getting workers with Tag: " + Constants.REPORT_TAG + "\n");
+                    mWorkLiveData = mWorkManager.getWorkInfosByTag(Constants.REPORT_TAG);
                     try {
                         List<WorkInfo> workList = mWorkLiveData.get();
                         for (int i = 0; i < workList.size(); i++) {
@@ -306,9 +287,9 @@ public class MainActivity extends AppCompatActivity {
                     }
 
                     //One Time SMS Workers
-                    Log.d(TAG, "Getting workers with Tag: " + Constants.SMSONETAG + "\n");
+                    Log.d(TAG, "Getting workers with Tag: " + Constants.SMS_ONE_TAG + "\n");
 
-                    mWorkLiveData = mWorkManager.getWorkInfosByTag(Constants.SMSONETAG);
+                    mWorkLiveData = mWorkManager.getWorkInfosByTag(Constants.SMS_ONE_TAG);
                     try {
                         List<WorkInfo> workList = mWorkLiveData.get();
                         for (int i = 0; i < workList.size(); i++) {
@@ -325,9 +306,9 @@ public class MainActivity extends AppCompatActivity {
 
 
                     //One Time Report Workers
-                    Log.d(TAG, "Getting workers with Tag: " + Constants.REPORTONETAG + "\n");
+                    Log.d(TAG, "Getting workers with Tag: " + Constants.REPORT_ONE_TAG + "\n");
 
-                    mWorkLiveData = mWorkManager.getWorkInfosByTag(Constants.REPORTONETAG);
+                    mWorkLiveData = mWorkManager.getWorkInfosByTag(Constants.REPORT_ONE_TAG);
                     try {
                         List<WorkInfo> workList = mWorkLiveData.get();
                         for (int i = 0; i < workList.size(); i++) {
@@ -344,9 +325,9 @@ public class MainActivity extends AppCompatActivity {
 
 
                     //One Time Report Workers with Wait time
-                    Log.d(TAG, "Getting workers with Tag: " + Constants.REPORTONEWAITTAG + "\n");
+                    Log.d(TAG, "Getting workers with Tag: " + Constants.REPORT_ONE_WAIT_TAG + "\n");
 
-                    mWorkLiveData = mWorkManager.getWorkInfosByTag(Constants.REPORTONEWAITTAG);
+                    mWorkLiveData = mWorkManager.getWorkInfosByTag(Constants.REPORT_ONE_WAIT_TAG);
                     try {
                         List<WorkInfo> workList = mWorkLiveData.get();
                         for (int i = 0; i < workList.size(); i++) {
@@ -373,13 +354,6 @@ public class MainActivity extends AppCompatActivity {
             showRequestPermissionsInfoAlertDialog();
         }
         mUserMobilePhone = mSharedPreferences.getString(PREF_USER_MOBILE_PHONE, "");
-
-        //app = new App(new AppConfiguration.Builder(getString(R.string.stitch_client_app_id))
-        //        .build());
-        //this.stitchClient = Stitch.getDefaultAppClient();
-
-        //final FcmServicePushClient pushClient =
-        //        this.stitchClient.getPush().getClient(FcmServicePushClient.factory, "gcm");
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
         progressBar.setIndeterminate(true);
 
@@ -391,63 +365,6 @@ public class MainActivity extends AppCompatActivity {
                     "FCM", NotificationManager.IMPORTANCE_HIGH);
             notificationManager.createNotificationChannel(channel);
         }
-
-        FirebaseMessaging.getInstance().getToken().
-                addOnCompleteListener(new OnCompleteListener<String>() {
-                    @Override
-                    public void onComplete(@NonNull Task<String> task) {
-                        if (!task.isSuccessful()) {
-                            Log.w(TAG, "Fetching FCM registration token failed", task.getException());
-                            return;
-                        }
-                        // Get new FCM registration token
-                        String token = task.getResult();
-
-                        // Log and toast
-                        String msg = getString(R.string.msg_token_fmt);
-                        Log.d(TAG, msg);
-                        Toast.makeText(MainActivity.this, msg, Toast.LENGTH_SHORT).show();
-
-                        //pushClient.registerDevice("token");
-                    }
-                });
-
-        /*
-
-        FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(MainActivity.this, new OnSuccessListener<InstanceIdResult>() {
-
-
-            @Override
-            public void onSuccess(InstanceIdResult instanceIdResult) {
-                String mToken = instanceIdResult.getToken();
-                Log.d("Token", mToken);
-
-                stitchClient.getAuth().loginWithCredential(new AnonymousCredential()
-                ).continueWithTask(new Continuation<StitchUser, Task<Void>>() {
-                    @Override
-                    public Task<Void> then(@NonNull Task<StitchUser> task) throws Exception {
-
-
-                        return pushClient.register(mToken);
-                    }
-                }).addOnCompleteListener(new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull final Task<Void> task) {
-                        if (!task.isSuccessful()) {
-                            Log.d(TAG, "Registration failed: " + task.getException());
-                            Toast.makeText(getApplicationContext(), "Error registering client for Firebase.", Toast.LENGTH_LONG).show();
-                            return;
-                        }
-
-                        Log.d(TAG, "Registration completed");
-                        Toast.makeText(getApplicationContext(), "Successfully registered client for Firebase.", Toast.LENGTH_SHORT).show();
-                        progressBar.setVisibility(View.INVISIBLE);
-                    }
-                });
-            }
-        });
-
-*/
         notificationManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         if (android.os.Build.VERSION.SDK_INT >= 26) {
@@ -483,7 +400,6 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG, "Activity onDestroy");
     }
 
-
     @Override
     protected void onStart() {
         IntentFilter intentFilter = new IntentFilter();
@@ -513,10 +429,6 @@ public class MainActivity extends AppCompatActivity {
         //Log.d(TAG, "gatewatch: not unregistering mReceiver");
         //unregisterReceiver(mReceiver);
         super.onStop();
-    }
-
-    public static MainActivity getInstance() {
-        return mainActivityInstance;
     }
 
     /**
@@ -601,7 +513,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onRequestPermissionsResult(int requestCode,
-                                           String permissions[], int[] grantResults) {
+                                           String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         switch (requestCode) {
             case SMS_PERMISSION_CODE: {
@@ -702,7 +614,7 @@ public class MainActivity extends AppCompatActivity {
         Integer balance = prefs.getInt(PrefStrings.PREPAID_BALANCE, -1);
         Integer balanceDue = prefs.getInt(PrefStrings.POSTPAID_BALANCE_DUE, -1);
         Integer balanceCredit = prefs.getInt(PrefStrings.POSTPAID_BALANCE_CREDIT, -1);
-         titleView.setText(mSharedPreferences.getString("instance_name", "unnamed").toUpperCase());
+        titleView.setText(mSharedPreferences.getString("instance_name", "unnamed").toUpperCase());
         String wifi = prefs.getString(PrefStrings.WIFI_SSID, "N/A");
         Boolean data = prefs.getBoolean(PrefStrings.MOBILE_DATA, false);
         Integer temp = prefs.getInt(PrefStrings.TEMPERATURE, -1);
@@ -738,12 +650,11 @@ public class MainActivity extends AppCompatActivity {
     public String getNotificationSummaryText() {
         SharedPreferences prefs = getSharedPreferences(PREF_STATS, MODE_PRIVATE);
         Boolean postPaid = prefs.getBoolean(PrefStrings.IS_POSTPAID, false);
-        StringBuilder summaryText  = new StringBuilder("");
-        if(postPaid) {
+        StringBuilder summaryText = new StringBuilder();
+        if (postPaid) {
             int postPaidBalanceCredit = prefs.getInt(PrefStrings.POSTPAID_BALANCE_CREDIT, -1);
             summaryText.append("Rs " + postPaidBalanceCredit + "*");
-        }
-        else{
+        } else {
             int prePaidBalance = prefs.getInt(PrefStrings.PREPAID_BALANCE, -1);
             summaryText.append("Rs " + prePaidBalance);
         }
@@ -807,13 +718,12 @@ public class MainActivity extends AppCompatActivity {
         Boolean monitorOnly = mSharedPreferences.getBoolean("switch_monitor_mode", false);
 
         //Only allow multiple subscriptions in monitor mode
-        if(!monitorOnly){
+        if (!monitorOnly) {
             topics = new String[1];
             topics[0] = single_topic;
 
         }
-        for(String topic: topics)
-        {
+        for (String topic : topics) {
             if (checkBox.isChecked()) {
                 FirebaseMessaging.getInstance().subscribeToTopic(topic).addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override

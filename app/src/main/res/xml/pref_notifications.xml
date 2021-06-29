@@ -50,12 +50,12 @@
         android:summary="Mobile number to sent SMS notifications. Multiple numbers can be separated by semicolon."/>
     <SwitchPreference
         android:defaultValue="false"
+        android:key="switch_slack"
+        android:summary="Send Messages to Slack Channel"
+        android:title="Push to Slack" />
+    <SwitchPreference
+        android:defaultValue="false"
         android:key="switch_monitor_mode"
         android:title="Monitor Mode"
         android:summary="Only Monitor Notifications"/>
-    <SwitchPreference
-        android:defaultValue="false"
-        android:key="switch_slack"
-        android:title="Push to Slack"
-        android:summary="Send Messages to Slack Channel"/>
 </PreferenceScreen>

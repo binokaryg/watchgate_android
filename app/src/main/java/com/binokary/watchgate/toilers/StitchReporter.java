@@ -5,6 +5,10 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+import androidx.work.Worker;
+import androidx.work.WorkerParameters;
+
 import com.binokary.watchgate.Constants;
 import com.binokary.watchgate.PrefStrings;
 import com.binokary.watchgate.R;
@@ -17,10 +21,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import androidx.work.Worker;
-import androidx.work.WorkerParameters;
-
-import io.realm.Realm;
 import io.realm.mongodb.App;
 import io.realm.mongodb.AppConfiguration;
 import io.realm.mongodb.Credentials;
@@ -31,63 +31,60 @@ import static android.content.Context.MODE_PRIVATE;
 
 public class StitchReporter extends Worker {
 
-    public static final String TAG = Constants.MAINTAG + StitchReporter.class.getSimpleName();
-    private SharedPreferences prefs;
-    private SharedPreferences mPrefs;
+    public static final String TAG = Constants.MAIN_TAG + StitchReporter.class.getSimpleName();
+    static App app;
     List<Object> arg = new ArrayList<>();
     BasicBSONObject bObj = new BasicBSONObject();
-    static App app;
 
     public StitchReporter(@androidx.annotation.NonNull Context context, @androidx.annotation.NonNull WorkerParameters workerParams) {
         super(context, workerParams);
     }
 
+    @NonNull
     @Override
     public Worker.Result doWork() {
         Context applicationContext = getApplicationContext();
         SharedPreferences.Editor stats = applicationContext.getSharedPreferences(Constants.PREF_STATS, MODE_PRIVATE).edit();
-        Boolean oneTime = getInputData().getBoolean("ONETIME", false);
-        Integer minInterval = getInputData().getInt("MIN", 10) * 60 * 1000;
-        Integer minOneInterval = getInputData().getInt("MIN_ONE", 3) * 60 * 1000;
-        prefs = applicationContext.getSharedPreferences(Constants.PREF_STATS, MODE_PRIVATE);
-        mPrefs = PreferenceManager.getDefaultSharedPreferences(applicationContext);
-        Long lastReportAttemptDate = prefs.getLong(PrefStrings.REPORT_ATTEMPT_DATE, 0);
-        Long lastReportUpdateDate = prefs.getLong(PrefStrings.UPD_DATE, 0);
-        Long now = System.currentTimeMillis();
+        boolean oneTime = getInputData().getBoolean("ONETIME", false);
+        int minInterval = getInputData().getInt("MIN", 10) * 60 * 1000;
+        int minOneInterval = getInputData().getInt("MIN_ONE", 3) * 60 * 1000;
+        SharedPreferences prefs = applicationContext.getSharedPreferences(Constants.PREF_STATS, MODE_PRIVATE);
+        SharedPreferences mPrefs = PreferenceManager.getDefaultSharedPreferences(applicationContext);
+        long lastReportAttemptDate = prefs.getLong(PrefStrings.REPORT_ATTEMPT_DATE, 0);
+        long lastReportUpdateDate = prefs.getLong(PrefStrings.UPD_DATE, 0);
+        long now = System.currentTimeMillis();
         if (now - lastReportAttemptDate < minOneInterval) {
             //don't even allow frequent oneTime requests to keep the number of stitch connections low
             Log.d(TAG, String.format("Not allowing to attempt %s reporting request because" +
                             " last attempt was on %s and and now it is %s", oneTime ? "One Time" : "Periodic",
                     StatsHelper.DateStringFromMS(lastReportAttemptDate), StatsHelper.DateStringFromMS(now)));
 
-            return Result.success(); //or FAILURE or RETRY?
-
         } else {
             stats.putLong(PrefStrings.REPORT_ATTEMPT_DATE, now);
+            stats.apply();
 
             if (!oneTime && now - lastReportUpdateDate < minInterval) {
                 //Allow one time but check periodic requests
                 Log.d(TAG, String.format("Not allowing to update because" +
                                 " last update was on %s and and now it is %s",
                         StatsHelper.DateStringFromMS(lastReportUpdateDate), StatsHelper.DateStringFromMS(now)));
-                return Result.success();
             } else {
                 try {
                     StatsHelper.CheckAndUpdateStats(applicationContext);
 
                     String instance = getInputData().getString("INSTANCE");
-                    Long balanceDateL = prefs.getLong(PrefStrings.BALANCE_DATE, 0);
-                    Long smsPackInfoDateL = prefs.getLong(PrefStrings.SMS_PACK_INFO_DATE, 0);
+                    long balanceDateL = prefs.getLong(PrefStrings.BALANCE_DATE, 0);
+                    long smsPackInfoDateL = prefs.getLong(PrefStrings.SMS_PACK_INFO_DATE, 0);
 
                     boolean isPostpaid = mPrefs.getBoolean("switch_preference_1", false);
                     Log.d(TAG, "Is Postpaid ? " + isPostpaid);
                     Integer balance = prefs.getInt(PrefStrings.PREPAID_BALANCE, -1);
                     Integer balanceDue = prefs.getInt(PrefStrings.POSTPAID_BALANCE_DUE, -1);
                     Integer balanceCredit = prefs.getInt(PrefStrings.POSTPAID_BALANCE_CREDIT, -1);
-                    Integer remainingSMS = prefs.getInt(PrefStrings.SMS_PACK_INFO, -1);
+                    int remainingSMS = prefs.getInt(PrefStrings.SMS_PACK_INFO, -1);
 
                     String stitchUpdateFunctionName = mPrefs.getString("pref_stitch_update_func", "updateStatusForObj");
-                    Long dateL = System.currentTimeMillis();
+                    long dateL = System.currentTimeMillis();
                     int battery = prefs.getInt(PrefStrings.BATTERY, -1);
                     boolean plugged = prefs.getBoolean(PrefStrings.PLUGGED, false);
                     boolean data = prefs.getBoolean(PrefStrings.MOBILE_DATA, false);
@@ -96,7 +93,7 @@ public class StitchReporter extends Worker {
                     String wifi = prefs.getString(PrefStrings.WIFI_SSID, "N/A");
                     int wifiStrength = prefs.getInt(PrefStrings.WIFI_STRENGTH, -1);
                     //int mobileStrength = prefs.getInt(PrefStrings.MOBILE_STRENGTH, -1);
-                    Long lastSMSInDateL = prefs.getLong(PrefStrings.LAST_SMS_IN_DATE, 0);
+                    long lastSMSInDateL = prefs.getLong(PrefStrings.LAST_SMS_IN_DATE, 0);
                     String carrierName = prefs.getString(PrefStrings.MOBILE_CARRIER, "N/A");
 
                     //order is important
@@ -141,58 +138,16 @@ public class StitchReporter extends Worker {
                         User user = app.currentUser();
                         assert user != null;
                         Functions functionsManager = app.getFunctions(user);
-                        try{
+                        try {
                             BsonValue result = functionsManager.callFunction(stitchUpdateFunctionName, arg, BsonValue.class);
                             Log.v(TAG, "Updated instance");
                             Log.v(TAG, result.toString());
-                        }
-                        catch (Exception ex)
-                        {
+                        } catch (Exception ex) {
                             Log.e(TAG, "failed to update for " + (oneTime ? "One Time" : "Periodic") + "request", ex);
                         }
                     } catch (Exception ex) {
                         Log.e(TAG, "Error logging into the Realm app. Make sure that anonymous authentication is enabled. Error: " + ex.getMessage());
                     }
-                   /*client = Stitch.getDefaultAppClient();
-                    client.getAuth().loginWithCredential(new AnonymousCredential()).addOnCompleteListener(
-                            new OnCompleteListener<StitchUser>() {
-                                @Override
-                                public void onComplete(@NonNull final Task<StitchUser> task) {
-                                    if (task.isSuccessful()) {
-                                        Log.d(TAG, String.format(
-                                                "logged in as user %s with provider %s",
-                                                task.getResult().getId(),
-                                                task.getResult().getLoggedInProviderType()));
-                                        Log.d(TAG, String.format("Calling function %s", stitchUpdateFunctionName + " arg: " + arg));
-
-                                        client.callFunction(stitchUpdateFunctionName, arg, BsonValue.class)
-                                                .addOnCompleteListener(new OnCompleteListener<BsonValue>() {
-                                                    @Override
-                                                    public void onComplete(@androidx.annotation.NonNull Task<BsonValue> upTask) {
-                                                        if (upTask.isSuccessful()) {
-                                                            Log.d(TAG, "Updated instance");
-                                                            Log.d(TAG, upTask.getResult().toString());
-                                                            stats.putLong(PrefStrings.UPD_DATE, dateL);
-                                                            stats.apply();
-                                                        } else {
-                                                            Log.e(TAG, "failed to update for " + (oneTime ? "One Time" : "Periodic") + "request", upTask.getException());
-                                                        }
-                                                        try {
-                                                            //client.close();
-                                                            Log.d(TAG, "Not Closed Stitch Client for " + (oneTime ? "One Time" : "Periodic") + "request");
-                                                        } catch (Exception ex) {
-                                                            Log.e(TAG, "Error Closing Stitch Client for " + (oneTime ? "One Time" : "Periodic") + "request: " + ex.getMessage());
-                                                        }
-                                                    }
-                                                });
-                                    }
-
-                                    else {
-                                        Log.e(TAG, "Could not log in to the Stitch Client" + task.getException());
-                                    }
-                                }
-                            });
-                    */
                 } catch (Exception e) {
                     Log.e(TAG, e.getMessage(), e);
                     try {
@@ -204,8 +159,8 @@ public class StitchReporter extends Worker {
                     return Result.failure();
 
                 }
-                return Result.success();
             }
         }
+        return Result.success(); //or FAILURE or RETRY?
     }
 }
