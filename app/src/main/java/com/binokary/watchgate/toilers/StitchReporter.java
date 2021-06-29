@@ -7,14 +7,8 @@ import android.util.Log;
 
 import com.binokary.watchgate.Constants;
 import com.binokary.watchgate.PrefStrings;
+import com.binokary.watchgate.R;
 import com.binokary.watchgate.StatsHelper;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.mongodb.lang.NonNull;
-import com.mongodb.stitch.android.core.Stitch;
-import com.mongodb.stitch.android.core.StitchAppClient;
-import com.mongodb.stitch.android.core.auth.StitchUser;
-import com.mongodb.stitch.core.auth.providers.anonymous.AnonymousCredential;
 
 import org.bson.BasicBSONObject;
 import org.bson.BsonValue;
@@ -26,6 +20,13 @@ import java.util.List;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
+import io.realm.Realm;
+import io.realm.mongodb.App;
+import io.realm.mongodb.AppConfiguration;
+import io.realm.mongodb.Credentials;
+import io.realm.mongodb.User;
+import io.realm.mongodb.functions.Functions;
+
 import static android.content.Context.MODE_PRIVATE;
 
 public class StitchReporter extends Worker {
@@ -34,8 +35,8 @@ public class StitchReporter extends Worker {
     private SharedPreferences prefs;
     private SharedPreferences mPrefs;
     List<Object> arg = new ArrayList<>();
-    BasicBSONObject bObj= new BasicBSONObject();
-    static StitchAppClient client;
+    BasicBSONObject bObj = new BasicBSONObject();
+    static App app;
 
     public StitchReporter(@androidx.annotation.NonNull Context context, @androidx.annotation.NonNull WorkerParameters workerParams) {
         super(context, workerParams);
@@ -107,7 +108,7 @@ public class StitchReporter extends Worker {
                     bObj.append("date", date);
                     bObj.append("lastSMSInDate", lastSMSInDate);
                     bObj.append("id", instance);
-                    if(balanceDateL > 0) { //Only if there is balance date
+                    if (balanceDateL > 0) { //Only if there is balance date
                         bObj.append("balanceDate", balanceDate);
                         if (isPostpaid) {
                             bObj.append("balanceDue", balanceDue);
@@ -117,21 +118,42 @@ public class StitchReporter extends Worker {
                         }
                     }
 
-                    bObj.append("battery",battery);
+                    bObj.append("battery", battery);
                     bObj.append("temp", temp);
                     bObj.append("wifi", wifi);
                     bObj.append("plugged", plugged);
                     bObj.append("data", data);
                     bObj.append("wifiStrength", wifiStrength);
                     bObj.append("carrier", carrierName);
-                    if(remainingSMS > -1) {
+                    if (remainingSMS > -1) {
                         bObj.append("remainingSMS", remainingSMS);
                         bObj.append("smsPackInfoDate", smsPackInfoDate);
                     }
 
                     arg.add(bObj);
 
-                    client = Stitch.getDefaultAppClient();
+                    app = new App(new AppConfiguration.Builder(applicationContext.getString(R.string.stitch_client_app_id))
+                            .build());
+
+                    Credentials credentials = Credentials.anonymous();
+                    try {
+                        app.login(credentials);
+                        User user = app.currentUser();
+                        assert user != null;
+                        Functions functionsManager = app.getFunctions(user);
+                        try{
+                            BsonValue result = functionsManager.callFunction(stitchUpdateFunctionName, arg, BsonValue.class);
+                            Log.v(TAG, "Updated instance");
+                            Log.v(TAG, result.toString());
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.e(TAG, "failed to update for " + (oneTime ? "One Time" : "Periodic") + "request", ex);
+                        }
+                    } catch (Exception ex) {
+                        Log.e(TAG, "Error logging into the Realm app. Make sure that anonymous authentication is enabled. Error: " + ex.getMessage());
+                    }
+                   /*client = Stitch.getDefaultAppClient();
                     client.getAuth().loginWithCredential(new AnonymousCredential()).addOnCompleteListener(
                             new OnCompleteListener<StitchUser>() {
                                 @Override
@@ -170,6 +192,7 @@ public class StitchReporter extends Worker {
                                     }
                                 }
                             });
+                    */
                 } catch (Exception e) {
                     Log.e(TAG, e.getMessage(), e);
                     try {

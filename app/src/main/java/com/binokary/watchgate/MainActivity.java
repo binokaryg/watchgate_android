@@ -6,6 +6,7 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 
+import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 
 import android.app.PendingIntent;
@@ -41,20 +42,18 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.binokary.watchgate.toilers.WorkerUtils;
-import com.google.android.gms.tasks.Continuation;
+//import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnSuccessListener;
+//import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.common.util.concurrent.ListenableFuture;
-import com.google.firebase.iid.FirebaseInstanceId;
-import com.google.firebase.iid.InstanceIdResult;
+//import com.google.firebase.iid.FirebaseInstanceId;
+//import com.google.firebase.iid.InstanceIdResult;
 import com.google.firebase.messaging.FirebaseMessaging;
-import com.mongodb.lang.NonNull;
-import com.mongodb.stitch.android.core.Stitch;
-import com.mongodb.stitch.android.core.StitchAppClient;
-import com.mongodb.stitch.android.core.auth.StitchUser;
-import com.mongodb.stitch.android.services.fcm.FcmServicePushClient;
-import com.mongodb.stitch.core.auth.providers.anonymous.AnonymousCredential;
+import io.realm.Realm;
+import io.realm.mongodb.App;
+import io.realm.mongodb.AppConfiguration;
+//import io.realm.mongodb.push.Push;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -97,8 +96,9 @@ public class MainActivity extends AppCompatActivity {
     static final String API_URL = "http://10.0.2.2:3000/api/";
     private long lastSmsInTime = 0;
 
-    private StitchAppClient stitchClient;
-
+    //private StitchAppClient stitchClient;
+    //private App app;
+    //Push pushClient;
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
@@ -374,12 +374,12 @@ public class MainActivity extends AppCompatActivity {
         }
         mUserMobilePhone = mSharedPreferences.getString(PREF_USER_MOBILE_PHONE, "");
 
+        //app = new App(new AppConfiguration.Builder(getString(R.string.stitch_client_app_id))
+        //        .build());
+        //this.stitchClient = Stitch.getDefaultAppClient();
 
-        this.stitchClient = Stitch.getDefaultAppClient();
-
-        final FcmServicePushClient pushClient =
-                this.stitchClient.getPush().getClient(FcmServicePushClient.factory, "gcm");
-
+        //final FcmServicePushClient pushClient =
+        //        this.stitchClient.getPush().getClient(FcmServicePushClient.factory, "gcm");
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
         progressBar.setIndeterminate(true);
 
@@ -391,6 +391,28 @@ public class MainActivity extends AppCompatActivity {
                     "FCM", NotificationManager.IMPORTANCE_HIGH);
             notificationManager.createNotificationChannel(channel);
         }
+
+        FirebaseMessaging.getInstance().getToken().
+                addOnCompleteListener(new OnCompleteListener<String>() {
+                    @Override
+                    public void onComplete(@NonNull Task<String> task) {
+                        if (!task.isSuccessful()) {
+                            Log.w(TAG, "Fetching FCM registration token failed", task.getException());
+                            return;
+                        }
+                        // Get new FCM registration token
+                        String token = task.getResult();
+
+                        // Log and toast
+                        String msg = getString(R.string.msg_token_fmt);
+                        Log.d(TAG, msg);
+                        Toast.makeText(MainActivity.this, msg, Toast.LENGTH_SHORT).show();
+
+                        //pushClient.registerDevice("token");
+                    }
+                });
+
+        /*
 
         FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(MainActivity.this, new OnSuccessListener<InstanceIdResult>() {
 
@@ -425,7 +447,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-
+*/
         notificationManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         if (android.os.Build.VERSION.SDK_INT >= 26) {
@@ -580,6 +602,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode,
                                            String permissions[], int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         switch (requestCode) {
             case SMS_PERMISSION_CODE: {
                 // If request is cancelled, the result arrays are empty.
@@ -771,13 +794,13 @@ public class MainActivity extends AppCompatActivity {
      * @param view
      */
     public void toggleSubscription(View view) {
-
-        if (!stitchClient.getAuth().isLoggedIn()) {
+/*
+        if (!app.currentUser().isLoggedIn()) {
             Log.e(TAG, "Not Logged In.");
             Toast.makeText(getApplicationContext(), "Error: Not logged in.", Toast.LENGTH_SHORT).show();
             return;
         }
-
+*/
         CheckBox checkBox = (CheckBox) view;
         final String single_topic = mSharedPreferences.getString("instance_name", "none");
         String[] topics = mSharedPreferences.getString("pref_all_instances", "").split(",");

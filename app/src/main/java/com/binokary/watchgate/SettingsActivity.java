@@ -13,6 +13,8 @@ import android.preference.PreferenceActivity;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.preference.SwitchPreference;
+
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import android.util.Log;
 import android.view.MenuItem;
@@ -21,7 +23,7 @@ import android.widget.Toast;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.messaging.FirebaseMessaging;
-import com.mongodb.lang.NonNull;
+//import com.mongodb.lang.NonNull;
 
 import java.util.List;
 

@@ -102,7 +102,7 @@ public class SMSReceiver extends BroadcastReceiver {
                                 jsonBody.put(
                                         "text",
                                         mSharedPreferences.getString("instance_name", "none").toUpperCase() +
-                                                " :green_circle: Topped Up");
+                                                " :money_with_wings: Topped Up");
                                 SlackHelper.sendMessage(context, jsonBody);
                             } catch (
                                     JSONException e) {
