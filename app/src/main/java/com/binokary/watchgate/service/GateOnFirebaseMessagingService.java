@@ -6,13 +6,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.SystemClock;
-import android.preference.PreferenceManager;
+import androidx.preference.PreferenceManager;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
-
-import android.util.Log;
 
 import com.binokary.watchgate.Constants;
 import com.binokary.watchgate.MainActivity;
@@ -20,21 +20,18 @@ import com.binokary.watchgate.NotificationID;
 import com.binokary.watchgate.R;
 import com.binokary.watchgate.SlackHelper;
 import com.binokary.watchgate.toilers.WorkerUtils;
-import com.google.firebase.messaging.RemoteMessage;
 import com.google.firebase.messaging.FirebaseMessagingService;
+import com.google.firebase.messaging.RemoteMessage;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.Map;
 import java.util.Objects;
 
 public class GateOnFirebaseMessagingService extends FirebaseMessagingService {
 
-    private SharedPreferences mSharedPreferences;
     private final String TAG = Constants.MAIN_TAG + "NOTIFY";
-
-    Handler handler = new Handler();
+    private SharedPreferences mSharedPreferences;
 
     @Override
     public void onCreate() {
@@ -45,9 +42,8 @@ public class GateOnFirebaseMessagingService extends FirebaseMessagingService {
     public void onMessageReceived(RemoteMessage message) {
 
         Log.d(TAG, "Message received");
-        Map data = message.getData();
-        String task = Objects.requireNonNull(data.get("task")).toString();
-        String body = Objects.requireNonNull(data.get("body")).toString();
+        String task = Objects.requireNonNull(message.getData().get("task"));
+        String body = Objects.requireNonNull(message.getData().get("body"));
         String from = message.getFrom();
         String topic = from;
         try {
@@ -58,7 +54,7 @@ public class GateOnFirebaseMessagingService extends FirebaseMessagingService {
         }
 
         boolean isPostpaid = mSharedPreferences.getBoolean("switch_preference_1", false);
-        String packageNameFromMsg = Objects.requireNonNull(data.get("package")).toString();
+        String packageNameFromMsg = Objects.requireNonNull(message.getData().get("package"));
         String regex = "^([A-Za-z][A-Za-z\\d_]*\\.)+[A-Za-z][A-Za-z\\d_]*$";
         String packageName = packageNameFromMsg.matches(regex) ?
                 packageNameFromMsg : mSharedPreferences.getString("edit_text_preference_package", "none");
@@ -100,8 +96,8 @@ public class GateOnFirebaseMessagingService extends FirebaseMessagingService {
                     } else {
                         Log.e(TAG, "Could not attempt RESTART: " + packageName + " : intent is null");
                     }
-                    handler.postDelayed(this::bringAppToFront, 5000);   //5 seconds
 
+                    new Handler(Looper.getMainLooper()).postDelayed(this::bringAppToFront, 5000);
                     break;
                 }
                 case "CHECK":

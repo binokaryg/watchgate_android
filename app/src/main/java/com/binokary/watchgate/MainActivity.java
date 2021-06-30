@@ -7,7 +7,6 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
@@ -17,7 +16,6 @@ import android.os.BatteryManager;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.StatFs;
-import android.preference.PreferenceManager;
 import android.provider.Telephony;
 import android.util.Log;
 import android.view.Menu;
@@ -35,12 +33,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
+import androidx.preference.PreferenceManager;
 import androidx.work.WorkInfo;
 import androidx.work.WorkManager;
 
 import com.binokary.watchgate.toilers.WorkerUtils;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.firebase.messaging.FirebaseMessaging;
 
@@ -51,15 +48,12 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = Constants.MAIN_TAG + "MainActivity";
-    private static final String PREF_USER_MOBILE_PHONE = "edit_number_preference";
     private static final String PREF_STATS = "gate_stats";
     private static final int SMS_PERMISSION_CODE = 0;
-    private static final int MY_PERMISSIONS_REQUEST_READ_PHONE_STATE = 1;
     private static MainActivity mainActivityInstance;
     TextView textView;
     TextView titleView;
@@ -67,12 +61,9 @@ public class MainActivity extends AppCompatActivity {
     WorkManager mWorkManager;
     ListenableFuture<List<WorkInfo>> mWorkLiveData;
     TextView levelView, healthView, tempView, pluggedView, wifiView, mobileView, networkView, spaceView, balanceView;
-    private String mUserMobilePhone;
     private SharedPreferences mSharedPreferences;
     private NotificationManager notificationManager;
     private NotificationCompat.Builder persistentNotificationBuilder;
-    private UUID workId;
-    private final long lastSmsInTime = 0;
 
     public static MainActivity getInstance() {
         return mainActivityInstance;
@@ -91,14 +82,12 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle item selection
-        switch (item.getItemId()) {
-            case R.id.settings:
-                Intent intent = new Intent(this, SettingsActivity.class);
-                this.startActivity(intent);
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
+        if (item.getItemId() == R.id.settings) {
+            Intent intent = new Intent(this, SettingsActivity.class);
+            this.startActivity(intent);
+            return true;
         }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -128,11 +117,11 @@ public class MainActivity extends AppCompatActivity {
         Button stopButton = (Button) findViewById(R.id.buttonStop);
         Button infoButton = (Button) findViewById(R.id.buttonInfo);
 
-        PreferenceManager.setDefaultValues(this, R.xml.pref_general, true);
-        PreferenceManager.setDefaultValues(this, R.xml.pref_interval, true);
-        PreferenceManager.setDefaultValues(this, R.xml.pref_variables, true);
-        PreferenceManager.setDefaultValues(this, R.xml.pref_network, true);
-        PreferenceManager.setDefaultValues(this, R.xml.pref_smspacks, true);
+        //PreferenceManager.setDefaultValues(this, R.xml.pref_general, true);
+        //PreferenceManager.setDefaultValues(this, R.xml.pref_interval, true);
+        //PreferenceManager.setDefaultValues(this, R.xml.pref_variables, true);
+        //PreferenceManager.setDefaultValues(this, R.xml.pref_network, true);
+        //PreferenceManager.setDefaultValues(this, R.xml.pref_smspacks, true);
         mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
         setTitle("WatchGate " + BuildConfig.VERSION_NAME);
@@ -142,218 +131,201 @@ public class MainActivity extends AppCompatActivity {
 
         //Log.d(TAG, "Activity onCreate: Background service started");
 
-        normalSMSBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (!hasValidPreConditions()) return;
-                progressBar.setVisibility(View.VISIBLE);
-                StatsHelper.CheckAndUpdateStats(getApplicationContext());
-                UpdateViews();
-                String smsQueryMsg = mSharedPreferences.getBoolean("switch_preference_1", false)
-                        ? mSharedPreferences.getString("pref_balance_query_postpaid", "CB")
-                        : mSharedPreferences.getString("pref_balance_query_prepaid", "BL");
-                SMSHelper.sendSms(mSharedPreferences.getString("pref_sms_destination", "1415"), smsQueryMsg);
-                Toast.makeText(getApplicationContext(), R.string.toast_sending_sms + (mSharedPreferences.getBoolean("switch_preference_1", true) ? "Postpaid" : "Prepaid"), Toast.LENGTH_SHORT).show();
-            }
+        normalSMSBtn.setOnClickListener(v -> {
+            if (!hasValidPreConditions()) return;
+            progressBar.setVisibility(View.VISIBLE);
+            StatsHelper.CheckAndUpdateStats(getApplicationContext());
+            UpdateViews();
+            String smsQueryMsg = mSharedPreferences.getBoolean("switch_preference_1", false)
+                    ? mSharedPreferences.getString("pref_balance_query_postpaid", "CB")
+                    : mSharedPreferences.getString("pref_balance_query_prepaid", "BL");
+            SMSHelper.sendSms(mSharedPreferences.getString("pref_sms_destination", "1415"), smsQueryMsg);
+            Toast.makeText(getApplicationContext(), R.string.toast_sending_sms + (mSharedPreferences.getBoolean("switch_preference_1", true) ? "Postpaid" : "Prepaid"), Toast.LENGTH_SHORT).show();
         });
 
-        startButton.setOnClickListener(new View.OnClickListener() {
+        startButton.setOnClickListener(v -> {
+            JSONObject jsonData = new JSONObject();
+            try {
+                jsonData.put("level", "25");
+                jsonData.put("timestamp", System.currentTimeMillis());
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
 
-            @Override
-            public void onClick(View v) {
-                JSONObject jsonData = new JSONObject();
-                try {
-                    jsonData.put("level", "25");
-                    jsonData.put("timestamp", System.currentTimeMillis());
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
+            String smsQueryMsg = mSharedPreferences.getBoolean("switch_preference_1", false)
+                    ? mSharedPreferences.getString("pref_balance_query_postpaid", "")
+                    : mSharedPreferences.getString("pref_balance_query_prepaid", "");
+            int smsInterval = mSharedPreferences.getInt("pref_interval_sms", 240);
+            String smsIntervalMinString = mSharedPreferences.getString("pref_interval_sms_min", "10");
+            String reportIntervalString = mSharedPreferences.getString("pref_interval_report", "30");
+            String reportIntervalMinString = mSharedPreferences.getString("pref_interval_report_min", "10");
+            String reportOneIntervalMinString = mSharedPreferences.getString("pref_interval_report_one_min", "3");
 
-                String smsQueryMsg = mSharedPreferences.getBoolean("switch_preference_1", false)
-                        ? mSharedPreferences.getString("pref_balance_query_postpaid", "")
-                        : mSharedPreferences.getString("pref_balance_query_prepaid", "");
-                String smsIntervalString = mSharedPreferences.getString("pref_interval_sms", "240");
-                String smsIntervalMinString = mSharedPreferences.getString("pref_interval_sms_min", "10");
-                String reportIntervalString = mSharedPreferences.getString("pref_interval_report", "30");
-                String reportIntervalMinString = mSharedPreferences.getString("pref_interval_report_min", "10");
-                String reportOneIntervalMinString = mSharedPreferences.getString("pref_interval_report_one_min", "3");
+            String instanceName = mSharedPreferences.getString("instance_name", "none");
 
-                String instanceName = mSharedPreferences.getString("instance_name", "none");
+            //int smsInterval = 240;
+            int smsIntervalMin = 10;
+            int reportInterval = 30;
+            int reportIntervalMin = 10;
+            int reportOneIntervalMin = 3;
+            try {
+                //smsInterval = Integer.parseInt(smsIntervalString);
+                reportInterval = Integer.parseInt(reportIntervalString);
+                smsIntervalMin = Integer.parseInt(smsIntervalMinString);
+                reportIntervalMin = Integer.parseInt(reportIntervalMinString);
+                reportOneIntervalMin = Integer.parseInt(reportOneIntervalMinString);
 
-                int smsInterval = 240;
-                int smsIntervalMin = 10;
-                int reportInterval = 30;
-                int reportIntervalMin = 10;
-                int reportOneIntervalMin = 3;
-                try {
-                    smsInterval = Integer.parseInt(smsIntervalString);
-                    reportInterval = Integer.parseInt(reportIntervalString);
-                    smsIntervalMin = Integer.parseInt(smsIntervalMinString);
-                    reportIntervalMin = Integer.parseInt(reportIntervalMinString);
-                    reportOneIntervalMin = Integer.parseInt(reportOneIntervalMinString);
+            } catch (Exception ex) {
+                Log.e(TAG, "Error parsing intervals: " + ex.getMessage());
+            }
+            //Log.d(TAG, "sending report");
+            mWorkManager = WorkManager.getInstance();
 
-                } catch (Exception ex) {
-                    Log.e(TAG, "Error parsing intervals: " + ex.getMessage());
-                }
-                //Log.d(TAG, "sending report");
+            WorkerUtils.enqueueSMSSendingWork(mSharedPreferences.getString("pref_sms_destination", "1415"), smsQueryMsg, smsInterval, smsIntervalMin);
+            WorkerUtils.enqueueStitchReportingWork(instanceName, reportInterval, reportIntervalMin, reportOneIntervalMin);
+        });
+
+
+        stopButton.setOnClickListener(v -> {
+            Log.d(TAG, " gatewatch stopping worker");
+            if (mWorkManager == null) {
                 mWorkManager = WorkManager.getInstance();
-
-                WorkerUtils.enqueueSMSSendingWork(mSharedPreferences.getString("pref_sms_destination", "1415"), smsQueryMsg, smsInterval, smsIntervalMin);
-                WorkerUtils.enqueueStitchReportingWork(instanceName, reportInterval, reportIntervalMin, reportOneIntervalMin);
+            }
+            mWorkLiveData = mWorkManager.getWorkInfosByTag(Constants.SMS_TAG);
+            try {
+                List<WorkInfo> workList = mWorkLiveData.get();
+                for (int i = 0; i < workList.size(); i++) {
+                    Log.d(TAG, "Work state of gatewatch" + i + " : " + workList.get(i).getState());
+                }
+            } catch (Exception ex) {
+                Log.e(TAG, "Error when trying to get task list: " + ex.getMessage());
             }
 
+            int clearStatus = WorkerUtils.clearTasks(Constants.SMS_TAG);
+            Log.d(TAG, " SMS sending tasks cleared " + clearStatus);
+
+            mWorkLiveData = mWorkManager.getWorkInfosByTag(Constants.REPORT_TAG);
+            try {
+                List<WorkInfo> workList = mWorkLiveData.get();
+                for (int i = 0; i < workList.size(); i++) {
+                    Log.d(TAG, "Work state of gatewatch" + i + " : " + workList.get(i).getState());
+                }
+            } catch (Exception ex) {
+                Log.e(TAG, "Error when trying to get task list: " + ex.getMessage());
+            }
+
+            clearStatus = WorkerUtils.clearTasks(Constants.REPORT_TAG);
+            Log.d(TAG, " Stitch reporting tasks cleared " + clearStatus);
         });
 
+        infoButton.setOnClickListener(v -> {
 
-        stopButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.d(TAG, " gatewatch stopping worker");
-                if (mWorkManager == null) {
-                    mWorkManager = WorkManager.getInstance();
-                }
-                if (mWorkManager != null) {
-                    mWorkLiveData = mWorkManager.getWorkInfosByTag(Constants.SMS_TAG);
-                    try {
-                        List<WorkInfo> workList = mWorkLiveData.get();
-                        for (int i = 0; i < workList.size(); i++) {
-                            Log.d(TAG, "Work state of gatewatch" + i + " : " + workList.get(i).getState());
-                        }
-                    } catch (Exception ex) {
-                        Log.e(TAG, "Error when trying to get task list: " + ex.getMessage());
-                    }
+            StringBuilder infoBuilder = new StringBuilder("Info:\n");
 
-                    int clearStatus = WorkerUtils.clearTasks(Constants.SMS_TAG);
-                    Log.d(TAG, " SMS sending tasks cleared " + clearStatus);
 
-                    mWorkLiveData = mWorkManager.getWorkInfosByTag(Constants.REPORT_TAG);
-                    try {
-                        List<WorkInfo> workList = mWorkLiveData.get();
-                        for (int i = 0; i < workList.size(); i++) {
-                            Log.d(TAG, "Work state of gatewatch" + i + " : " + workList.get(i).getState());
-                        }
-                    } catch (Exception ex) {
-                        Log.e(TAG, "Error when trying to get task list: " + ex.getMessage());
-                    }
-
-                    clearStatus = WorkerUtils.clearTasks(Constants.REPORT_TAG);
-                    Log.d(TAG, " Stitch reporting tasks cleared " + clearStatus);
-                }
+            if (mWorkManager == null) {
+                mWorkManager = WorkManager.getInstance();
             }
-        });
-
-        infoButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                StringBuilder infoBuilder = new StringBuilder("Info:\n");
-
-
-                if (mWorkManager == null) {
-                    mWorkManager = WorkManager.getInstance();
+            //SMS Workers
+            Log.d(TAG, "Getting workers with Tag: " + Constants.SMS_TAG + "\n");
+            mWorkLiveData = mWorkManager.getWorkInfosByTag(Constants.SMS_TAG);
+            try {
+                List<WorkInfo> workList = mWorkLiveData.get();
+                for (int i = 0; i < workList.size(); i++) {
+                    Log.d(TAG, "Work state of SMS Senders " + i + " : " + workList.get(i).getState());
+                    infoBuilder.append("SMSS").append(i);
+                    infoBuilder.append(": ");
+                    infoBuilder.append(workList.get(i).getState());
+                    infoBuilder.append("\n");
                 }
-                if (mWorkManager != null) {
-                    //SMS Workers
-                    Log.d(TAG, "Getting workers with Tag: " + Constants.SMS_TAG + "\n");
-                    mWorkLiveData = mWorkManager.getWorkInfosByTag(Constants.SMS_TAG);
-                    try {
-                        List<WorkInfo> workList = mWorkLiveData.get();
-                        for (int i = 0; i < workList.size(); i++) {
-                            Log.d(TAG, "Work state of SMS Senders " + i + " : " + workList.get(i).getState());
-                            infoBuilder.append("SMSS" + i);
-                            infoBuilder.append(": ");
-                            infoBuilder.append(workList.get(i).getState());
-                            infoBuilder.append("\n");
-                        }
-                        textView.setText(infoBuilder);
-                    } catch (Exception ex) {
-                        Log.e(TAG, "Error when trying to get task list: " + ex.getMessage());
-                    }
-                    //Report Workers
-                    Log.d(TAG, "Getting workers with Tag: " + Constants.REPORT_TAG + "\n");
-                    mWorkLiveData = mWorkManager.getWorkInfosByTag(Constants.REPORT_TAG);
-                    try {
-                        List<WorkInfo> workList = mWorkLiveData.get();
-                        for (int i = 0; i < workList.size(); i++) {
-                            Log.d(TAG, "Work state of Stitch Reporters " + i + " : " + workList.get(i).getState());
-                            infoBuilder.append("SR" + i);
-                            infoBuilder.append(": ");
-                            infoBuilder.append(workList.get(i).getState());
-                            infoBuilder.append("\n");
-                        }
-                        textView.setText(infoBuilder);
-                    } catch (Exception ex) {
-                        Log.e(TAG, "Error when trying to get task list: " + ex.getMessage());
-                    }
-
-                    //One Time SMS Workers
-                    Log.d(TAG, "Getting workers with Tag: " + Constants.SMS_ONE_TAG + "\n");
-
-                    mWorkLiveData = mWorkManager.getWorkInfosByTag(Constants.SMS_ONE_TAG);
-                    try {
-                        List<WorkInfo> workList = mWorkLiveData.get();
-                        for (int i = 0; i < workList.size(); i++) {
-                            Log.d(TAG, "Work state of one time SMS Senders " + i + " : " + workList.get(i).getState());
-                            infoBuilder.append("SMS1S" + i);
-                            infoBuilder.append(": ");
-                            infoBuilder.append(workList.get(i).getState());
-                            infoBuilder.append("\n");
-                        }
-                        textView.setText(infoBuilder);
-                    } catch (Exception ex) {
-                        Log.e(TAG, "Error when trying to get task list: " + ex.getMessage());
-                    }
-
-
-                    //One Time Report Workers
-                    Log.d(TAG, "Getting workers with Tag: " + Constants.REPORT_ONE_TAG + "\n");
-
-                    mWorkLiveData = mWorkManager.getWorkInfosByTag(Constants.REPORT_ONE_TAG);
-                    try {
-                        List<WorkInfo> workList = mWorkLiveData.get();
-                        for (int i = 0; i < workList.size(); i++) {
-                            Log.d(TAG, "Work state of one time Stitch reporters " + i + " : " + workList.get(i).getState());
-                            infoBuilder.append("S1R" + i);
-                            infoBuilder.append(": ");
-                            infoBuilder.append(workList.get(i).getState());
-                            infoBuilder.append("\n");
-                        }
-                        textView.setText(infoBuilder);
-                    } catch (Exception ex) {
-                        Log.e(TAG, "Error when trying to get task list: " + ex.getMessage());
-                    }
-
-
-                    //One Time Report Workers with Wait time
-                    Log.d(TAG, "Getting workers with Tag: " + Constants.REPORT_ONE_WAIT_TAG + "\n");
-
-                    mWorkLiveData = mWorkManager.getWorkInfosByTag(Constants.REPORT_ONE_WAIT_TAG);
-                    try {
-                        List<WorkInfo> workList = mWorkLiveData.get();
-                        for (int i = 0; i < workList.size(); i++) {
-                            Log.d(TAG, "Work state of Stitch reporters with wait time " + i + " : " + workList.get(i).getState());
-                            infoBuilder.append("S1WR" + i);
-                            infoBuilder.append(": ");
-                            infoBuilder.append(workList.get(i).getState());
-                            infoBuilder.append("\n");
-                        }
-                        textView.setText(infoBuilder);
-                    } catch (Exception ex) {
-                        Log.e(TAG, "Error when trying to get task list: " + ex.getMessage());
-                    }
-
-                }
-                //Stats
-                StatsHelper.CheckAndUpdateStats(getApplicationContext());
-                UpdateViews();
+                textView.setText(infoBuilder);
+            } catch (Exception ex) {
+                Log.e(TAG, "Error when trying to get task list: " + ex.getMessage());
             }
+            //Report Workers
+            Log.d(TAG, "Getting workers with Tag: " + Constants.REPORT_TAG + "\n");
+            mWorkLiveData = mWorkManager.getWorkInfosByTag(Constants.REPORT_TAG);
+            try {
+                List<WorkInfo> workList = mWorkLiveData.get();
+                for (int i = 0; i < workList.size(); i++) {
+                    Log.d(TAG, "Work state of Stitch Reporters " + i + " : " + workList.get(i).getState());
+                    infoBuilder
+                            .append("SR")
+                            .append(i)
+                            .append(": ")
+                            .append(workList.get(i).getState())
+                            .append("\n");
+                }
+                textView.setText(infoBuilder);
+            } catch (Exception ex) {
+                Log.e(TAG, "Error when trying to get task list: " + ex.getMessage());
+            }
+
+            //One Time SMS Workers
+            Log.d(TAG, "Getting workers with Tag: " + Constants.SMS_ONE_TAG + "\n");
+
+            mWorkLiveData = mWorkManager.getWorkInfosByTag(Constants.SMS_ONE_TAG);
+            try {
+                List<WorkInfo> workList = mWorkLiveData.get();
+                for (int i = 0; i < workList.size(); i++) {
+                    Log.d(TAG, "Work state of one time SMS Senders " + i + " : " + workList.get(i).getState());
+                    infoBuilder.append("SMS1S").append(i);
+                    infoBuilder.append(": ");
+                    infoBuilder.append(workList.get(i).getState());
+                    infoBuilder.append("\n");
+                }
+                textView.setText(infoBuilder);
+            } catch (Exception ex) {
+                Log.e(TAG, "Error when trying to get task list: " + ex.getMessage());
+            }
+
+
+            //One Time Report Workers
+            Log.d(TAG, "Getting workers with Tag: " + Constants.REPORT_ONE_TAG + "\n");
+
+            mWorkLiveData = mWorkManager.getWorkInfosByTag(Constants.REPORT_ONE_TAG);
+            try {
+                List<WorkInfo> workList = mWorkLiveData.get();
+                for (int i = 0; i < workList.size(); i++) {
+                    Log.d(TAG, "Work state of one time Stitch reporters " + i + " : " + workList.get(i).getState());
+                    infoBuilder.append("S1R").append(i);
+                    infoBuilder.append(": ");
+                    infoBuilder.append(workList.get(i).getState());
+                    infoBuilder.append("\n");
+                }
+                textView.setText(infoBuilder);
+            } catch (Exception ex) {
+                Log.e(TAG, "Error when trying to get task list: " + ex.getMessage());
+            }
+
+
+            //One Time Report Workers with Wait time
+            Log.d(TAG, "Getting workers with Tag: " + Constants.REPORT_ONE_WAIT_TAG + "\n");
+
+            mWorkLiveData = mWorkManager.getWorkInfosByTag(Constants.REPORT_ONE_WAIT_TAG);
+            try {
+                List<WorkInfo> workList = mWorkLiveData.get();
+                for (int i = 0; i < workList.size(); i++) {
+                    Log.d(TAG, "Work state of Stitch reporters with wait time " + i + " : " + workList.get(i).getState());
+                    infoBuilder.append("S1WR").append(i);
+                    infoBuilder.append(": ");
+                    infoBuilder.append(workList.get(i).getState());
+                    infoBuilder.append("\n");
+                }
+                textView.setText(infoBuilder);
+            } catch (Exception ex) {
+                Log.e(TAG, "Error when trying to get task list: " + ex.getMessage());
+            }
+
+            //Stats
+            StatsHelper.CheckAndUpdateStats(getApplicationContext());
+            UpdateViews();
         });
 
 
         if (!SMSHelper.hasAllNecessaryPermissions(MainActivity.this)) {
             showRequestPermissionsInfoAlertDialog();
         }
-        mUserMobilePhone = mSharedPreferences.getString(PREF_USER_MOBILE_PHONE, "");
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
         progressBar.setIndeterminate(true);
 
@@ -406,14 +378,10 @@ public class MainActivity extends AppCompatActivity {
         intentFilter.addAction(Telephony.Sms.Intents.SMS_RECEIVED_ACTION);
         //Log.d(TAG, "gatewatch: not registering sReceiver");
         //registerReceiver(sReceiver, intentFilter); //registered in Manifest
-        try {
-            long freeMemory = freeMemory();
-            long totalMemory = totalMemory();
-            String freeSpaceMsg = String.format("%d MB free of %d MB total", freeMemory, totalMemory);
-            spaceView.setText(freeSpaceMsg);
-        } catch (Exception e) {
-            throw e;
-        }
+        long freeMemory = freeMemory();
+        long totalMemory = totalMemory();
+        String freeSpaceMsg = String.format("%d MB free of %d MB total", freeMemory, totalMemory);
+        spaceView.setText(freeSpaceMsg);
         super.onStart();
     }
 
@@ -429,15 +397,6 @@ public class MainActivity extends AppCompatActivity {
         //Log.d(TAG, "gatewatch: not unregistering mReceiver");
         //unregisterReceiver(mReceiver);
         super.onStop();
-    }
-
-    /**
-     * Checks if stored SharedPreferences value needs updating and updates \o/
-     */
-    private void checkAndUpdateUserPrefNumber() {
-        mUserMobilePhone = mSharedPreferences.getString(PREF_USER_MOBILE_PHONE, "");
-
-        Log.d(TAG, mUserMobilePhone);
     }
 
 
@@ -496,14 +455,11 @@ public class MainActivity extends AppCompatActivity {
         builder.setTitle(R.string.permission_alert_dialog_title); // Your own title
         builder.setMessage(R.string.permission_dialog_message); // Your own message
 
-        builder.setPositiveButton(R.string.action_ok, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-                // Display system runtime permission request?
-                if (makeSystemRequest) {
-                    requestReadAndSendSmsPermission();
-                }
+        builder.setPositiveButton(R.string.action_ok, (dialog, which) -> {
+            dialog.dismiss();
+            // Display system runtime permission request?
+            if (makeSystemRequest) {
+                requestReadAndSendSmsPermission();
             }
         });
 
@@ -513,40 +469,8 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onRequestPermissionsResult(int requestCode,
-                                           String[] permissions, int[] grantResults) {
+                                           @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        switch (requestCode) {
-            case SMS_PERMISSION_CODE: {
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
-                    // permission was granted, yay! Do the
-                    // SMS related task you need to do.
-
-                } else {
-                    // permission denied, boo! Disable the
-                    // functionality that depends on this permission.
-                }
-                return;
-            }
-
-            case MY_PERMISSIONS_REQUEST_READ_PHONE_STATE: {
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
-                    // permission was granted, yay! Do the
-                    // SMS related task you need to do.
-
-                } else {
-                    // permission denied, boo! Disable the
-                    // functionality that depends on this permission.
-                }
-                return;
-            }
-            // other 'case' lines to check for other
-            // permissions this app might request
-        }
     }
 
     private String ConvHealth(int health) {
@@ -589,9 +513,8 @@ public class MainActivity extends AppCompatActivity {
         external = (statFs.getTotalBytes()/(1024*1024));*/
 
         StatFs statFs = new StatFs(Environment.getDataDirectory().getAbsolutePath());
-        long total = (statFs.getTotalBytes() / (1024 * 1024));
 
-        return total;
+        return (statFs.getTotalBytes() / (1024 * 1024));
     }
 
     private long freeMemory() {
@@ -604,8 +527,7 @@ public class MainActivity extends AppCompatActivity {
         external = (statFs.getFreeBytes()/(1024*1024));*/
 
         StatFs statFs = new StatFs(Environment.getDataDirectory().getAbsolutePath());
-        long free = (statFs.getFreeBytes() / (1024 * 1024));
-        return free;
+        return (statFs.getFreeBytes() / (1024 * 1024));
     }
 
 
@@ -616,19 +538,18 @@ public class MainActivity extends AppCompatActivity {
         Integer balanceCredit = prefs.getInt(PrefStrings.POSTPAID_BALANCE_CREDIT, -1);
         titleView.setText(mSharedPreferences.getString("instance_name", "unnamed").toUpperCase());
         String wifi = prefs.getString(PrefStrings.WIFI_SSID, "N/A");
-        Boolean data = prefs.getBoolean(PrefStrings.MOBILE_DATA, false);
-        Integer temp = prefs.getInt(PrefStrings.TEMPERATURE, -1);
-        Integer health = prefs.getInt(PrefStrings.HEALTH, -1);
-        Boolean plugged = prefs.getBoolean(PrefStrings.PLUGGED, false);
-        Integer battery = prefs.getInt(PrefStrings.BATTERY, -1);
+        boolean data = prefs.getBoolean(PrefStrings.MOBILE_DATA, false);
+        int temp = prefs.getInt(PrefStrings.TEMPERATURE, -1);
+        int health = prefs.getInt(PrefStrings.HEALTH, -1);
+        boolean plugged = prefs.getBoolean(PrefStrings.PLUGGED, false);
+        int battery = prefs.getInt(PrefStrings.BATTERY, -1);
         String carrier = prefs.getString(PrefStrings.MOBILE_CARRIER, "");
         //Integer mobileStrength = prefs.getInt(PrefStrings.MOBILE_STRENGTH, -1);
-        Integer wifiStrength = prefs.getInt(PrefStrings.WIFI_STRENGTH, -1);
-        Long upDate = prefs.getLong(PrefStrings.UPD_DATE, 0);
+        int wifiStrength = prefs.getInt(PrefStrings.WIFI_STRENGTH, -1);
         Long balanceDate = prefs.getLong(PrefStrings.BALANCE_DATE, 0);
-        Boolean isPostpaid = prefs.getBoolean(PrefStrings.IS_POSTPAID, false);
+        boolean isPostpaid = prefs.getBoolean(PrefStrings.IS_POSTPAID, false);
         String dateTimeString = DateFormat.getDateTimeInstance().format(balanceDate);
-        String balanceMsg = "";
+        String balanceMsg;
         if (isPostpaid) {
             balanceMsg = String.format("Due: Rs %d, Credit: Rs %d @ %s", balanceDue, balanceCredit, dateTimeString);
         } else {
@@ -636,8 +557,8 @@ public class MainActivity extends AppCompatActivity {
         }
 
         balanceView.setText(balanceMsg);
-        levelView.setText(battery.toString() + "%");
-        tempView.setText(temp.toString() + " °C");
+        levelView.setText(battery + "%");
+        tempView.setText(temp + " °C");
         healthView.setText(ConvHealth(health));
         pluggedView.setText(plugged ? "Yes" : "No");
         wifiView.setText(wifi + " (Signal: " + (wifiStrength + 1) + "/5)");
@@ -649,7 +570,7 @@ public class MainActivity extends AppCompatActivity {
 
     public String getNotificationSummaryText() {
         SharedPreferences prefs = getSharedPreferences(PREF_STATS, MODE_PRIVATE);
-        Boolean postPaid = prefs.getBoolean(PrefStrings.IS_POSTPAID, false);
+        boolean postPaid = prefs.getBoolean(PrefStrings.IS_POSTPAID, false);
         StringBuilder summaryText = new StringBuilder();
         if (postPaid) {
             int postPaidBalanceCredit = prefs.getInt(PrefStrings.POSTPAID_BALANCE_CREDIT, -1);
@@ -661,11 +582,11 @@ public class MainActivity extends AppCompatActivity {
         long balanceDate = prefs.getLong(PrefStrings.BALANCE_DATE, -1);
         SimpleDateFormat formatter = new SimpleDateFormat("MMM d HH:mm");
         String dateStringBalance = formatter.format(new Date(balanceDate));
-        summaryText.append(" (" + dateStringBalance + "); ");
+        summaryText.append(" (").append(dateStringBalance).append("); ");
         int smsPack = prefs.getInt(PrefStrings.SMS_PACK_INFO, -1);
         long smsPackDate = prefs.getLong(PrefStrings.SMS_PACK_INFO_DATE, -1);
         String dateStringMsg = formatter.format(new Date(smsPackDate));
-        summaryText.append("SMS: " + smsPack + " (" + dateStringMsg + ")");
+        summaryText.append("SMS: ").append(smsPack).append(" (").append(dateStringMsg).append(")");
         return summaryText.toString();
     }
 
@@ -698,24 +619,11 @@ public class MainActivity extends AppCompatActivity {
         updateNotificationSummary(getNotificationSummaryText());
     }
 
-    /**
-     * Called when the user subscribes to specific push notification topics.
-     * The method is the onClick method.
-     *
-     * @param view
-     */
     public void toggleSubscription(View view) {
-/*
-        if (!app.currentUser().isLoggedIn()) {
-            Log.e(TAG, "Not Logged In.");
-            Toast.makeText(getApplicationContext(), "Error: Not logged in.", Toast.LENGTH_SHORT).show();
-            return;
-        }
-*/
         CheckBox checkBox = (CheckBox) view;
         final String single_topic = mSharedPreferences.getString("instance_name", "none");
         String[] topics = mSharedPreferences.getString("pref_all_instances", "").split(",");
-        Boolean monitorOnly = mSharedPreferences.getBoolean("switch_monitor_mode", false);
+        boolean monitorOnly = mSharedPreferences.getBoolean("switch_monitor_mode", false);
 
         //Only allow multiple subscriptions in monitor mode
         if (!monitorOnly) {
@@ -725,30 +633,24 @@ public class MainActivity extends AppCompatActivity {
         }
         for (String topic : topics) {
             if (checkBox.isChecked()) {
-                FirebaseMessaging.getInstance().subscribeToTopic(topic).addOnCompleteListener(new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull final Task<Void> task) {
-                        if (!task.isSuccessful()) {
-                            Log.d(TAG, "Error subscribing to topic " + task.getException());
-                            return;
-                        }
-
-                        Log.d(TAG, "Subscribed to topic " + topic);
-                        Toast.makeText(getApplicationContext(), "Subscribed to topic " + topic, Toast.LENGTH_LONG).show();
+                FirebaseMessaging.getInstance().subscribeToTopic(topic).addOnCompleteListener(task -> {
+                    if (!task.isSuccessful()) {
+                        Log.d(TAG, "Error subscribing to topic " + task.getException());
+                        return;
                     }
+
+                    Log.d(TAG, "Subscribed to topic " + topic);
+                    Toast.makeText(getApplicationContext(), "Subscribed to topic " + topic, Toast.LENGTH_LONG).show();
                 });
             } else {
-                FirebaseMessaging.getInstance().unsubscribeFromTopic(topic).addOnCompleteListener(new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull final Task<Void> task) {
-                        if (!task.isSuccessful()) {
-                            Log.d(TAG, "Error unsubscribing from topic " + task.getException());
-                            return;
-                        }
-
-                        Log.d(TAG, "Unsubscribed from topic " + topic);
-                        Toast.makeText(getApplicationContext(), "Unsubscribed from topic " + topic, Toast.LENGTH_LONG).show();
+                FirebaseMessaging.getInstance().unsubscribeFromTopic(topic).addOnCompleteListener(task -> {
+                    if (!task.isSuccessful()) {
+                        Log.d(TAG, "Error unsubscribing from topic " + task.getException());
+                        return;
                     }
+
+                    Log.d(TAG, "Unsubscribed from topic " + topic);
+                    Toast.makeText(getApplicationContext(), "Unsubscribed from topic " + topic, Toast.LENGTH_LONG).show();
                 });
             }
         }
