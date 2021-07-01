@@ -382,7 +382,8 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:onClick="toggleSubscription"
-            android:text="Subscribe All" />
+            android:text="Subscribe"
+            android:dependency="switch_monitor_mode"/>
 
     </LinearLayout>
 

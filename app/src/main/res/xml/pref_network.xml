@@ -1,7 +1,6 @@
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <!-- NOTE: EditTextPreference accepts EditText attributes. -->
-    <!-- NOTE: EditTextPreference's summary should be set to its value by the activity code. -->
     <EditTextPreference
         android:defaultValue="@string/pref_sms_destination_default"
         android:key="pref_sms_destination"
@@ -9,7 +8,8 @@
         android:selectAllOnFocus="true"
         android:singleLine="true"
         android:summary="The number you want to send query SMS to"
-        android:title="Query SMS Destination" />
+        android:title="Query SMS Destination"
+        app:useSimpleSummaryProvider="true" />
     <EditTextPreference
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -19,14 +19,16 @@
         android:selectAllOnFocus="true"
         android:singleLine="true"
         android:summary="The number from where balance information SMS will arrive"
-        android:title="Balance Info SMS Source" />
+        android:title="Balance Info SMS Source"
+        app:useSimpleSummaryProvider="true" />
     <EditTextPreference
         android:defaultValue="@string/pref_balance_query_prepaid_default"
         android:key="pref_balance_query_prepaid"
         android:selectAllOnFocus="true"
         android:singleLine="true"
         android:summary="Body of SMS to be sent for querying Prepaid balance"
-        android:title="Balance Query Message (Prepaid)" />
+        android:title="Balance Query Message (Prepaid)"
+        app:useSimpleSummaryProvider="true" />
     <EditTextPreference
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -35,10 +37,7 @@
         android:selectAllOnFocus="true"
         android:singleLine="true"
         android:summary="Body of SMS to be sent for querying Postpaid balance"
-        android:title="Balance Query Message (Postpaid)" />
-
-    <!-- NOTE: Hide buttons to simplify the UI. Users can touch outside the dialog to
-         dismiss it. -->
-    <!-- NOTE: ListPreference's summary should be set to its value by the activity code. -->
+        android:title="Balance Query Message (Postpaid)"
+        app:useSimpleSummaryProvider="true" />
 
 </PreferenceScreen>

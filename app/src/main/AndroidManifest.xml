@@ -23,7 +23,6 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -34,7 +33,7 @@
         <activity
             android:name=".SettingsActivity"
             android:label="@string/title_activity_settings"
-            android:parentActivityName=".MainActivity"  />
+            android:parentActivityName=".MainActivity" />
 
         <service
             android:name=".service.GateBackgroundService"
@@ -46,19 +45,18 @@
             android:enabled="true">
             <intent-filter>
                 <action android:name="android.provider.Telephony.SMS_RECEIVED" />
+
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
-        </receiver>
-        <!-- Name of your Firebase ListenerService -->
+        </receiver> <!-- Name of your Firebase ListenerService -->
         <service
             android:name=".service.GateOnFirebaseMessagingService"
             android:enabled="true"
             android:exported="true">
             <intent-filter>
-                <action android:name="com.google.firebase.MESSAGING_EVENT"/>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
-
     </application>
 
 </manifest>

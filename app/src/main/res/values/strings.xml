@@ -21,6 +21,8 @@
     <string name="buttonUpdate">Update</string>
     <string name="textViewBalance">Balance</string>
     <string name="title_activity_settings">Settings</string>
+    <string name="watchgate_title">Watch Gate</string>
+    <string name="msg_token_fmt">FCM Token generated</string>
 
     <!-- Strings related to Settings -->
     <string name="pref_header_general">General Settings</string>
@@ -53,6 +55,4 @@
     <string name="pref_sms_sub_default">SMS300</string>
     <string name="country_code_default">+977</string>
     <string name="pref_all_instances_default">baglung,baitadi,bajura,banke,dadeldhura,dhading,gorkha,ilam,kailali,kanchanpur,pyuthan,rasuwa,sindhuli,sindhupalchowk,sunsari,syangja</string>
-    <string name="watchgate_title">Watch Gate</string>
-    <string name="msg_token_fmt">FCM Token generated</string>
 </resources>

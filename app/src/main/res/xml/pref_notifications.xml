@@ -1,23 +1,21 @@
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-
-    <!-- NOTE: EditTextPreference accepts EditText attributes. -->
-    <!-- NOTE: EditTextPreference's summary should be set to its value by the activity code. -->
-
-
-    <!-- NOTE: Hide buttons to simplify the UI. Users can touch outside the dialog to
-         dismiss it. -->
-    <!-- NOTE: ListPreference's summary should be set to its value by the activity code. -->
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <SwitchPreference
         android:defaultValue="false"
         android:key="switch_preference_notification"
         android:title="Subscribe to FCM"
-        android:summary="Enable to use FCM services"/>
+        android:summary="Enable to use FCM services" />
     <SwitchPreference
         android:defaultValue="false"
         android:key="switch_sms_notification"
         android:title="SMS Notification"
-        android:summary="Enable to send SMS notifications"/>
+        android:summary="Enable to send SMS notifications" />
+    <SwitchPreference
+        android:defaultValue="false"
+        android:key="switch_slack"
+        android:summary="Send Messages to Slack Channel"
+        android:title="Push to Slack" />
     <EditTextPreference
         android:defaultValue="2"
         android:key="sms_notification_interval"
@@ -25,7 +23,8 @@
         android:inputType="number"
         android:digits="0123456789"
         android:title="SMS Notification Interval (hours)"
-        android:summary="Minimum interval between two SMS notifications"/>
+        android:summary="Minimum interval between two SMS notifications"
+        app:useSimpleSummaryProvider="true"/>
     <EditTextPreference
         android:defaultValue="500"
         android:key="edit_balance_limit"
@@ -33,7 +32,8 @@
         android:inputType="number"
         android:digits="0123456789"
         android:title="Critical Balance Limit"
-        android:summary="SMS notification will be sent if balance is below this limit"/>
+        android:summary="SMS notification will be sent if balance is below this limit"
+        app:useSimpleSummaryProvider="true"/>
     <EditTextPreference
         android:defaultValue="medic.gateway.alert"
         android:key="edit_text_preference_package"
@@ -47,15 +47,11 @@
         android:inputType="text"
         android:digits="1234567890;"
         android:title="@string/own_number_label"
-        android:summary="Mobile number to sent SMS notifications. Multiple numbers can be separated by semicolon."/>
-    <SwitchPreference
-        android:defaultValue="false"
-        android:key="switch_slack"
-        android:summary="Send Messages to Slack Channel"
-        android:title="Push to Slack" />
+        android:summary="Mobile number to sent SMS notifications. Multiple numbers can be separated by semicolon."
+        app:useSimpleSummaryProvider="true"/>
     <SwitchPreference
         android:defaultValue="false"
         android:key="switch_monitor_mode"
         android:title="Monitor Mode"
-        android:summary="Only Monitor Notifications"/>
+        android:summary="Only Monitor Notifications" />
 </PreferenceScreen>

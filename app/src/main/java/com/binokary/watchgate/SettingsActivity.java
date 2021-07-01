@@ -1,14 +1,18 @@
 package com.binokary.watchgate;
+
 import android.content.SharedPreferences;
 import android.os.Bundle;
-
-import androidx.appcompat.app.ActionBar;
-import androidx.preference.PreferenceManager;
+import android.text.InputType;
 import android.util.Log;
+import android.widget.EditText;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.preference.EditTextPreference;
 import androidx.preference.PreferenceFragmentCompat;
+import androidx.preference.PreferenceManager;
 
 import com.google.firebase.messaging.FirebaseMessaging;
 
@@ -95,6 +99,31 @@ public class SettingsActivity extends AppCompatActivity implements SharedPrefere
         @Override
         public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
             setPreferencesFromResource(R.xml.pref_general, rootKey);
+            EditTextPreference instanceName = findPreference("instance_name");
+            EditTextPreference countryCode = findPreference("country_code");
+            if (instanceName != null) {
+                instanceName.setOnBindEditTextListener(
+                        new EditTextPreference.OnBindEditTextListener() {
+                            @Override
+                            public void onBindEditText(@NonNull EditText editText) {
+                                editText.setInputType(InputType.TYPE_CLASS_TEXT);
+                                editText.setMaxLines(1);
+                            }
+                        }
+                );
+            }
+            if (countryCode != null) {
+                countryCode.setOnBindEditTextListener(
+                        new EditTextPreference.OnBindEditTextListener() {
+                            @Override
+                            public void onBindEditText(@NonNull EditText editText) {
+                                editText.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_SIGNED);
+                                editText.setMaxLines(1);
+                            }
+                        }
+                );
+            }
+
         }
     }
 
