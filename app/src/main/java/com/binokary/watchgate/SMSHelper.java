@@ -42,9 +42,9 @@ public class SMSHelper {
         SimpleDateFormat formatter = new SimpleDateFormat("MMM d HH:mm", Locale.US);
         String dateTimeString = formatter.format(new Date(dateInMS));
         if (isPostpaid) {
-            return String.format("Due: Rs %d, Credit: Rs %d", balanceDue, balanceCredit, dateTimeString);
+            return String.format(Locale.US, "Due: Rs %d, Credit: Rs %d", balanceDue, balanceCredit, dateTimeString);
         } else {
-            return String.format("Rs %d (%s)", balance, dateTimeString);
+            return String.format(Locale.US, "Rs %d (%s)", balance, dateTimeString);
         }
     }
 

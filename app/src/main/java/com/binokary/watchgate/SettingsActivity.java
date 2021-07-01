@@ -11,8 +11,10 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.preference.EditTextPreference;
+import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
+import androidx.preference.PreferenceScreen;
 
 import com.google.firebase.messaging.FirebaseMessaging;
 
@@ -89,11 +91,6 @@ public class SettingsActivity extends AppCompatActivity implements SharedPrefere
             setPreferencesFromResource(R.xml.pref_headers, rootKey);
         }
     }
-
-    /**
-     * This fragment shows general preferences only. It is used when the
-     * activity is showing a two-pane settings UI.
-     */
 
     public static class GeneralPreferenceFragment extends PreferenceFragmentCompat {
         @Override

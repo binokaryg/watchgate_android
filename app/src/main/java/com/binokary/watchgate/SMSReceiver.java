@@ -4,11 +4,12 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
 import android.provider.Telephony;
 import android.telephony.SmsMessage;
 import android.util.Log;
 import android.widget.Toast;
+
+import androidx.preference.PreferenceManager;
 
 import com.binokary.watchgate.toilers.WorkerUtils;
 
@@ -16,6 +17,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.text.DateFormat;
+import java.util.Locale;
 
 import static android.content.Context.MODE_PRIVATE;
 
@@ -246,18 +248,9 @@ public class SMSReceiver extends BroadcastReceiver {
                 //Make one time update report after getting message from Balance or SMS Pack info
                 if (isBalanceInfo || isSmsPackInfo) {
                     String instanceName = mSharedPreferences.getString("instance_name", "none");
-                    String reportOneIntervalMinString = mSharedPreferences.getString("pref_interval_report_one_min", "3");
-                    String reportOneWaitMinString = mSharedPreferences.getString("pref_wait_report_one_time", "180");
-                    int reportOneIntervalMin = 3;
-                    int reportOneWaitTime = 180;
+                    int reportOneIntervalMin = mSharedPreferences.getInt("pref_interval_report_one_min", 3);
+                    int reportOneWaitTime = mSharedPreferences.getInt("pref_wait_report_one_time", 180);
                     int initialDelayInSeconds = 0;
-                    try {
-                        reportOneIntervalMin = Integer.parseInt(reportOneIntervalMinString);
-                        reportOneWaitTime = Integer.parseInt(reportOneWaitMinString);
-
-                    } catch (Exception ex) {
-                        Log.e("Error parsing integer: ", ex.getMessage());
-                    }
 
                     if (checkSMSPack) { //If SMS Pack check is enabled
                         if (isBalanceInfo || isTopUpInfo) { //If it is balance info or top up info
@@ -295,13 +288,7 @@ public class SMSReceiver extends BroadcastReceiver {
     }
 
     public void CheckCriticalBalanceAndSendNotifications(Context context, int balanceInRs) {
-        String criticalBalanceStr = mSharedPreferences.getString("edit_balance_limit", "500");
-        int criticalBalance = 100;
-        try {
-            criticalBalance = Integer.parseInt(criticalBalanceStr);
-        } catch (Exception ex) {
-            Log.e(TAG, "Error parsing criticalBalance: " + ex.getMessage());
-        }
+        int criticalBalance = mSharedPreferences.getInt("edit_balance_limit", 500);
 
         if (balanceInRs <= criticalBalance) {
             //Push to Slack Channel
@@ -310,7 +297,9 @@ public class SMSReceiver extends BroadcastReceiver {
                 try {
                     jsonBody.put(
                             "text",
-                            mSharedPreferences.getString("instance_name", "none").toUpperCase() + " :red_circle: Balance is Rs. " + balanceInRs);
+                            mSharedPreferences.getString("instance_name", "none").toUpperCase()
+                                    + mSharedPreferences.getString("pref_critical_balance_msg_slack_default", ": Low Balance: Rs ")
+                                    + balanceInRs);
                     SlackHelper.sendMessage(context, jsonBody);
                 } catch (
                         JSONException e) {
@@ -330,17 +319,11 @@ public class SMSReceiver extends BroadcastReceiver {
             Log.d(TAG, "Preparing to send sms notification");
             String smsRecipients = mSharedPreferences.getString("edit_number_preference", "");
             String[] smsRecipientArray = smsRecipients.split(";");
-            String smsIntervalStr = mSharedPreferences.getString("sms_notification_interval", "4");
+            int smsInterval = mSharedPreferences.getInt("sms_notification_interval", 2);
             String instanceName = mSharedPreferences.getString("instance_name", "none");
             long lastNotificationTime = prefs.getLong(PrefStrings.SMS_NOTIFICATION_DATE, 0);
             long currentTime = System.currentTimeMillis();
-            String smsMsg = String.format("Balance in %s is %d.", instanceName.toUpperCase(), balanceInRs);
-            int smsInterval = 2;
-            try {
-                smsInterval = Integer.parseInt(smsIntervalStr);
-            } catch (Exception ex) {
-                Log.e(TAG, "Error parsing smsInterval " + ex.getMessage());
-            }
+            String smsMsg = String.format(Locale.US, "Balance in %s is %d.", instanceName.toUpperCase(), balanceInRs);
 
             if (smsInterval < currentTime - lastNotificationTime) {
                 Log.d(TAG, "Interval OK, enqueuing SMS");

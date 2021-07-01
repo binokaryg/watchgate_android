@@ -48,6 +48,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -108,28 +109,15 @@ public class MainActivity extends AppCompatActivity {
         networkView = (TextView) findViewById(R.id.textViewNetwork);
         spaceView = (TextView) findViewById(R.id.textViewFreeSpace);
         balanceView = (TextView) findViewById(R.id.textViewBalance);
-        //mReceiver = new BatteryBroadcastReceiver();
-        //aReceiver = new AllBroadcastReceiver();
-        //sReceiver = new SMSBroadcastReceiver();
 
         Button normalSMSBtn = (Button) findViewById(R.id.btn_normal_sms);
         Button startButton = (Button) findViewById(R.id.buttonStart);
         Button stopButton = (Button) findViewById(R.id.buttonStop);
         Button infoButton = (Button) findViewById(R.id.buttonInfo);
 
-        //PreferenceManager.setDefaultValues(this, R.xml.pref_general, true);
-        //PreferenceManager.setDefaultValues(this, R.xml.pref_interval, true);
-        //PreferenceManager.setDefaultValues(this, R.xml.pref_variables, true);
-        //PreferenceManager.setDefaultValues(this, R.xml.pref_network, true);
-        //PreferenceManager.setDefaultValues(this, R.xml.pref_smspacks, true);
         mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
         setTitle("WatchGate " + BuildConfig.VERSION_NAME);
-
-        //Intent backgroundService = new Intent(getApplicationContext(), GateBackgroundService.class);
-        //startService(backgroundService);
-
-        //Log.d(TAG, "Activity onCreate: Background service started");
 
         normalSMSBtn.setOnClickListener(v -> {
             if (!hasValidPreConditions()) return;
@@ -156,30 +144,14 @@ public class MainActivity extends AppCompatActivity {
                     ? mSharedPreferences.getString("pref_balance_query_postpaid", "")
                     : mSharedPreferences.getString("pref_balance_query_prepaid", "");
             int smsInterval = mSharedPreferences.getInt("pref_interval_sms", 240);
-            String smsIntervalMinString = mSharedPreferences.getString("pref_interval_sms_min", "10");
-            String reportIntervalString = mSharedPreferences.getString("pref_interval_report", "30");
-            String reportIntervalMinString = mSharedPreferences.getString("pref_interval_report_min", "10");
-            String reportOneIntervalMinString = mSharedPreferences.getString("pref_interval_report_one_min", "3");
+            int smsIntervalMin = mSharedPreferences.getInt("pref_interval_sms_min", 10);
+            int reportInterval = mSharedPreferences.getInt("pref_interval_report", 30);
+            int reportIntervalMin = mSharedPreferences.getInt("pref_interval_report_min", 10);
+            int reportOneIntervalMin = mSharedPreferences.getInt("pref_interval_report_one_min", 3);
 
             String instanceName = mSharedPreferences.getString("instance_name", "none");
 
-            //int smsInterval = 240;
-            int smsIntervalMin = 10;
-            int reportInterval = 30;
-            int reportIntervalMin = 10;
-            int reportOneIntervalMin = 3;
-            try {
-                //smsInterval = Integer.parseInt(smsIntervalString);
-                reportInterval = Integer.parseInt(reportIntervalString);
-                smsIntervalMin = Integer.parseInt(smsIntervalMinString);
-                reportIntervalMin = Integer.parseInt(reportIntervalMinString);
-                reportOneIntervalMin = Integer.parseInt(reportOneIntervalMinString);
-
-            } catch (Exception ex) {
-                Log.e(TAG, "Error parsing intervals: " + ex.getMessage());
-            }
-            //Log.d(TAG, "sending report");
-            mWorkManager = WorkManager.getInstance();
+            mWorkManager = WorkManager.getInstance(getApplicationContext());
 
             WorkerUtils.enqueueSMSSendingWork(mSharedPreferences.getString("pref_sms_destination", "1415"), smsQueryMsg, smsInterval, smsIntervalMin);
             WorkerUtils.enqueueStitchReportingWork(instanceName, reportInterval, reportIntervalMin, reportOneIntervalMin);
@@ -357,9 +329,9 @@ public class MainActivity extends AppCompatActivity {
                 .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_i_see))
                 .setSmallIcon(R.drawable.ic_remove_red_eye_black_24dp)
                 .setTicker("Watchgate")
-                .setPriority(Notification.PRIORITY_MAX) // this is deprecated in API 26 but you can still use for below 26
-                .setContentTitle("WG" + versionName)
+                .setContentTitle("WG" + versionName + ": " + mSharedPreferences.getString("instance_name", "unnamed").toUpperCase())
                 .setContentText(getNotificationSummaryText())
+                .setPriority(Notification.PRIORITY_MAX)
                 .setContentInfo("Info")
                 .setContentIntent(pendingIntent)
                 .setOngoing(true);
@@ -380,7 +352,7 @@ public class MainActivity extends AppCompatActivity {
         //registerReceiver(sReceiver, intentFilter); //registered in Manifest
         long freeMemory = freeMemory();
         long totalMemory = totalMemory();
-        String freeSpaceMsg = String.format("%d MB free of %d MB total", freeMemory, totalMemory);
+        String freeSpaceMsg = String.format(Locale.US, "%d MB free of %d MB total", freeMemory, totalMemory);
         spaceView.setText(freeSpaceMsg);
         super.onStart();
     }
@@ -551,17 +523,17 @@ public class MainActivity extends AppCompatActivity {
         String dateTimeString = DateFormat.getDateTimeInstance().format(balanceDate);
         String balanceMsg;
         if (isPostpaid) {
-            balanceMsg = String.format("Due: Rs %d, Credit: Rs %d @ %s", balanceDue, balanceCredit, dateTimeString);
+            balanceMsg = String.format(Locale.US, "Due: Rs %d, Credit: Rs %d @ %s", balanceDue, balanceCredit, dateTimeString);
         } else {
-            balanceMsg = String.format("Rs %d at %s", balance, dateTimeString);
+            balanceMsg = String.format(Locale.US, "Rs %d at %s", balance, dateTimeString);
         }
 
         balanceView.setText(balanceMsg);
-        levelView.setText(battery + "%");
-        tempView.setText(temp + " °C");
+        levelView.setText(String.format(Locale.US, "%d%%", battery));
+        tempView.setText(String.format(Locale.US, "%d°C", temp));
         healthView.setText(ConvHealth(health));
         pluggedView.setText(plugged ? "Yes" : "No");
-        wifiView.setText(wifi + " (Signal: " + (wifiStrength + 1) + "/5)");
+        wifiView.setText(String.format(Locale.US, "%s (Signal: %d/5)", wifi, wifiStrength + 1));
         mobileView.setText(data ? "Yes" : "No");
         networkView.setText(carrier);
         //networkView.setText(carrier + " (Signal: " + (mobileStrength + 1) + "/5)");
@@ -574,13 +546,13 @@ public class MainActivity extends AppCompatActivity {
         StringBuilder summaryText = new StringBuilder();
         if (postPaid) {
             int postPaidBalanceCredit = prefs.getInt(PrefStrings.POSTPAID_BALANCE_CREDIT, -1);
-            summaryText.append("Rs " + postPaidBalanceCredit + "*");
+            summaryText.append("Rs ").append(postPaidBalanceCredit).append("*");
         } else {
             int prePaidBalance = prefs.getInt(PrefStrings.PREPAID_BALANCE, -1);
-            summaryText.append("Rs " + prePaidBalance);
+            summaryText.append("Rs ").append(prePaidBalance);
         }
         long balanceDate = prefs.getLong(PrefStrings.BALANCE_DATE, -1);
-        SimpleDateFormat formatter = new SimpleDateFormat("MMM d HH:mm");
+        SimpleDateFormat formatter = new SimpleDateFormat("MMM d HH:mm", Locale.US);
         String dateStringBalance = formatter.format(new Date(balanceDate));
         summaryText.append(" (").append(dateStringBalance).append("); ");
         int smsPack = prefs.getInt(PrefStrings.SMS_PACK_INFO, -1);
@@ -606,7 +578,7 @@ public class MainActivity extends AppCompatActivity {
     public void updateLastSMSInView(final String msg) {
         MainActivity.this.runOnUiThread(() -> {
             TextView textV1 = findViewById(R.id.textViewSMSInTime);
-            textV1.setText("Last SMS in: " + msg);
+            textV1.setText(String.format(getString(R.string.last_sms_display), msg));
         });
         updateNotificationSummary(getNotificationSummaryText());
     }
@@ -614,7 +586,7 @@ public class MainActivity extends AppCompatActivity {
     public void updateSMSPackView(final String msg) {
         MainActivity.this.runOnUiThread(() -> {
             TextView textV1 = findViewById(R.id.textViewSMSPack);
-            textV1.setText("SMS Pack: " + msg);
+            textV1.setText(String.format(getString(R.string.sms_pack_display), msg));
         });
         updateNotificationSummary(getNotificationSummaryText());
     }

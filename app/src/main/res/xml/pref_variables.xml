@@ -48,7 +48,8 @@
         android:key="pref_sms_pack_no_regex"
         android:selectAllOnFocus="true"
         android:singleLine="true"
-        android:title="SMS Pack Null Regex" />
+        android:title="SMS Pack Null Regex"
+        app:useSimpleSummaryProvider="true" />
     <EditTextPreference
         android:defaultValue="@string/pref_sms_pack_active_default"
         android:key="pref_sms_pack_active"
@@ -62,6 +63,13 @@
         android:selectAllOnFocus="true"
         android:singleLine="true"
         android:title="Stitch Update Function"
+        app:useSimpleSummaryProvider="true" />
+    <EditTextPreference
+        android:defaultValue="@string/pref_critical_balance_msg_slack_default"
+        android:key="pref_critical_balance_msg_slack"
+        android:selectAllOnFocus="true"
+        android:singleLine="false"
+        android:title="All Instances"
         app:useSimpleSummaryProvider="true" />
     <EditTextPreference
         android:defaultValue="@string/pref_all_instances_default"

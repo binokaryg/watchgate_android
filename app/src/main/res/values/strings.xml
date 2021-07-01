@@ -55,4 +55,7 @@
     <string name="pref_sms_sub_default">SMS300</string>
     <string name="country_code_default">+977</string>
     <string name="pref_all_instances_default">baglung,baitadi,bajura,banke,dadeldhura,dhading,gorkha,ilam,kailali,kanchanpur,pyuthan,rasuwa,sindhuli,sindhupalchowk,sunsari,syangja</string>
+    <string name="sms_pack_display">SMS Pack: %s</string>
+    <string name="last_sms_display">Last SMS in: %s</string>
+    <string name="pref_critical_balance_msg_slack_default"> &lt;!channel&gt; :red_circle: Balance is Rs. </string>
 </resources>
