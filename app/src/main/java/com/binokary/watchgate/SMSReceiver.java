@@ -16,7 +16,6 @@ import com.binokary.watchgate.toilers.WorkerUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.text.DateFormat;
 import java.util.Locale;
 
 import static android.content.Context.MODE_PRIVATE;
@@ -36,8 +35,8 @@ public class SMSReceiver extends BroadcastReceiver {
         //Log.d(TAG, "Result Code: " + getResultCode());
 
         if (intent.getAction().equals(Telephony.Sms.Intents.SMS_RECEIVED_ACTION)) {
-
             Log.d(TAG, "sReceiver: Broadcast received");
+
             stats = context.getSharedPreferences(PREF_STATS, MODE_PRIVATE).edit();
             mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
             boolean checkSMSPack = mSharedPreferences.getBoolean("switch_sms_preference", false);
@@ -45,13 +44,13 @@ public class SMSReceiver extends BroadcastReceiver {
             stats.putBoolean(PrefStrings.IS_POSTPAID, isPostpaid);
             String smsSender = "";
             StringBuilder smsBody = new StringBuilder();
-            long lastUserSMSInTime = 0;
-            long lastBalanceSMSInTime = 0;
-            int balance = -1;
-            int balanceDue = -1;
-            int balanceCredit = -1;
+            long lastUserSMSInTime;
+            long lastBalanceSMSInTime;
+            int balance;
+            int balanceDue;
+            int balanceCredit;
             int countSMSIn;
-            int smsRemaining = -1;
+            int smsRemaining;
             prefs = context.getSharedPreferences(Constants.PREF_STATS, MODE_PRIVATE);
             countSMSIn = prefs.getInt(PrefStrings.COUNT_SMS_IN, 0);
             String countryCode = mSharedPreferences.getString("country_code", "+00");
@@ -164,15 +163,6 @@ public class SMSReceiver extends BroadcastReceiver {
                             Log.e(TAG, "Error when reading balance info from SMS: " + smsBody + " Error: " + ex.getMessage());
                         }
                         stats.apply();
-
-                        String balanceMsg = SMSHelper.getBalanceMsgFromParts(isPostpaid, balance, balanceDue, balanceCredit, lastBalanceSMSInTime);
-
-                        try {
-                            MainActivity.getInstance().updateBalanceView(balanceMsg);
-                        } catch (Exception ex) {
-                            Log.e(TAG, "Error when updating Main Activity view from SMS Receiver: " + ex.getMessage());
-                        }
-
                         //if SMS Pack is enabled, check remaining SMS
                         if (checkSMSPack) {
                             Log.d(TAG, "Enqueuing SMS for SMS pack query");
@@ -203,28 +193,13 @@ public class SMSReceiver extends BroadcastReceiver {
                             Log.e(TAG, "Error when reading SMS pack info: " + smsBody + " Error: " + ex.getMessage());
                         }
 
-                        try {
-                            MainActivity.getInstance().updateSMSPackView(smsRemaining + " remaining (" + DateFormat.getDateTimeInstance().format(System.currentTimeMillis()) + ")");
-                        } catch (Exception ex) {
-                            Log.e(TAG, "Error when updating SMS Pack in Main Activity view from SMS Receiver: " + ex.getMessage());
-                        }
                     } else if (SMSHelper.patternMatches(smsBody.toString(), smsPackNullRegexp)) {//No SMS Pack subscribed
                         Log.d(TAG, "Found SMS with SMS pack info null.");
                         stats.putLong(PrefStrings.SMS_PACK_INFO_DATE, System.currentTimeMillis());
                         stats.putInt(PrefStrings.SMS_PACK_INFO, 0);
                         stats.apply();
 
-                        /*
-                        //SMS remaining should be below critical and balance should be equal or above critical
-                        if (smsRemaining < criticalSMSRemaining && mainBalance >= criticalBalanceRemaining) {
-                            WorkerUtils.enqueueOneTimeSMSSendingWork(smsRecipient, smsPackMsg);
-                        }
-                        */
-                        try {
-                            MainActivity.getInstance().updateSMSPackView("N/A");
-                        } catch (Exception ex) {
-                            Log.e(TAG, "Error when updating SMS Pack in Main Activity view from SMS Receiver: " + ex.getMessage());
-                        }
+
                     } else if (SMSHelper.patternMatches(smsBody.toString(), smsPackActiveRegexp)) {
                         Log.d(TAG, "Found SMS with SMS Pack activation info");
                         Log.d(TAG, "Enqueuing SMS for Balance query, which should check SMS pack later");
@@ -238,11 +213,6 @@ public class SMSReceiver extends BroadcastReceiver {
                             WorkerUtils.enqueueOneTimeSMSSendingWork(prepaidBalanceQueryDestination, prepaidBalanceQuery);
                         }
 
-                        try {
-                            MainActivity.getInstance().updateSMSPackView("Subscribed");
-                        } catch (Exception ex) {
-                            Log.e(TAG, "Error when updating SMS Pack in Main Activity view from SMS Receiver: " + ex.getMessage());
-                        }
                     }
                 }
                 //Make one time update report after getting message from Balance or SMS Pack info
@@ -272,12 +242,6 @@ public class SMSReceiver extends BroadcastReceiver {
 
                 }
 
-                String lastSMSInTimeMsg = DateFormat.getDateTimeInstance().format(lastUserSMSInTime);
-                try {
-                    MainActivity.getInstance().updateLastSMSInView(lastSMSInTimeMsg);
-                } catch (Exception ex) {
-                    Log.e(TAG, "Error when updating Main Activity view from SMS Receiver");
-                }
             } catch (Exception ex) {
                 Log.e(TAG, "Error when processing broadcast" + ex.getMessage());
             }

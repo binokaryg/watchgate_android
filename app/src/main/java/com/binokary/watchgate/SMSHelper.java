@@ -6,6 +6,7 @@ import android.content.pm.PackageManager;
 import androidx.core.content.ContextCompat;
 import android.telephony.SmsManager;
 
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -39,8 +40,7 @@ public class SMSHelper {
     }
 
     public static String getBalanceMsgFromParts(boolean isPostpaid, int balance, int balanceDue, int balanceCredit, long dateInMS) {
-        SimpleDateFormat formatter = new SimpleDateFormat("MMM d HH:mm", Locale.US);
-        String dateTimeString = formatter.format(new Date(dateInMS));
+        String dateTimeString = DateFormat.getDateTimeInstance().format(dateInMS);
         if (isPostpaid) {
             return String.format(Locale.US, "Due: Rs %d, Credit: Rs %d", balanceDue, balanceCredit, dateTimeString);
         } else {

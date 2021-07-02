@@ -55,7 +55,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = Constants.MAIN_TAG + "MainActivity";
     private static final String PREF_STATS = "gate_stats";
     private static final int SMS_PERMISSION_CODE = 0;
-    private static MainActivity mainActivityInstance;
+    //private static MainActivity mainActivityInstance;
     TextView textView;
     TextView titleView;
     ProgressBar progressBar;
@@ -65,14 +65,9 @@ public class MainActivity extends AppCompatActivity {
     private SharedPreferences mSharedPreferences;
     private NotificationManager notificationManager;
     private NotificationCompat.Builder persistentNotificationBuilder;
+    SharedPreferences prefs;
+    SharedPreferences.OnSharedPreferenceChangeListener listener;
 
-    public static MainActivity getInstance() {
-        return mainActivityInstance;
-    }
-
-    //private StitchAppClient stitchClient;
-    //private App app;
-    //Push pushClient;
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
@@ -94,28 +89,34 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mainActivityInstance = this;
+        //mainActivityInstance = this;
         setContentView(R.layout.activity_main);
-        textView = (TextView) findViewById(R.id.textView);
-        titleView = (TextView) findViewById(R.id.textViewTitle);
-        progressBar = (ProgressBar) findViewById(R.id.progressBar);
+        textView = findViewById(R.id.textView);
+        titleView = findViewById(R.id.textViewTitle);
+        progressBar = findViewById(R.id.progressBar);
 
-        levelView = (TextView) findViewById(R.id.textViewLevel);
-        healthView = (TextView) findViewById(R.id.textViewHealth);
-        tempView = (TextView) findViewById(R.id.textViewTemperature);
-        pluggedView = (TextView) findViewById(R.id.textViewPlugged);
-        wifiView = (TextView) findViewById(R.id.textViewWifi);
-        mobileView = (TextView) findViewById(R.id.textViewMobile);
-        networkView = (TextView) findViewById(R.id.textViewNetwork);
-        spaceView = (TextView) findViewById(R.id.textViewFreeSpace);
-        balanceView = (TextView) findViewById(R.id.textViewBalance);
+        levelView = findViewById(R.id.textViewLevel);
+        healthView = findViewById(R.id.textViewHealth);
+        tempView = findViewById(R.id.textViewTemperature);
+        pluggedView = findViewById(R.id.textViewPlugged);
+        wifiView = findViewById(R.id.textViewWifi);
+        mobileView = findViewById(R.id.textViewMobile);
+        networkView = findViewById(R.id.textViewNetwork);
+        spaceView = findViewById(R.id.textViewFreeSpace);
+        balanceView = findViewById(R.id.textViewBalance);
 
-        Button normalSMSBtn = (Button) findViewById(R.id.btn_normal_sms);
-        Button startButton = (Button) findViewById(R.id.buttonStart);
-        Button stopButton = (Button) findViewById(R.id.buttonStop);
-        Button infoButton = (Button) findViewById(R.id.buttonInfo);
+        Button normalSMSBtn = findViewById(R.id.btn_normal_sms);
+        Button startButton = findViewById(R.id.buttonStart);
+        Button stopButton = findViewById(R.id.buttonStop);
+        Button infoButton = findViewById(R.id.buttonInfo);
 
         mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        prefs = getSharedPreferences(PREF_STATS, MODE_PRIVATE);
+        listener = (sharedPreferences, key) -> {
+            StatsHelper.CheckAndUpdateStats(getApplicationContext());
+            UpdateViews();
+        };
+        prefs.registerOnSharedPreferenceChangeListener(listener);
 
         setTitle("WatchGate " + BuildConfig.VERSION_NAME);
 
@@ -161,7 +162,7 @@ public class MainActivity extends AppCompatActivity {
         stopButton.setOnClickListener(v -> {
             Log.d(TAG, " gatewatch stopping worker");
             if (mWorkManager == null) {
-                mWorkManager = WorkManager.getInstance();
+                mWorkManager = WorkManager.getInstance(getApplicationContext());
             }
             mWorkLiveData = mWorkManager.getWorkInfosByTag(Constants.SMS_TAG);
             try {
@@ -196,7 +197,7 @@ public class MainActivity extends AppCompatActivity {
 
 
             if (mWorkManager == null) {
-                mWorkManager = WorkManager.getInstance();
+                mWorkManager = WorkManager.getInstance(getApplicationContext());
             }
             //SMS Workers
             Log.d(TAG, "Getting workers with Tag: " + Constants.SMS_TAG + "\n");
@@ -298,7 +299,7 @@ public class MainActivity extends AppCompatActivity {
         if (!SMSHelper.hasAllNecessaryPermissions(MainActivity.this)) {
             showRequestPermissionsInfoAlertDialog();
         }
-        progressBar = (ProgressBar) findViewById(R.id.progressBar);
+        progressBar = findViewById(R.id.progressBar);
         progressBar.setIndeterminate(true);
 
         if (android.os.Build.VERSION.SDK_INT >= 26) {
@@ -331,7 +332,6 @@ public class MainActivity extends AppCompatActivity {
                 .setTicker("Watchgate")
                 .setContentTitle("WG" + versionName + ": " + mSharedPreferences.getString("instance_name", "unnamed").toUpperCase())
                 .setContentText(getNotificationSummaryText())
-                .setPriority(Notification.PRIORITY_MAX)
                 .setContentInfo("Info")
                 .setContentIntent(pendingIntent)
                 .setOngoing(true);
@@ -359,9 +359,17 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onResume() {
+        super.onResume();
         StatsHelper.CheckAndUpdateStats(getApplicationContext());
         UpdateViews();
-        super.onResume();
+        prefs.registerOnSharedPreferenceChangeListener(listener);
+    }
+
+    @Override
+    protected void onPause(){
+        super.onPause();
+        prefs.unregisterOnSharedPreferenceChangeListener(listener);
+
     }
 
     @Override
@@ -476,13 +484,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private long totalMemory() {
-       /* long root, data, external;
-        StatFs statFs = new StatFs(Environment.getDataDirectory().getAbsolutePath());
-        data  = (statFs.getTotalBytes()/(1024*1024));
-        statFs = new StatFs(Environment.getRootDirectory().getAbsolutePath());
-        root = (statFs.getTotalBytes()/(1024*1024));
-        statFs = new StatFs(Environment.getExternalStorageDirectory().getAbsolutePath());
-        external = (statFs.getTotalBytes()/(1024*1024));*/
 
         StatFs statFs = new StatFs(Environment.getDataDirectory().getAbsolutePath());
 
@@ -490,14 +491,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private long freeMemory() {
-       /* long root, data, external;
-        StatFs statFs = new StatFs(Environment.getDataDirectory().getAbsolutePath());
-        data  = (statFs.getFreeBytes()/(1024*1024));
-        statFs = new StatFs(Environment.getRootDirectory().getAbsolutePath());
-        root = (statFs.getFreeBytes()/(1024*1024));
-        statFs = new StatFs(Environment.getExternalStorageDirectory().getAbsolutePath());
-        external = (statFs.getFreeBytes()/(1024*1024));*/
-
         StatFs statFs = new StatFs(Environment.getDataDirectory().getAbsolutePath());
         return (statFs.getFreeBytes() / (1024 * 1024));
     }
@@ -505,9 +498,6 @@ public class MainActivity extends AppCompatActivity {
 
     public void UpdateViews() {
         SharedPreferences prefs = getSharedPreferences(PREF_STATS, MODE_PRIVATE);
-        Integer balance = prefs.getInt(PrefStrings.PREPAID_BALANCE, -1);
-        Integer balanceDue = prefs.getInt(PrefStrings.POSTPAID_BALANCE_DUE, -1);
-        Integer balanceCredit = prefs.getInt(PrefStrings.POSTPAID_BALANCE_CREDIT, -1);
         titleView.setText(mSharedPreferences.getString("instance_name", "unnamed").toUpperCase());
         String wifi = prefs.getString(PrefStrings.WIFI_SSID, "N/A");
         boolean data = prefs.getBoolean(PrefStrings.MOBILE_DATA, false);
@@ -518,17 +508,6 @@ public class MainActivity extends AppCompatActivity {
         String carrier = prefs.getString(PrefStrings.MOBILE_CARRIER, "");
         //Integer mobileStrength = prefs.getInt(PrefStrings.MOBILE_STRENGTH, -1);
         int wifiStrength = prefs.getInt(PrefStrings.WIFI_STRENGTH, -1);
-        Long balanceDate = prefs.getLong(PrefStrings.BALANCE_DATE, 0);
-        boolean isPostpaid = prefs.getBoolean(PrefStrings.IS_POSTPAID, false);
-        String dateTimeString = DateFormat.getDateTimeInstance().format(balanceDate);
-        String balanceMsg;
-        if (isPostpaid) {
-            balanceMsg = String.format(Locale.US, "Due: Rs %d, Credit: Rs %d @ %s", balanceDue, balanceCredit, dateTimeString);
-        } else {
-            balanceMsg = String.format(Locale.US, "Rs %d at %s", balance, dateTimeString);
-        }
-
-        balanceView.setText(balanceMsg);
         levelView.setText(String.format(Locale.US, "%d%%", battery));
         tempView.setText(String.format(Locale.US, "%d°C", temp));
         healthView.setText(ConvHealth(health));
@@ -536,12 +515,16 @@ public class MainActivity extends AppCompatActivity {
         wifiView.setText(String.format(Locale.US, "%s (Signal: %d/5)", wifi, wifiStrength + 1));
         mobileView.setText(data ? "Yes" : "No");
         networkView.setText(carrier);
-        //networkView.setText(carrier + " (Signal: " + (mobileStrength + 1) + "/5)");
+
+        updateBalanceInfoView(prefs);
+        updateLastSMSInView(prefs);
+        updateSMSPackView(prefs);
+
+        updateNotificationSummary(getNotificationSummaryText());
 
     }
 
     public String getNotificationSummaryText() {
-        SharedPreferences prefs = getSharedPreferences(PREF_STATS, MODE_PRIVATE);
         boolean postPaid = prefs.getBoolean(PrefStrings.IS_POSTPAID, false);
         StringBuilder summaryText = new StringBuilder();
         if (postPaid) {
@@ -566,31 +549,6 @@ public class MainActivity extends AppCompatActivity {
         persistentNotificationBuilder.setContentText(summaryText);
         notificationManager.notify(1, persistentNotificationBuilder.build());
     }
-
-    public void updateBalanceView(final String msg) {
-        MainActivity.this.runOnUiThread(() -> {
-            TextView textV1 = findViewById(R.id.textViewBalance);
-            textV1.setText(msg);
-            progressBar.setVisibility(View.INVISIBLE);
-        });
-    }
-
-    public void updateLastSMSInView(final String msg) {
-        MainActivity.this.runOnUiThread(() -> {
-            TextView textV1 = findViewById(R.id.textViewSMSInTime);
-            textV1.setText(String.format(getString(R.string.last_sms_display), msg));
-        });
-        updateNotificationSummary(getNotificationSummaryText());
-    }
-
-    public void updateSMSPackView(final String msg) {
-        MainActivity.this.runOnUiThread(() -> {
-            TextView textV1 = findViewById(R.id.textViewSMSPack);
-            textV1.setText(String.format(getString(R.string.sms_pack_display), msg));
-        });
-        updateNotificationSummary(getNotificationSummaryText());
-    }
-
     public void toggleSubscription(View view) {
         CheckBox checkBox = (CheckBox) view;
         final String single_topic = mSharedPreferences.getString("instance_name", "none");
@@ -628,5 +586,33 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void updateBalanceInfoView(SharedPreferences sharedPreferences) {
+        String text = SMSHelper.getBalanceMsgFromParts(
+                sharedPreferences.getBoolean(PrefStrings.IS_POSTPAID, false),
+                sharedPreferences.getInt(PrefStrings.PREPAID_BALANCE, -1),
+                sharedPreferences.getInt(PrefStrings.POSTPAID_BALANCE_DUE, -1),
+                sharedPreferences.getInt(PrefStrings.POSTPAID_BALANCE_CREDIT, -1),
+                sharedPreferences.getLong(PrefStrings.BALANCE_DATE, -1)
+        );
+        ((TextView) findViewById(R.id.textViewBalance)).setText(text);
+        updateNotificationSummary(getNotificationSummaryText());
+        progressBar.setVisibility(View.INVISIBLE);
+    }
 
+    private void updateLastSMSInView(SharedPreferences sharedPreferences) {
+        String text = String.format(
+                getString(R.string.last_sms_display),
+                DateFormat.getDateTimeInstance().format(sharedPreferences.getLong(PrefStrings.LAST_SMS_IN_DATE, 0))
+        );
+        ((TextView) findViewById(R.id.textViewSMSInTime)).setText(text);
+    }
+
+    private void updateSMSPackView(SharedPreferences sharedPreferences) {
+        String text = String.format(
+                getString(R.string.sms_pack_display),
+                sharedPreferences.getInt(PrefStrings.SMS_PACK_INFO, 0),
+                DateFormat.getDateTimeInstance().format(sharedPreferences.getLong(PrefStrings.SMS_PACK_INFO_DATE, 0))
+        );
+        ((TextView) findViewById(R.id.textViewSMSPack)).setText(text);
+    }
 }
