@@ -110,6 +110,14 @@ public class MainActivity extends AppCompatActivity {
         Button stopButton = findViewById(R.id.buttonStop);
         Button infoButton = findViewById(R.id.buttonInfo);
 
+
+        PreferenceManager.setDefaultValues(this, R.xml.pref_general, true);
+        PreferenceManager.setDefaultValues(this, R.xml.pref_interval, true);
+        PreferenceManager.setDefaultValues(this, R.xml.pref_network, true);
+        PreferenceManager.setDefaultValues(this, R.xml.pref_notifications, true);
+        PreferenceManager.setDefaultValues(this, R.xml.pref_smspacks, true);
+        PreferenceManager.setDefaultValues(this, R.xml.pref_variables, true);
+
         mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         prefs = getSharedPreferences(PREF_STATS, MODE_PRIVATE);
         listener = (sharedPreferences, key) -> {

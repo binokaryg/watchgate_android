@@ -26,6 +26,7 @@ import androidx.work.OneTimeWorkRequest;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
 
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import static com.binokary.watchgate.Constants.MAIN_TAG;
@@ -57,7 +58,7 @@ public final class WorkerUtils {
                         .addTag(SMS_TAG)
                         .build();
         Log.d(TAG, "Enqueuing Unique Periodic SMS Sending Task with TAG: " + SMS_TAG);
-        WorkManager.getInstance(getApplicationContext()).enqueueUniquePeriodicWork(SMS_TAG, ExistingPeriodicWorkPolicy.KEEP, periodicSMSSendingRequest);
+        WorkManager.getInstance(Objects.requireNonNull(getApplicationContext())).enqueueUniquePeriodicWork(SMS_TAG, ExistingPeriodicWorkPolicy.KEEP, periodicSMSSendingRequest);
 
     }
 
@@ -74,7 +75,7 @@ public final class WorkerUtils {
                         .addTag(SMS_ONE_TAG)
                         .build();
         Log.d(TAG, "Enqueuing One Time SMS Sending Task with TAG: " + SMS_ONE_TAG);
-        WorkManager.getInstance(getApplicationContext()).enqueue(oneTimeSMSSendingRequest);
+        WorkManager.getInstance(Objects.requireNonNull(getApplicationContext())).enqueue(oneTimeSMSSendingRequest);
     }
 
 
@@ -97,7 +98,7 @@ public final class WorkerUtils {
                         .addTag(REPORT_TAG)
                         .build();
         Log.d(TAG, "Enqueuing Unique Periodic Stitch Reporting Task for instance " + instance + " with TAG: " + REPORT_TAG);
-        WorkManager.getInstance(getApplicationContext()).enqueueUniquePeriodicWork(REPORT_TAG, ExistingPeriodicWorkPolicy.KEEP, stitchReportingRequest);
+        WorkManager.getInstance(Objects.requireNonNull(getApplicationContext())).enqueueUniquePeriodicWork(REPORT_TAG, ExistingPeriodicWorkPolicy.KEEP, stitchReportingRequest);
 
     }
 
@@ -124,13 +125,13 @@ public final class WorkerUtils {
                         .addTag(tag)
                         .build();
         Log.d(TAG, "Enqueuing One Time Stitch Reporting Task for instance " + instance + " with TAG: " + REPORT_ONE_TAG);
-        WorkManager.getInstance(getApplicationContext()).enqueue(stitchReportingRequest);
+        WorkManager.getInstance(Objects.requireNonNull(getApplicationContext())).enqueue(stitchReportingRequest);
     }
 
     public static int clearTasks(String taskTAG) {
         try {
-            WorkManager.getInstance().cancelAllWorkByTag(taskTAG);
-            WorkManager.getInstance().pruneWork();
+            WorkManager.getInstance(Objects.requireNonNull(getApplicationContext())).cancelAllWorkByTag(taskTAG);
+            WorkManager.getInstance(getApplicationContext()).pruneWork();
             return 1;
         } catch (Exception ex) {
             return 0;

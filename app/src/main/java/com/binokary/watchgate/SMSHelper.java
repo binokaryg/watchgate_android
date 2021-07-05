@@ -3,13 +3,12 @@ package com.binokary.watchgate;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import androidx.core.content.ContextCompat;
 import android.telephony.SmsManager;
 
+import androidx.core.content.ContextCompat;
+
 import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;

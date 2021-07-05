@@ -4,17 +4,13 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.InputType;
 import android.util.Log;
-import android.widget.EditText;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.preference.EditTextPreference;
-import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
-import androidx.preference.PreferenceScreen;
 
 import com.google.firebase.messaging.FirebaseMessaging;
 
@@ -100,23 +96,17 @@ public class SettingsActivity extends AppCompatActivity implements SharedPrefere
             EditTextPreference countryCode = findPreference("country_code");
             if (instanceName != null) {
                 instanceName.setOnBindEditTextListener(
-                        new EditTextPreference.OnBindEditTextListener() {
-                            @Override
-                            public void onBindEditText(@NonNull EditText editText) {
-                                editText.setInputType(InputType.TYPE_CLASS_TEXT);
-                                editText.setMaxLines(1);
-                            }
+                        editText -> {
+                            editText.setInputType(InputType.TYPE_CLASS_TEXT);
+                            editText.setMaxLines(1);
                         }
                 );
             }
             if (countryCode != null) {
                 countryCode.setOnBindEditTextListener(
-                        new EditTextPreference.OnBindEditTextListener() {
-                            @Override
-                            public void onBindEditText(@NonNull EditText editText) {
-                                editText.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_SIGNED);
-                                editText.setMaxLines(1);
-                            }
+                        editText -> {
+                            editText.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_SIGNED);
+                            editText.setMaxLines(1);
                         }
                 );
             }
