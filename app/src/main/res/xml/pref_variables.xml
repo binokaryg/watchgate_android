@@ -69,7 +69,7 @@
         android:key="pref_critical_balance_msg_slack"
         android:selectAllOnFocus="true"
         android:singleLine="false"
-        android:title="All Instances"
+        android:title="Low balance message (Slack)"
         app:useSimpleSummaryProvider="true" />
     <EditTextPreference
         android:defaultValue="@string/pref_all_instances_default"

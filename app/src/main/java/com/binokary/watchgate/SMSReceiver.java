@@ -262,7 +262,7 @@ public class SMSReceiver extends BroadcastReceiver {
                     jsonBody.put(
                             "text",
                             mSharedPreferences.getString("instance_name", "none").toUpperCase()
-                                    + mSharedPreferences.getString("pref_critical_balance_msg_slack_default", ": Low Balance: Rs ")
+                                    + mSharedPreferences.getString("pref_critical_balance_msg_slack", ": :red_circle: Low Balance: Rs ")
                                     + balanceInRs);
                     SlackHelper.sendMessage(context, jsonBody);
                 } catch (
