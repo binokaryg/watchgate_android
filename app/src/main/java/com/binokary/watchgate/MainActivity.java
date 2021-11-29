@@ -41,9 +41,6 @@ import com.binokary.watchgate.toilers.WorkerUtils;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.firebase.messaging.FirebaseMessaging;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -141,13 +138,6 @@ public class MainActivity extends AppCompatActivity {
         });
 
         startButton.setOnClickListener(v -> {
-            JSONObject jsonData = new JSONObject();
-            try {
-                jsonData.put("level", "25");
-                jsonData.put("timestamp", System.currentTimeMillis());
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
 
             String smsQueryMsg = mSharedPreferences.getBoolean("switch_preference_1", false)
                     ? mSharedPreferences.getString("pref_balance_query_postpaid", "")
@@ -329,7 +319,7 @@ public class MainActivity extends AppCompatActivity {
         String versionName = BuildConfig.VERSION_NAME;
         Intent intent = new Intent(this, MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE);
         persistentNotificationBuilder = new NotificationCompat.Builder(getApplicationContext(), "channel_persistent");
 
         persistentNotificationBuilder.setAutoCancel(false)
@@ -356,8 +346,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onStart() {
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(Telephony.Sms.Intents.SMS_RECEIVED_ACTION);
-        //Log.d(TAG, "gatewatch: not registering sReceiver");
-        //registerReceiver(sReceiver, intentFilter); //registered in Manifest
         long freeMemory = freeMemory();
         long totalMemory = totalMemory();
         String freeSpaceMsg = String.format(Locale.US, "%d MB free of %d MB total", freeMemory, totalMemory);
@@ -382,8 +370,6 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onStop() {
-        //Log.d(TAG, "gatewatch: not unregistering mReceiver");
-        //unregisterReceiver(mReceiver);
         super.onStop();
     }
 
@@ -418,14 +404,13 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        //ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.RECEIVE_SMS},
-        //              SMS_PERMISSION_CODE);
         ActivityCompat.requestPermissions(MainActivity.this, new String[]{
                         Manifest.permission.READ_SMS,
                         Manifest.permission.RECEIVE_SMS, Manifest.permission.SEND_SMS,
                         Manifest.permission.READ_PHONE_STATE,
                         Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                        Manifest.permission.ACCESS_COARSE_LOCATION
+                        Manifest.permission.ACCESS_FINE_LOCATION,
+                        Manifest.permission.CHANGE_WIFI_STATE
                 },
                 SMS_PERMISSION_CODE);
     }
