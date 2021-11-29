@@ -47,30 +47,6 @@ public class SMSHelper {
         }
     }
 
-    public static List<Integer> getPostpaidBalanceFromMsgBodyRegex(String msgBody){
-        List<Integer> balanceData = new ArrayList<>();
-        Pattern pattern = Pattern.compile("Rs\\s(.*?)\\.");
-        Matcher matcher = pattern.matcher(msgBody);
-        while (matcher.find())
-        {
-            String matched = Objects.requireNonNull(matcher.group(1)).replace(",", "").replace(".","");
-            int matchedInt = Integer.parseInt(matched);
-            balanceData.add(matchedInt);
-        }
-        return balanceData;
-    }
-
-    public static int getPrepaidBalanceFromMsgBodyRegex(String msgBody){
-        Pattern pattern = Pattern.compile("Rs\\s(.*?)\\.");
-        Matcher matcher = pattern.matcher(msgBody);
-        if (matcher.find())
-        {
-            String matched = Objects.requireNonNull(matcher.group(1)).replace(",", "").replace(".","");
-            return Integer.parseInt(matched);
-        }
-        return -1;
-    }
-
     public static Integer getIntFromMsgBodyRegex(String msgBody, String regexp) {
         Pattern pattern = Pattern.compile(regexp);
         Matcher matcher = pattern.matcher(msgBody);
@@ -83,7 +59,7 @@ public class SMSHelper {
     }
 
     public static Boolean patternMatches(String msgBody, String regexp) {
-        Pattern pattern = Pattern.compile(regexp);
+        Pattern pattern = Pattern.compile(regexp, Pattern.DOTALL);
         Matcher matcher = pattern.matcher(msgBody);
         return matcher.matches();
     }

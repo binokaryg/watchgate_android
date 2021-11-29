@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import androidx.preference.PreferenceManager;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.work.Worker;
@@ -132,7 +133,12 @@ public class StitchReporter extends Worker {
                     app = new App(new AppConfiguration.Builder(applicationContext.getString(R.string.stitch_client_app_id))
                             .build());
 
-                    Credentials credentials = Credentials.anonymous();
+                    String realmKey = mPrefs.getString("realm_key_override", "");
+                    if(realmKey.trim().isEmpty()) {
+                        realmKey = applicationContext.getResources().getString(R.string.realm_key_default);
+                    }
+
+                    Credentials credentials = Credentials.apiKey(realmKey);
                     try {
                         app.login(credentials);
                         User user = app.currentUser();
@@ -146,7 +152,8 @@ public class StitchReporter extends Worker {
                             Log.e(TAG, "failed to update for " + (oneTime ? "One Time" : "Periodic") + "request", ex);
                         }
                     } catch (Exception ex) {
-                        Log.e(TAG, "Error logging into the Realm app. Make sure that anonymous authentication is enabled. Error: " + ex.getMessage());
+                        Log.e(TAG, "Error logging into the Realm app. Make sure that API key is set. Error: " + ex.getMessage());
+                        Toast.makeText(getApplicationContext(), "Error logging in with API Key", Toast.LENGTH_LONG).show();
                     }
                 } catch (Exception e) {
                     Log.e(TAG, e.getMessage(), e);

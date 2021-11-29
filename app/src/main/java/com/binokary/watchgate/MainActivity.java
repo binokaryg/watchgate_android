@@ -62,11 +62,11 @@ public class MainActivity extends AppCompatActivity {
     WorkManager mWorkManager;
     ListenableFuture<List<WorkInfo>> mWorkLiveData;
     TextView levelView, healthView, tempView, pluggedView, wifiView, mobileView, networkView, spaceView, balanceView;
+    SharedPreferences prefs;
+    SharedPreferences.OnSharedPreferenceChangeListener listener;
     private SharedPreferences mSharedPreferences;
     private NotificationManager notificationManager;
     private NotificationCompat.Builder persistentNotificationBuilder;
-    SharedPreferences prefs;
-    SharedPreferences.OnSharedPreferenceChangeListener listener;
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -374,7 +374,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onPause(){
+    protected void onPause() {
         super.onPause();
         prefs.unregisterOnSharedPreferenceChangeListener(listener);
 
@@ -420,11 +420,13 @@ public class MainActivity extends AppCompatActivity {
 
         //ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.RECEIVE_SMS},
         //              SMS_PERMISSION_CODE);
-        ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.READ_SMS,
+        ActivityCompat.requestPermissions(MainActivity.this, new String[]{
+                        Manifest.permission.READ_SMS,
                         Manifest.permission.RECEIVE_SMS, Manifest.permission.SEND_SMS,
                         Manifest.permission.READ_PHONE_STATE,
                         Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                        Manifest.permission.ACCESS_COARSE_LOCATION},
+                        Manifest.permission.ACCESS_COARSE_LOCATION
+                },
                 SMS_PERMISSION_CODE);
     }
 
@@ -557,6 +559,7 @@ public class MainActivity extends AppCompatActivity {
         persistentNotificationBuilder.setContentText(summaryText);
         notificationManager.notify(1, persistentNotificationBuilder.build());
     }
+
     public void toggleSubscription(View view) {
         CheckBox checkBox = (CheckBox) view;
         final String single_topic = mSharedPreferences.getString("instance_name", "none");

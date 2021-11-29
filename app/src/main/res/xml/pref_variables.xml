@@ -79,4 +79,14 @@
         android:title="All Instances"
         app:useSimpleSummaryProvider="true" />
 
+    <EditTextPreference
+        android:defaultValue=""
+        android:inputType="text"
+        android:key="realm_key_override"
+        android:maxLines="1"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="Realm API Key"
+        app:useSimpleSummaryProvider="true" />
+
 </PreferenceScreen>
