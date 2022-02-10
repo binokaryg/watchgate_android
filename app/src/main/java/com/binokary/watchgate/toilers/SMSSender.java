@@ -5,19 +5,20 @@ import android.content.SharedPreferences;
 import android.telephony.SmsManager;
 import android.util.Log;
 
-import com.binokary.watchgate.Constants;
 import com.binokary.watchgate.PrefStrings;
 import com.binokary.watchgate.StatsHelper;
 
 import androidx.annotation.NonNull;
-import androidx.work.WorkManager;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
 import static android.content.Context.MODE_PRIVATE;
+import static com.binokary.watchgate.Constants.MAIN_TAG;
+import static com.binokary.watchgate.Constants.PREF_STATS;
+import static com.binokary.watchgate.Constants.SMS_TAG;
 
 public class SMSSender extends Worker {
-    public static final String TAG = Constants.MAINTAG + SMSSender.class.getSimpleName();
+    public static final String TAG = MAIN_TAG + SMSSender.class.getSimpleName();
     // Define the parameter keys:
     public static final String KEY_RECIPIENT_ARG = "RECIPIENT";
     public static final String KEY_MSG_ARG = "MSG";
@@ -27,18 +28,19 @@ public class SMSSender extends Worker {
         super(context, workerParams);
     }
 
+    @NonNull
     @Override
     public Worker.Result doWork() {
         Context applicationContext = getApplicationContext();
         try {
-            prefs = applicationContext.getSharedPreferences(Constants.PREF_STATS, MODE_PRIVATE);
+            prefs = applicationContext.getSharedPreferences(PREF_STATS, MODE_PRIVATE);
             // Fetch the arguments (and specify default values):
             String recipient = getInputData().getString(KEY_RECIPIENT_ARG);
             String msg = getInputData().getString(KEY_MSG_ARG);
-            Integer minInterval = getInputData().getInt("MIN", 0) * 60 * 1000;
-            Boolean oneTime = getInputData().getBoolean("ONETIMEREQUEST", false);
-            Long lastBalanceDate = prefs.getLong(PrefStrings.BALANCE_DATE, 0);
-            Long date = System.currentTimeMillis();
+            int minInterval = getInputData().getInt("MIN", 0) * 60 * 1000;
+            boolean oneTime = getInputData().getBoolean(SMS_TAG, false);
+            long lastBalanceDate = prefs.getLong(PrefStrings.BALANCE_DATE, 0);
+            long date = System.currentTimeMillis();
             if (oneTime || (date - lastBalanceDate > minInterval)) {
                 Log.d(TAG, "Sending sms as a " + (oneTime ? "One Time" : "Periodic") + " request");
                 SmsManager smsManager = SmsManager.getDefault();

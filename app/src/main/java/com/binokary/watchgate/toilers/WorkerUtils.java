@@ -18,10 +18,6 @@ package com.binokary.watchgate.toilers;
 
 import android.util.Log;
 
-import com.binokary.watchgate.Constants;
-
-import java.util.concurrent.TimeUnit;
-
 import androidx.work.Constraints;
 import androidx.work.Data;
 import androidx.work.ExistingPeriodicWorkPolicy;
@@ -30,15 +26,20 @@ import androidx.work.OneTimeWorkRequest;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
 
-import static com.binokary.watchgate.Constants.REPORTONETAG;
-import static com.binokary.watchgate.Constants.REPORTONEWAITTAG;
-import static com.binokary.watchgate.Constants.REPORTTAG;
-import static com.binokary.watchgate.Constants.SMSONETAG;
-import static com.binokary.watchgate.Constants.SMSTAG;
+import java.util.Objects;
+import java.util.concurrent.TimeUnit;
+
+import static com.binokary.watchgate.Constants.MAIN_TAG;
+import static com.binokary.watchgate.Constants.REPORT_ONE_TAG;
+import static com.binokary.watchgate.Constants.REPORT_ONE_WAIT_TAG;
+import static com.binokary.watchgate.Constants.REPORT_TAG;
+import static com.binokary.watchgate.Constants.SMS_ONE_TAG;
+import static com.binokary.watchgate.Constants.SMS_TAG;
+import static io.realm.Realm.getApplicationContext;
 
 
 public final class WorkerUtils {
-    private static final String TAG = Constants.MAINTAG + WorkerUtils.class.getSimpleName();
+    private static final String TAG = MAIN_TAG + WorkerUtils.class.getSimpleName();
 
     private WorkerUtils() {
     }
@@ -54,10 +55,10 @@ public final class WorkerUtils {
         final PeriodicWorkRequest periodicSMSSendingRequest =
                 new PeriodicWorkRequest.Builder(SMSSender.class, minutes, TimeUnit.MINUTES)
                         .setInputData(smsData)
-                        .addTag(SMSTAG)
+                        .addTag(SMS_TAG)
                         .build();
-        Log.d(TAG, "Enqueuing Unique Periodic SMS Sending Task with TAG: " + SMSTAG);
-        WorkManager.getInstance().enqueueUniquePeriodicWork(SMSTAG, ExistingPeriodicWorkPolicy.KEEP, periodicSMSSendingRequest);
+        Log.d(TAG, "Enqueuing Unique Periodic SMS Sending Task with TAG: " + SMS_TAG);
+        WorkManager.getInstance(Objects.requireNonNull(getApplicationContext())).enqueueUniquePeriodicWork(SMS_TAG, ExistingPeriodicWorkPolicy.KEEP, periodicSMSSendingRequest);
 
     }
 
@@ -71,10 +72,10 @@ public final class WorkerUtils {
         final OneTimeWorkRequest oneTimeSMSSendingRequest =
                 new OneTimeWorkRequest.Builder(SMSSender.class)
                         .setInputData(smsData)
-                        .addTag(SMSONETAG)
+                        .addTag(SMS_ONE_TAG)
                         .build();
-        Log.d(TAG, "Enqueuing One Time SMS Sending Task with TAG: " + SMSONETAG);
-        WorkManager.getInstance().enqueue(oneTimeSMSSendingRequest);
+        Log.d(TAG, "Enqueuing One Time SMS Sending Task with TAG: " + SMS_ONE_TAG);
+        WorkManager.getInstance(Objects.requireNonNull(getApplicationContext())).enqueue(oneTimeSMSSendingRequest);
     }
 
 
@@ -94,10 +95,10 @@ public final class WorkerUtils {
                 new PeriodicWorkRequest.Builder(StitchReporter.class, minutes, TimeUnit.MINUTES)
                         .setConstraints(stitchReportingConstraints)
                         .setInputData(stitchReportData)
-                        .addTag(REPORTTAG)
+                        .addTag(REPORT_TAG)
                         .build();
-        Log.d(TAG, "Enqueuing Unique Periodic Stitch Reporting Task for instance " + instance + " with TAG: " + REPORTTAG);
-        WorkManager.getInstance().enqueueUniquePeriodicWork(REPORTTAG, ExistingPeriodicWorkPolicy.KEEP, stitchReportingRequest);
+        Log.d(TAG, "Enqueuing Unique Periodic Stitch Reporting Task for instance " + instance + " with TAG: " + REPORT_TAG);
+        WorkManager.getInstance(Objects.requireNonNull(getApplicationContext())).enqueueUniquePeriodicWork(REPORT_TAG, ExistingPeriodicWorkPolicy.KEEP, stitchReportingRequest);
 
     }
 
@@ -114,7 +115,7 @@ public final class WorkerUtils {
                 .build();
 
         //Use waiting tag if initial Delay is more than 0
-        String tag = initialDelayInSeconds > 0 ? REPORTONEWAITTAG : REPORTONETAG;
+        String tag = initialDelayInSeconds > 0 ? REPORT_ONE_WAIT_TAG : REPORT_ONE_TAG;
 
         final OneTimeWorkRequest stitchReportingRequest =
                 new OneTimeWorkRequest.Builder(StitchReporter.class)
@@ -123,14 +124,14 @@ public final class WorkerUtils {
                         .setInitialDelay(initialDelayInSeconds, TimeUnit.SECONDS)
                         .addTag(tag)
                         .build();
-        Log.d(TAG, "Enqueuing One Time Stitch Reporting Task for instance " + instance + " with TAG: " + REPORTONETAG);
-        WorkManager.getInstance().enqueue(stitchReportingRequest);
+        Log.d(TAG, "Enqueuing One Time Stitch Reporting Task for instance " + instance + " with TAG: " + REPORT_ONE_TAG);
+        WorkManager.getInstance(Objects.requireNonNull(getApplicationContext())).enqueue(stitchReportingRequest);
     }
 
     public static int clearTasks(String taskTAG) {
         try {
-            WorkManager.getInstance().cancelAllWorkByTag(taskTAG);
-            WorkManager.getInstance().pruneWork();
+            WorkManager.getInstance(Objects.requireNonNull(getApplicationContext())).cancelAllWorkByTag(taskTAG);
+            WorkManager.getInstance(getApplicationContext()).pruneWork();
             return 1;
         } catch (Exception ex) {
             return 0;

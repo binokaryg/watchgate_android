@@ -5,23 +5,19 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
+import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.BatteryManager;
+import android.os.Build;
 import android.telephony.TelephonyManager;
 import android.util.Log;
-
-import org.bson.BsonDateTime;
-import org.bson.BsonInt32;
-import org.bson.BsonInt64;
-import org.bson.BsonNull;
-import org.bson.BsonString;
-import org.bson.BsonValue;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 import java.util.TimeZone;
 
 import static android.content.Context.MODE_PRIVATE;
@@ -30,8 +26,7 @@ import static android.content.Context.WIFI_SERVICE;
 import static com.binokary.watchgate.Constants.PREF_STATS;
 
 public final class StatsHelper {
-    public static final String TAG = Constants.MAINTAG + StatsHelper.class.getSimpleName();
-    private static Context applicationContext;
+    public static final String TAG = Constants.MAIN_TAG + StatsHelper.class.getSimpleName();
     protected static ConnectivityManager cm;
     protected static TelephonyManager tm;
     static SharedPreferences.Editor stats;
@@ -40,25 +35,21 @@ public final class StatsHelper {
     }
 
     public static void CheckAndUpdateStats(Context appContext) {
-        applicationContext = appContext;
 
-        stats = applicationContext.getSharedPreferences(PREF_STATS, MODE_PRIVATE).edit();
-        Long date = System.currentTimeMillis();
-        int battery = -1;
-        boolean plugged = false;
-        boolean data = false;
-        int temp = -1;
-        int health = -1;
+        stats = appContext.getSharedPreferences(PREF_STATS, MODE_PRIVATE).edit();
+        int battery;
+        boolean plugged;
+        int temp;
+        int health;
         String wifi = "N/A";
-        String carrierName = "";
+        String carrierName;
         int wifiSignalStrength = -1;
-        int mobileSignalStrength = -1;
 
         try {
             //battery
             IntentFilter intentFilter = new IntentFilter();
             intentFilter.addAction(Intent.ACTION_BATTERY_CHANGED);
-            Intent batteryStatus = applicationContext.registerReceiver(null, intentFilter);
+            Intent batteryStatus = appContext.registerReceiver(null, intentFilter);
             // Are we charging / charged?
             int pluggedStatus = batteryStatus.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1);
             plugged = pluggedStatus != 0; // 0 means it is on battery, other constants are different types of power sources
@@ -84,24 +75,48 @@ public final class StatsHelper {
 
         //Connection
         try {
-            cm =
-                    (ConnectivityManager) applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE);
-
-            NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-            if (activeNetwork != null) {
-                boolean isConnected = activeNetwork != null &&
-                        activeNetwork.isConnectedOrConnecting();
-                boolean isWiFi = activeNetwork.getType() == ConnectivityManager.TYPE_WIFI;
-                boolean isData = activeNetwork.getType() == ConnectivityManager.TYPE_MOBILE;
+            cm = (ConnectivityManager) appContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+            int result = 0; // connection type. 0: none; 1: mobile data; 2: wifi
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                if (cm != null) {
+                    NetworkCapabilities capabilities = cm.getNetworkCapabilities(cm.getActiveNetwork());
+                    if (capabilities != null) {
+                        if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
+                            result = 2;
+                        } else if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
+                            result = 1;
+                        } else if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_VPN)) {
+                            result = 3;
+                        }
+                    }
+                }
+            } else {
+                if (cm != null) {
+                    NetworkInfo activeNetwork = cm.getActiveNetworkInfo();//Deprecated: only to support below Android 6.0 (API level 23)
+                    if (activeNetwork != null) {
+                        // connected to the internet
+                        if (activeNetwork.getType() == ConnectivityManager.TYPE_WIFI) {
+                            result = 2;
+                        } else if (activeNetwork.getType() == ConnectivityManager.TYPE_MOBILE) {
+                            result = 1;
+                        } else if (activeNetwork.getType() == ConnectivityManager.TYPE_VPN) {
+                            result = 3;
+                        }
+                    }
+                }
+            }
+            if (result != 0) {
+                boolean isData = result == 1;
+                boolean isWiFi = result == 2;
                 //Wifi
                 if (isWiFi) {
-                    WifiManager wifiManager = (WifiManager) applicationContext.getApplicationContext().getSystemService(WIFI_SERVICE);
+                    WifiManager wifiManager = (WifiManager) appContext.getApplicationContext().getSystemService(WIFI_SERVICE);
                     int wifiState = wifiManager.getWifiState();
                     if (wifiState == WifiManager.WIFI_STATE_ENABLED) {
                         WifiInfo info = wifiManager.getConnectionInfo();
                         if (info != null) {
                             wifi = info.getSSID().replace("\"", "");
-                            wifiSignalStrength = WifiManager.calculateSignalLevel(info.getRssi(), 5);
+                            wifiSignalStrength = calculateSignalLevelOwn(info.getRssi());
                             //Log.d(TAG, "Wifi Signal: " + wifiSignalStrength);
                             Log.d(TAG, "Wifi SSID: " + wifi);
                         }
@@ -117,34 +132,10 @@ public final class StatsHelper {
 
         //Mobile Network
         try {
-            tm = (TelephonyManager) applicationContext.getSystemService(TELEPHONY_SERVICE);
+            tm = (TelephonyManager) appContext.getSystemService(TELEPHONY_SERVICE);
             carrierName = tm.getNetworkOperatorName();
             //Log.d(TAG, "Carrier: " + carrierName);
             stats.putString(PrefStrings.MOBILE_CARRIER, carrierName);
-
-            //Mobile Signal Strength not working in Huawei phone (checked Huawei LMO-N31)
-            // using PhoneStateListener & onSignalStrengthsChanged, signalStrength gave
-            // value of 0 in getGsmSignalStrength. Signal value was given by mWcdmaRscpasu but may be
-            // applicable to WCDMA network only
-            /*
-            if (ActivityCompat.checkSelfPermission(applicationContext, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                // do nothing
-                Log.d(TAG, "No Location Access");
-            } else if(tm.getAllCellInfo().size() > 0){
-                if (tm.getAllCellInfo().get(0).getClass() == CellInfoGsm.class) {
-                    mobileSignalStrength = (((CellInfoGsm) tm.getAllCellInfo().get(0)).getCellSignalStrength().getLevel());
-                } else if (tm.getAllCellInfo().get(0).getClass() == CellInfoWcdma.class) {
-                    mobileSignalStrength = (((CellInfoWcdma) tm.getAllCellInfo().get(0)).getCellSignalStrength().getLevel());
-                } else if (tm.getAllCellInfo().get(0).getClass() == CellInfoLte.class) {
-                    mobileSignalStrength = (((CellInfoLte) tm.getAllCellInfo().get(0)).getCellSignalStrength().getLevel());
-                }
-                stats.putInt(PrefStrings.MOBILE_STRENGTH, mobileSignalStrength);
-                //Log.d(TAG, "Mobile Signal:" + mobileSignalStrength);
-            }
-            else {
-                Log.d(TAG, "Can not read cell info");
-            }
-            */
         } catch (Exception ex) {
             Log.e(TAG, "Error checking mobile network: " + ex.getMessage());
         }
@@ -153,29 +144,25 @@ public final class StatsHelper {
 
     public static String DateStringFromMS(long ld) {
         Date d = new Date(ld);
-        DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US);
         df.setTimeZone(TimeZone.getTimeZone("Asia/Kathmandu"));
-        String dateString = df.format(d);
-        return dateString;
+        return df.format(d);
     }
 
-    public static BsonValue objToBsonValue(Object obj) {
-        if (obj instanceof Integer) {
-            return new BsonInt32((Integer) obj);
-        }
+    private static int calculateSignalLevelOwn (int rssi) {
+        final int MIN_RSSI = -100;
+        final int MAX_RSSI = -55;
+        final int numLevels = 5;
 
-        if (obj instanceof String) {
-            return new BsonString((String) obj);
+        if (rssi <= MIN_RSSI) {
+            return 0;
+        } else if (rssi >= MAX_RSSI) {
+            return numLevels - 1;
+        } else {
+            float inputRange = (MAX_RSSI - MIN_RSSI);
+            float outputRange = (numLevels - 1);
+            return (int)((float)(rssi - MIN_RSSI) * outputRange / inputRange);
         }
-
-        if (obj instanceof Long) {
-            return new BsonInt64((Long) obj);
-        }
-
-        if (obj instanceof Date) {
-            return new BsonDateTime(((Date) obj).getTime());
-        }
-        return new BsonNull();
     }
 
 }

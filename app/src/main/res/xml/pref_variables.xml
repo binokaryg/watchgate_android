@@ -1,70 +1,92 @@
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <!-- NOTE: EditTextPreference accepts EditText attributes. -->
-    <!-- NOTE: EditTextPreference's summary should be set to its value by the activity code. -->
-        <EditTextPreference
+    <EditTextPreference
         android:defaultValue="@string/pref_pre_balance_regex_default"
         android:key="pref_pre_balance_regex"
         android:selectAllOnFocus="true"
         android:singleLine="true"
-        android:title="Prepaid Balance Regex" />
+        android:title="Prepaid Balance Regex"
+        app:useSimpleSummaryProvider="true"/>
     <EditTextPreference
         android:defaultValue="@string/pref_post_balance_due_regex_default"
         android:key="pref_post_balance_due_regex"
         android:selectAllOnFocus="true"
         android:singleLine="true"
-        android:title="Postpaid Balance Due Regex" />
+        android:title="Postpaid Balance Due Regex"
+        app:useSimpleSummaryProvider="true" />
     <EditTextPreference
         android:defaultValue="@string/pref_post_balance_credit_regex_default"
         android:key="pref_post_balance_credit_regex"
         android:selectAllOnFocus="true"
         android:singleLine="true"
-        android:title="Postpaid Balance Credit Regex" />
+        android:title="Postpaid Balance Credit Regex"
+        app:useSimpleSummaryProvider="true" />
     <EditTextPreference
         android:defaultValue="@string/pref_pre_balance_top_up_regex_default"
         android:key="pref_pre_balance_top_up_regex"
         android:selectAllOnFocus="true"
         android:singleLine="true"
-        android:title="Prepaid Balance Top Up Message Regex" />
+        android:title="Prepaid Balance Top Up Message Regex"
+        app:useSimpleSummaryProvider="true" />
     <EditTextPreference
         android:defaultValue="@string/pref_post_balance_top_up_regex_default"
         android:key="pref_post_balance_top_up_regex"
         android:selectAllOnFocus="true"
         android:singleLine="true"
-        android:title="Postpaid Balance Top Up Message Regex" />
+        android:title="Postpaid Balance Top Up Message Regex"
+        app:useSimpleSummaryProvider="true" />
     <EditTextPreference
         android:defaultValue="@string/pref_sms_pack_info_regex_default"
         android:key="pref_sms_pack_info_regex"
         android:selectAllOnFocus="true"
         android:singleLine="true"
-        android:title="SMS Pack Info Regex" />
+        android:title="SMS Pack Info Regex"
+        app:useSimpleSummaryProvider="true" />
     <EditTextPreference
         android:defaultValue="@string/pref_sms_pack_null_regex_default"
         android:key="pref_sms_pack_no_regex"
         android:selectAllOnFocus="true"
         android:singleLine="true"
-        android:title="SMS Pack Null Regex" />
+        android:title="SMS Pack Null Regex"
+        app:useSimpleSummaryProvider="true" />
     <EditTextPreference
         android:defaultValue="@string/pref_sms_pack_active_default"
         android:key="pref_sms_pack_active"
         android:selectAllOnFocus="true"
         android:singleLine="true"
-        android:title="SMS Pack Activated Message Regex" />
+        android:title="SMS Pack Activated Message Regex"
+        app:useSimpleSummaryProvider="true" />
     <EditTextPreference
         android:defaultValue="@string/pref_stitch_update_func_default"
         android:key="pref_stitch_update_func"
         android:selectAllOnFocus="true"
         android:singleLine="true"
-        android:title="Stitch Update Function" />
+        android:title="Stitch Update Function"
+        app:useSimpleSummaryProvider="true" />
+    <EditTextPreference
+        android:defaultValue="@string/pref_critical_balance_msg_slack_default"
+        android:key="pref_critical_balance_msg_slack"
+        android:selectAllOnFocus="true"
+        android:singleLine="false"
+        android:title="Low balance message (Slack)"
+        app:useSimpleSummaryProvider="true" />
     <EditTextPreference
         android:defaultValue="@string/pref_all_instances_default"
         android:key="pref_all_instances"
         android:selectAllOnFocus="true"
         android:singleLine="false"
-        android:title="All Instances" />
+        android:title="All Instances"
+        app:useSimpleSummaryProvider="true" />
 
-    <!-- NOTE: Hide buttons to simplify the UI. Users can touch outside the dialog to
-         dismiss it. -->
-    <!-- NOTE: ListPreference's summary should be set to its value by the activity code. -->
+    <EditTextPreference
+        android:defaultValue=""
+        android:inputType="text"
+        android:key="realm_key_override"
+        android:maxLines="1"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="Realm API Key"
+        app:useSimpleSummaryProvider="true" />
 
 </PreferenceScreen>

@@ -1,62 +1,66 @@
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <!-- NOTE: EditTextPreference accepts EditText attributes. -->
-    <!-- NOTE: EditTextPreference's summary should be set to its value by the activity code. -->
-    <EditTextPreference
+    <SeekBarPreference
         android:defaultValue="@integer/default_sms_interval"
-        android:digits="0123456789"
-        android:inputType="number"
+        android:max="720"
         android:key="pref_interval_sms"
         android:selectAllOnFocus="true"
-        android:title="Balance Query Interval (minutes)" />
-    <EditTextPreference
+        android:title="Balance Query Interval"
+        android:summary="minutes"
+        app:showSeekBarValue="true"/>
+    <SeekBarPreference
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:defaultValue="@integer/min_sms_interval"
+        android:max="30"
         android:key="pref_interval_sms_min"
         android:selectAllOnFocus="true"
         android:digits="0123456789"
         android:inputType="number"
-        android:title="Balance Query Minimum Interval (minutes)" />
-    <EditTextPreference
+        android:title="Balance Query Minimum Interval"
+        android:summary="minutes"
+        app:showSeekBarValue="true"/>
+    <SeekBarPreference
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:defaultValue="@integer/default_report_interval"
+        android:max="240"
         android:key="pref_interval_report"
         android:selectAllOnFocus="true"
-        android:digits="0123456789"
-        android:inputType="number"
-        android:title="Reporting Interval (minutes)" />
-    <EditTextPreference
+        android:title="Reporting Interval"
+        android:summary="minutes"
+        app:showSeekBarValue="true"/>
+    <SeekBarPreference
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:defaultValue="@integer/min_report_interval"
+        android:max="60"
         android:key="pref_interval_report_min"
         android:selectAllOnFocus="true"
-        android:digits="0123456789"
-        android:inputType="number"
-        android:title="Periodic Reporting Minimum Interval (minutes)" />
-    <EditTextPreference
+        android:title="Periodic Reporting Minimum Interval"
+        android:summary="minutes"
+        app:showSeekBarValue="true"/>
+    <SeekBarPreference
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:defaultValue="@integer/min_one_report_interval"
+        android:max="30"
         android:key="pref_interval_report_one_min"
-        android:digits="0123456789"
-        android:inputType="number"
         android:selectAllOnFocus="true"
-        android:title="One Time Reporting Minimum Interval (minutes)" />
-    <EditTextPreference
+        android:title="One Time Reporting Minimum Interval"
+        android:summary="minutes"
+        app:showSeekBarValue="true"/>
+    <SeekBarPreference
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:defaultValue="@integer/one_time_report_wait"
+        android:max="300"
         android:key="pref_wait_report_one_time"
-        android:digits="0123456789"
-        android:inputType="number"
         android:selectAllOnFocus="true"
-        android:title="One Time Reporting Waiting Time (seconds)" />
+        android:title="One Time Reporting Waiting Time"
+        android:summary="seconds"
+        app:showSeekBarValue="true"/>
 
-    <!-- NOTE: Hide buttons to simplify the UI. Users can touch outside the dialog to
-         dismiss it. -->
-    <!-- NOTE: ListPreference's summary should be set to its value by the activity code. -->
 
 </PreferenceScreen>

@@ -1,7 +1,6 @@
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <!-- NOTE: EditTextPreference accepts EditText attributes. -->
-    <!-- NOTE: EditTextPreference's summary should be set to its value by the activity code. -->
     <SwitchPreference
         android:defaultValue="false"
         android:key="switch_sms_preference"
@@ -16,7 +15,8 @@
         android:selectAllOnFocus="true"
         android:singleLine="true"
         android:summary="The number you want to send query SMS to"
-        android:title="Query SMS Destination" />
+        android:title="Query SMS Destination"
+        app:useSimpleSummaryProvider="true" />
     <EditTextPreference
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -27,7 +27,8 @@
         android:selectAllOnFocus="true"
         android:singleLine="true"
         android:summary="The number from where SMS pack information will arrive"
-        android:title="SMS Info Source" />
+        android:title="SMS Info Source"
+        app:useSimpleSummaryProvider="true" />
     <EditTextPreference
         android:defaultValue="@string/pref_sms_query_default"
         android:key="pref_sms_query"
@@ -35,7 +36,8 @@
         android:selectAllOnFocus="true"
         android:singleLine="true"
         android:summary="Body of SMS to be sent for querying SMS balance"
-        android:title="SMS Query Message" />
+        android:title="SMS Query Message"
+        app:useSimpleSummaryProvider="true" />
     <EditTextPreference
         android:defaultValue="@string/pref_sms_sub_default"
         android:dependency="switch_sms_preference"
@@ -43,30 +45,7 @@
         android:selectAllOnFocus="true"
         android:singleLine="true"
         android:summary="SMS code to subscribe to a SMS pack"
-        android:title="SMS Pack Subscription Code"/>
-    <!--Preferences below is for conditionally subscribing an SMS pack, TODO_MAYBE_LATER-->
-    <!--<EditTextPreference
-        android:defaultValue="@integer/pref_sms_pack_min_bal_default"
-        android:dependency="switch_sms_preference"
-        android:key="pref_sms_min"
-        android:selectAllOnFocus="true"
-        android:singleLine="true"
-        android:summary="If number of SMS remaining is below this value, new SMS pack will be subscribed"
-        android:title="Critical SMS Remaining"
-        android:visibility="invisible" />
-    <EditTextPreference
-        android:defaultValue="@integer/pref_sms_pack_min_bal_default"
-        android:dependency="switch_sms_preference"
-        android:key="pref_sms_bal_min"
-        android:selectAllOnFocus="true"
-        android:singleLine="true"
-        android:summary="If main balance is below this value, new SMS pack will not be subscribed"
-        android:title="Critical Balance Remaining"
-        android:visibility="invisible" />
-    -->
-
-    <!-- NOTE: Hide buttons to simplify the UI. Users can touch outside the dialog to
-         dismiss it. -->
-    <!-- NOTE: ListPreference's summary should be set to its value by the activity code. -->
+        android:title="SMS Pack Subscription Code"
+        app:useSimpleSummaryProvider="true"/>
 
 </PreferenceScreen>
