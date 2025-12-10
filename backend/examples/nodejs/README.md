@@ -61,6 +61,8 @@ Receives phone status updates from the Android app.
 }
 ```
 
+Note: Date fields are formatted using Java's Date.toString() method.
+
 **Response:**
 ```json
 {
