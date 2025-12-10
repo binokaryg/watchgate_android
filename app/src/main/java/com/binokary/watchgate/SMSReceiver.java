@@ -236,8 +236,8 @@ public class SMSReceiver extends BroadcastReceiver {
                     }
 
                     //Clear any waiting tasks before enqueuing new one
-                    WorkerUtils.clearTasks(Constants.REPORT_ONE_WAIT_TAG);
-                    WorkerUtils.enqueueOneTimeStitchReportingWork(instanceName, reportOneIntervalMin, initialDelayInSeconds);
+                    WorkerUtils.clearTasks(context, Constants.REPORT_ONE_WAIT_TAG);
+                    WorkerUtils.enqueueOneTimeReportingWork(context, instanceName, reportOneIntervalMin, initialDelayInSeconds);
 
 
                 }

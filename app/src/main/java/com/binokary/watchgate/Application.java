@@ -1,12 +1,18 @@
 package com.binokary.watchgate;
 
-import io.realm.Realm;
+import android.content.Context;
 
 public class Application extends android.app.Application {
+
+    private static Context context;
 
     @Override
     public void onCreate() {
         super.onCreate();
-        Realm.init(this);
+        context = getApplicationContext();
+    }
+
+    public static Context getContext() {
+        return context;
     }
 }

@@ -152,8 +152,8 @@ public class MainActivity extends AppCompatActivity {
 
             mWorkManager = WorkManager.getInstance(getApplicationContext());
 
-            WorkerUtils.enqueueSMSSendingWork(mSharedPreferences.getString("pref_sms_destination", "1415"), smsQueryMsg, smsInterval, smsIntervalMin);
-            WorkerUtils.enqueueStitchReportingWork(instanceName, reportInterval, reportIntervalMin, reportOneIntervalMin);
+            WorkerUtils.enqueueSMSSendingWork(getApplicationContext(), mSharedPreferences.getString("pref_sms_destination", "1415"), smsQueryMsg, smsInterval, smsIntervalMin);
+            WorkerUtils.enqueueReportingWork(getApplicationContext(), instanceName, reportInterval, reportIntervalMin, reportOneIntervalMin);
         });
 
 
@@ -172,7 +172,7 @@ public class MainActivity extends AppCompatActivity {
                 Log.e(TAG, "Error when trying to get task list: " + ex.getMessage());
             }
 
-            int clearStatus = WorkerUtils.clearTasks(Constants.SMS_TAG);
+            int clearStatus = WorkerUtils.clearTasks(getApplicationContext(), Constants.SMS_TAG);
             Log.d(TAG, " SMS sending tasks cleared " + clearStatus);
 
             mWorkLiveData = mWorkManager.getWorkInfosByTag(Constants.REPORT_TAG);
@@ -185,8 +185,8 @@ public class MainActivity extends AppCompatActivity {
                 Log.e(TAG, "Error when trying to get task list: " + ex.getMessage());
             }
 
-            clearStatus = WorkerUtils.clearTasks(Constants.REPORT_TAG);
-            Log.d(TAG, " Stitch reporting tasks cleared " + clearStatus);
+            clearStatus = WorkerUtils.clearTasks(getApplicationContext(), Constants.REPORT_TAG);
+            Log.d(TAG, " Backend reporting tasks cleared " + clearStatus);
         });
 
         infoButton.setOnClickListener(v -> {
