@@ -47,6 +47,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import io.realm.BuildConfig;
+
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = Constants.MAIN_TAG + "MainActivity";
