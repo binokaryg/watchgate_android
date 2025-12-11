@@ -6,7 +6,8 @@
     android:layout_height="match_parent"
     android:visibility="visible"
     tools:context="com.binokary.watchgate.MainActivity"
-    tools:layout_editor_absoluteY="81dp">
+    tools:layout_editor_absoluteY="81dp"
+    android:paddingTop="?attr/actionBarSize">
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline"
