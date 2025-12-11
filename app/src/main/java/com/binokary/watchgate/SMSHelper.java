@@ -35,8 +35,6 @@ public class SMSHelper {
                 ContextCompat.checkSelfPermission(mContext,
                         Manifest.permission.CHANGE_WIFI_STATE) == PackageManager.PERMISSION_GRANTED &&
                 ContextCompat.checkSelfPermission(mContext,
-                        Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED &&
-                ContextCompat.checkSelfPermission(mContext,
                         Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED;
     }
 
