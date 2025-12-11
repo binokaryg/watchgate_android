@@ -50,7 +50,8 @@
         <receiver
             android:name=".SMSReceiver"
             android:exported="false"
-            android:enabled="true">
+            android:enabled="true"
+            android:permission="android.permission.BROADCAST_SMS">
             <intent-filter>
                 <action android:name="android.provider.Telephony.SMS_RECEIVED" />
 
@@ -60,7 +61,8 @@
         <service
             android:name=".service.GateOnFirebaseMessagingService"
             android:enabled="true"
-            android:exported="true">
+            android:exported="true"
+            android:permission="com.google.android.c2dm.permission.SEND">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>

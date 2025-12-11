@@ -8,8 +8,6 @@ import android.telephony.SmsManager;
 import androidx.core.content.ContextCompat;
 
 import java.text.DateFormat;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.regex.Matcher;
@@ -41,7 +39,7 @@ public class SMSHelper {
     public static String getBalanceMsgFromParts(boolean isPostpaid, int balance, int balanceDue, int balanceCredit, long dateInMS) {
         String dateTimeString = DateFormat.getDateTimeInstance().format(dateInMS);
         if (isPostpaid) {
-            return String.format(Locale.US, "Due: Rs %d, Credit: Rs %d", balanceDue, balanceCredit, dateTimeString);
+            return String.format(Locale.US, "Due: Rs %d, Credit: Rs %d", balanceDue, balanceCredit);
         } else {
             return String.format(Locale.US, "Rs %d (%s)", balance, dateTimeString);
         }
