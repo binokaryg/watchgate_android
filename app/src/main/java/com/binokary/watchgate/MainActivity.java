@@ -46,7 +46,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-
+import java.util.Objects;
+import java.util.concurrent.ExecutionException;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -59,7 +60,7 @@ public class MainActivity extends AppCompatActivity {
     ProgressBar progressBar;
     WorkManager mWorkManager;
     ListenableFuture<List<WorkInfo>> mWorkLiveData;
-    TextView levelView, healthView, tempView, pluggedView, wifiView, mobileView, networkView, spaceView, balanceView;
+    TextView levelView, healthView, tempView, pluggedView, wifiView, mobileView, networkView, spaceView, balanceView, instanceView;
     SharedPreferences prefs;
     SharedPreferences.OnSharedPreferenceChangeListener listener;
     private SharedPreferences mSharedPreferences;
@@ -102,6 +103,7 @@ public class MainActivity extends AppCompatActivity {
         networkView = findViewById(R.id.textViewNetwork);
         spaceView = findViewById(R.id.textViewFreeSpace);
         balanceView = findViewById(R.id.textViewBalance);
+        instanceView = findViewById(R.id.textViewInstance);
 
         Button normalSMSBtn = findViewById(R.id.btn_normal_sms);
         Button startButton = findViewById(R.id.buttonStart);
@@ -164,30 +166,29 @@ public class MainActivity extends AppCompatActivity {
                 mWorkManager = WorkManager.getInstance(getApplicationContext());
             }
             mWorkLiveData = mWorkManager.getWorkInfosByTag(Constants.SMS_TAG);
+
+            List<WorkInfo> workList;
             try {
-                List<WorkInfo> workList = mWorkLiveData.get();
-                for (int i = 0; i < workList.size(); i++) {
+                workList = mWorkLiveData.get();
+                int workListSize = Objects.requireNonNull(workList).size();
+                for (int i = 0; i < workListSize; i++) {
                     Log.d(TAG, "Work state of gatewatch" + i + " : " + workList.get(i).getState());
                 }
-            } catch (Exception ex) {
-                Log.e(TAG, "Error when trying to get task list: " + ex.getMessage());
-            }
 
-            int clearStatus = WorkerUtils.clearTasks(Constants.SMS_TAG);
-            Log.d(TAG, " SMS sending tasks cleared " + clearStatus);
+                int clearStatus = WorkerUtils.clearTasks(Constants.SMS_TAG);
+                Log.d(TAG, " SMS sending tasks cleared " + clearStatus);
 
-            mWorkLiveData = mWorkManager.getWorkInfosByTag(Constants.REPORT_TAG);
-            try {
-                List<WorkInfo> workList = mWorkLiveData.get();
-                for (int i = 0; i < workList.size(); i++) {
+                mWorkLiveData = mWorkManager.getWorkInfosByTag(Constants.REPORT_TAG);
+                for (int i = 0; i < workListSize; i++) {
                     Log.d(TAG, "Work state of gatewatch" + i + " : " + workList.get(i).getState());
                 }
-            } catch (Exception ex) {
-                Log.e(TAG, "Error when trying to get task list: " + ex.getMessage());
+
+                clearStatus = WorkerUtils.clearTasks(Constants.REPORT_TAG);
+                Log.d(TAG, " Stitch reporting tasks cleared " + clearStatus);
+            } catch (ExecutionException | InterruptedException e) {
+                throw new RuntimeException(e);
             }
 
-            clearStatus = WorkerUtils.clearTasks(Constants.REPORT_TAG);
-            Log.d(TAG, " Stitch reporting tasks cleared " + clearStatus);
         });
 
         infoButton.setOnClickListener(v -> {
@@ -203,7 +204,7 @@ public class MainActivity extends AppCompatActivity {
             mWorkLiveData = mWorkManager.getWorkInfosByTag(Constants.SMS_TAG);
             try {
                 List<WorkInfo> workList = mWorkLiveData.get();
-                for (int i = 0; i < workList.size(); i++) {
+                for (int i = 0; i < Objects.requireNonNull(workList).size(); i++) {
                     Log.d(TAG, "Work state of SMS Senders " + i + " : " + workList.get(i).getState());
                     infoBuilder.append("SMSS").append(i);
                     infoBuilder.append(": ");
@@ -219,7 +220,7 @@ public class MainActivity extends AppCompatActivity {
             mWorkLiveData = mWorkManager.getWorkInfosByTag(Constants.REPORT_TAG);
             try {
                 List<WorkInfo> workList = mWorkLiveData.get();
-                for (int i = 0; i < workList.size(); i++) {
+                for (int i = 0; i < Objects.requireNonNull(workList).size(); i++) {
                     Log.d(TAG, "Work state of Stitch Reporters " + i + " : " + workList.get(i).getState());
                     infoBuilder
                             .append("SR")
@@ -239,7 +240,7 @@ public class MainActivity extends AppCompatActivity {
             mWorkLiveData = mWorkManager.getWorkInfosByTag(Constants.SMS_ONE_TAG);
             try {
                 List<WorkInfo> workList = mWorkLiveData.get();
-                for (int i = 0; i < workList.size(); i++) {
+                for (int i = 0; i < Objects.requireNonNull(workList).size(); i++) {
                     Log.d(TAG, "Work state of one time SMS Senders " + i + " : " + workList.get(i).getState());
                     infoBuilder.append("SMS1S").append(i);
                     infoBuilder.append(": ");
@@ -258,7 +259,7 @@ public class MainActivity extends AppCompatActivity {
             mWorkLiveData = mWorkManager.getWorkInfosByTag(Constants.REPORT_ONE_TAG);
             try {
                 List<WorkInfo> workList = mWorkLiveData.get();
-                for (int i = 0; i < workList.size(); i++) {
+                for (int i = 0; i < Objects.requireNonNull(workList).size(); i++) {
                     Log.d(TAG, "Work state of one time Stitch reporters " + i + " : " + workList.get(i).getState());
                     infoBuilder.append("S1R").append(i);
                     infoBuilder.append(": ");
@@ -277,7 +278,7 @@ public class MainActivity extends AppCompatActivity {
             mWorkLiveData = mWorkManager.getWorkInfosByTag(Constants.REPORT_ONE_WAIT_TAG);
             try {
                 List<WorkInfo> workList = mWorkLiveData.get();
-                for (int i = 0; i < workList.size(); i++) {
+                for (int i = 0; i < Objects.requireNonNull(workList).size(); i++) {
                     Log.d(TAG, "Work state of Stitch reporters with wait time " + i + " : " + workList.get(i).getState());
                     infoBuilder.append("S1WR").append(i);
                     infoBuilder.append(": ");
@@ -428,8 +429,8 @@ public class MainActivity extends AppCompatActivity {
      */
     public void showRequestPermissionsInfoAlertDialog(final boolean makeSystemRequest) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(R.string.permission_alert_dialog_title); // Your own title
-        builder.setMessage(R.string.permission_dialog_message); // Your own message
+        builder.setTitle(R.string.permission_alert_dialog_title);
+        builder.setMessage(R.string.permission_dialog_message);
 
         builder.setPositiveButton(R.string.action_ok, (dialog, which) -> {
             dialog.dismiss();
@@ -495,6 +496,7 @@ public class MainActivity extends AppCompatActivity {
     public void UpdateViews() {
         SharedPreferences prefs = getSharedPreferences(PREF_STATS, MODE_PRIVATE);
         titleView.setText(mSharedPreferences.getString("instance_name", "unnamed").toUpperCase());
+        instanceView.setText(mSharedPreferences.getString("instance_name", "unnamed").toUpperCase());
         String wifi = prefs.getString(PrefStrings.WIFI_SSID, "N/A");
         boolean data = prefs.getBoolean(PrefStrings.MOBILE_DATA, false);
         int temp = prefs.getInt(PrefStrings.TEMPERATURE, -1);

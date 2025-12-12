@@ -60,4 +60,11 @@
     <string name="pref_critical_balance_msg_slack_default"> :red_circle: &lt;!channel&gt; Balance is Rs. </string>
     <string name="slack_url">https://google.com</string>
     <string name="realm_key_default">watchgate-code</string>
+    <string name="info">INFO</string>
+    <string name="start">START</string>
+    <string name="stop">STOP</string>
+    <string name="subscribe">Subscribe</string>
+    <string name="free_space">Free Space</string>
+    <string name="refresh">refresh</string>
+    <string name="textViewInstance">Instance</string>
 </resources>

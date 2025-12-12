@@ -6,8 +6,7 @@
     android:layout_height="match_parent"
     android:visibility="visible"
     tools:context="com.binokary.watchgate.MainActivity"
-    tools:layout_editor_absoluteY="81dp"
-    android:paddingTop="?attr/actionBarSize">
+    tools:layout_editor_absoluteY="81dp">
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline"
@@ -19,28 +18,47 @@
     <TextView
         android:id="@+id/textViewTitle"
         android:layout_width="wrap_content"
-        android:layout_height="20dp"
-        android:layout_marginStart="10dp"
-        android:layout_marginTop="4dp"
-        android:layout_marginEnd="10dp"
-        android:layout_marginBottom="4dp"
+        android:layout_height="wrap_content"
         android:text="@string/watchgate_title"
         app:layout_constraintBottom_toTopOf="@+id/tableLayout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"/>
 
     <TableLayout
         android:id="@+id/tableLayout"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="4dp"
         android:layout_marginEnd="4dp"
+        android:layout_marginTop="100dp"
         android:layout_marginBottom="4dp"
         app:layout_constraintBottom_toTopOf="@+id/scrollView"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textViewTitle">
+        <TableRow
+            android:id="@+id/Instance"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1">
+
+            <TextView
+                android:id="@+id/textViewLabelInstance"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/textViewInstance" />
+
+            <TextView
+                android:id="@+id/textViewInstance"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/textViewInstance" />
+
+        </TableRow>
+
 
         <TableRow
             android:id="@+id/Battery"
@@ -50,14 +68,14 @@
 
             <TextView
                 android:id="@+id/textViewLabelBattery"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="@string/textViewLevel" />
 
             <TextView
                 android:id="@+id/textViewLevel"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="@string/textViewLevel" />
@@ -72,14 +90,14 @@
 
             <TextView
                 android:id="@+id/textViewLabelBatteryHealth"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="@string/textViewHealth" />
 
             <TextView
                 android:id="@+id/textViewHealth"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="@string/textViewHealth" />
@@ -94,14 +112,14 @@
 
             <TextView
                 android:id="@+id/textViewLabelTemp"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="@string/textViewTemp" />
 
             <TextView
                 android:id="@+id/textViewTemperature"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="@string/textViewTemp" />
@@ -116,14 +134,14 @@
 
             <TextView
                 android:id="@+id/textViewLabelPlug"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="@string/textViewPlugged" />
 
             <TextView
                 android:id="@+id/textViewPlugged"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="@string/textViewPlugged" />
@@ -138,14 +156,14 @@
 
             <TextView
                 android:id="@+id/textViewLabelWifi"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="@string/textViewWifi" />
 
             <TextView
                 android:id="@+id/textViewWifi"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="@string/textViewWifi" />
@@ -160,7 +178,7 @@
 
             <TextView
                 android:id="@+id/textViewLabelMobileData"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="@string/textViewMobile"
@@ -168,7 +186,7 @@
 
             <TextView
                 android:id="@+id/textViewMobile"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="@string/textViewMobile" />
@@ -183,14 +201,14 @@
 
             <TextView
                 android:id="@+id/textViewLabelCarrier"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="@string/textViewNetwork" />
 
             <TextView
                 android:id="@+id/textViewNetwork"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="@string/textViewNetwork" />
@@ -205,14 +223,14 @@
 
             <TextView
                 android:id="@+id/textViewLabelFreeSpace"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Free Space" />
+                android:text="@string/free_space" />
 
             <TextView
                 android:id="@+id/textViewFreeSpace"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="" />
@@ -227,7 +245,7 @@
 
             <TextView
                 android:id="@+id/textViewLabelBalance"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="@string/textViewBalance" />
@@ -235,7 +253,7 @@
             <ProgressBar
                 android:id="@+id/progressBar"
                 style="?android:attr/progressBarStyle"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="22dp"
@@ -248,12 +266,11 @@
 
             <Button
                 android:id="@+id/btn_normal_sms"
-                android:layout_width="128dp"
+                android:layout_width="18dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:drawableLeft="@android:drawable/stat_notify_sync_noanim"
-                tools:layout_editor_absoluteX="204dp"
-                tools:layout_editor_absoluteY="132dp" />
+                android:drawableStart="@android:drawable/stat_notify_sync_noanim" />
+
 
         </TableRow>
 
@@ -309,6 +326,7 @@
         </TableRow>
 
 
+
     </TableLayout>
 
 
@@ -331,15 +349,15 @@
         <TextView
             android:id="@+id/textView"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_marginBottom="8dp"
             android:layout_marginTop="8dp"
-            android:layout_weight="1"
             android:editable="false"
             android:visibility="visible"
             app:layout_constraintBottom_toTopOf="@+id/linearLayout"
             app:layout_constraintTop_toBottomOf="@+id/tableLayout2"
-            tools:layout_editor_absoluteX="154dp" />
+            tools:layout_editor_absoluteX="154dp"
+            tools:ignore="Deprecated" />
     </ScrollView>
 
     <LinearLayout
@@ -361,21 +379,21 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="START" />
+            android:text="@string/start" />
 
         <Button
             android:id="@+id/buttonStop"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="STOP" />
+            android:text="@string/stop" />
 
         <Button
             android:id="@+id/buttonInfo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="INFO" />
+            android:text="@string/info" />
 
         <CheckBox
             android:id="@+id/checkBox"
@@ -383,7 +401,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:onClick="toggleSubscription"
-            android:text="Subscribe"
+            android:text="@string/subscribe"
             android:dependency="switch_monitor_mode"/>
 
     </LinearLayout>

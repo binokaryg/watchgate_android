@@ -1,4 +1,5 @@
-<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+<PreferenceScreen
+    xmlns:app="http://schemas.android.com/apk/res-auto">
     <Preference
         app:fragment="com.binokary.watchgate.SettingsActivity$GeneralPreferenceFragment"
         app:icon="@drawable/ic_info_black_24dp"
