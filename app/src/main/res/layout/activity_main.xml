@@ -269,7 +269,9 @@
                 android:layout_width="18dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:drawableStart="@android:drawable/stat_notify_sync_noanim" />
+                android:drawableStart="@android:drawable/stat_notify_sync_noanim"
+                android:text="@string/refresh"
+                android:textColor="#FFFFFF" />
 
 
         </TableRow>
