@@ -58,13 +58,6 @@
         android:title="SMS Pack Activated Message Regex"
         app:useSimpleSummaryProvider="true" />
     <EditTextPreference
-        android:defaultValue="@string/pref_stitch_update_func_default"
-        android:key="pref_stitch_update_func"
-        android:selectAllOnFocus="true"
-        android:singleLine="true"
-        android:title="Stitch Update Function"
-        app:useSimpleSummaryProvider="true" />
-    <EditTextPreference
         android:defaultValue="@string/pref_critical_balance_msg_slack_default"
         android:key="pref_critical_balance_msg_slack"
         android:selectAllOnFocus="true"
@@ -81,12 +74,24 @@
 
     <EditTextPreference
         android:defaultValue=""
-        android:inputType="text"
-        android:key="realm_key_override"
+        android:inputType="textUri"
+        android:key="pref_backend_url"
         android:maxLines="1"
         android:selectAllOnFocus="true"
         android:singleLine="true"
-        android:title="Realm API Key"
+        android:title="Backend API URL"
+        android:summary="URL of your self-hosted backend endpoint (e.g., https://your-server.com/api/status)"
+        app:useSimpleSummaryProvider="true" />
+
+    <EditTextPreference
+        android:defaultValue=""
+        android:inputType="text"
+        android:key="pref_api_key"
+        android:maxLines="1"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="API Key"
+        android:summary="API key for authentication with your backend"
         app:useSimpleSummaryProvider="true" />
 
 </PreferenceScreen>

@@ -17,6 +17,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Locale;
+import java.util.Objects;
 
 import static android.content.Context.MODE_PRIVATE;
 
@@ -34,7 +35,7 @@ public class SMSReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         //Log.d(TAG, "Result Code: " + getResultCode());
 
-        if (intent.getAction().equals(Telephony.Sms.Intents.SMS_RECEIVED_ACTION)) {
+        if (Objects.equals(intent.getAction(), Telephony.Sms.Intents.SMS_RECEIVED_ACTION)) {
             Log.d(TAG, "sReceiver: Broadcast received");
 
             stats = context.getSharedPreferences(PREF_STATS, MODE_PRIVATE).edit();
@@ -61,6 +62,7 @@ public class SMSReceiver extends BroadcastReceiver {
                     smsSender = smsMessage.getOriginatingAddress();
                 }
 
+                assert smsSender != null;
                 if (smsSender.length() > 9) //SMS from user
                 {
                     countSMSIn += 1;
@@ -103,7 +105,7 @@ public class SMSReceiver extends BroadcastReceiver {
                                 SlackHelper.sendMessage(context, jsonBody);
                             } catch (
                                     JSONException e) {
-                                Log.e(TAG, e.getMessage());
+                                Log.e(TAG, Objects.requireNonNull(e.getMessage()));
                             }
                         }
                     }
@@ -146,7 +148,7 @@ public class SMSReceiver extends BroadcastReceiver {
                                             SlackHelper.sendMessage(context, jsonBody);
                                         } catch (
                                                 JSONException e) {
-                                            Log.e(TAG, e.getMessage());
+                                            Log.e(TAG, Objects.requireNonNull(e.getMessage()));
                                         }
                                     }
                                     Log.d(TAG, "Balance is " + balance);
@@ -236,8 +238,8 @@ public class SMSReceiver extends BroadcastReceiver {
                     }
 
                     //Clear any waiting tasks before enqueuing new one
-                    WorkerUtils.clearTasks(Constants.REPORT_ONE_WAIT_TAG);
-                    WorkerUtils.enqueueOneTimeStitchReportingWork(instanceName, reportOneIntervalMin, initialDelayInSeconds);
+                    WorkerUtils.clearTasks(context, Constants.REPORT_ONE_WAIT_TAG);
+                    WorkerUtils.enqueueOneTimeReportingWork(context, instanceName, reportOneIntervalMin, initialDelayInSeconds);
 
 
                 }
@@ -267,7 +269,7 @@ public class SMSReceiver extends BroadcastReceiver {
                     SlackHelper.sendMessage(context, jsonBody);
                 } catch (
                         JSONException e) {
-                    Log.e(TAG, e.getMessage());
+                    Log.e(TAG, Objects.requireNonNull(e.getMessage()));
                 }
             }
             if (mSharedPreferences.getBoolean("switch_sms_notification", false)) {

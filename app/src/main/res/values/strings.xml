@@ -43,7 +43,6 @@
     <string name="pref_sms_pack_info_regex_default">.*free sms.*?([0-9,]+).*</string>
     <string name="pref_sms_pack_active_default">.*SMS.*activated.*</string>
     <string name="pref_sms_pack_null_regex_default">.*no free resource.*</string>
-    <string name="pref_stitch_update_func_default">updateStatusForObj</string>
     <string name="pref_header_variable">Advanced</string>
     <string name="pref_header_query">Balance Query Settings</string>
     <string name="pref_header_sms">SMS Pack Settings</string>
@@ -59,7 +58,6 @@
     <string name="last_sms_display">Last SMS in: %s</string>
     <string name="pref_critical_balance_msg_slack_default"> :red_circle: &lt;!channel&gt; Balance is Rs. </string>
     <string name="slack_url">https://google.com</string>
-    <string name="realm_key_default">watchgate-code</string>
     <string name="info">INFO</string>
     <string name="start">START</string>
     <string name="stop">STOP</string>

@@ -16,6 +16,7 @@
 
 package com.binokary.watchgate.toilers;
 
+import android.content.Context;
 import android.util.Log;
 
 import androidx.work.Constraints;
@@ -35,7 +36,6 @@ import static com.binokary.watchgate.Constants.REPORT_ONE_WAIT_TAG;
 import static com.binokary.watchgate.Constants.REPORT_TAG;
 import static com.binokary.watchgate.Constants.SMS_ONE_TAG;
 import static com.binokary.watchgate.Constants.SMS_TAG;
-import static io.realm.Realm.getApplicationContext;
 
 
 public final class WorkerUtils {
@@ -44,7 +44,7 @@ public final class WorkerUtils {
     private WorkerUtils() {
     }
 
-    public static void enqueueSMSSendingWork(String recipient, String msg, Integer minutes, Integer minMinutes) {
+    public static void enqueueSMSSendingWork(Context context, String recipient, String msg, Integer minutes, Integer minMinutes) {
 
         Data smsData = new Data.Builder()
                 .putString("RECIPIENT", recipient)
@@ -58,11 +58,17 @@ public final class WorkerUtils {
                         .addTag(SMS_TAG)
                         .build();
         Log.d(TAG, "Enqueuing Unique Periodic SMS Sending Task with TAG: " + SMS_TAG);
-        WorkManager.getInstance(Objects.requireNonNull(getApplicationContext())).enqueueUniquePeriodicWork(SMS_TAG, ExistingPeriodicWorkPolicy.KEEP, periodicSMSSendingRequest);
+        WorkManager.getInstance(Objects.requireNonNull(context)).enqueueUniquePeriodicWork(SMS_TAG, ExistingPeriodicWorkPolicy.KEEP, periodicSMSSendingRequest);
 
     }
 
     public static void enqueueOneTimeSMSSendingWork(String recipient, String msg) {
+        Context context = com.binokary.watchgate.Application.getContext();
+        if (context == null) {
+            Log.e(TAG, "Context is null, cannot enqueue SMS sending work");
+            return;
+        }
+
 
         Data smsData = new Data.Builder()
                 .putString("RECIPIENT", recipient)
@@ -75,63 +81,63 @@ public final class WorkerUtils {
                         .addTag(SMS_ONE_TAG)
                         .build();
         Log.d(TAG, "Enqueuing One Time SMS Sending Task with TAG: " + SMS_ONE_TAG);
-        WorkManager.getInstance(Objects.requireNonNull(getApplicationContext())).enqueue(oneTimeSMSSendingRequest);
+        WorkManager.getInstance(Objects.requireNonNull(context)).enqueue(oneTimeSMSSendingRequest);
     }
 
 
-    public static void enqueueStitchReportingWork(String instance, Integer minutes, Integer minMinutes, Integer minOneMinutes) {
+    public static void enqueueReportingWork(Context context, String instance, Integer minutes, Integer minMinutes, Integer minOneMinutes) {
 
-        Data stitchReportData = new Data.Builder()
+        Data reportData = new Data.Builder()
                 .putString("INSTANCE", instance)
                 .putInt("MIN", minMinutes)
                 .putInt("MIN_ONE", minOneMinutes)
                 .build();
 
-        Constraints stitchReportingConstraints = new Constraints.Builder()
+        Constraints reportingConstraints = new Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.CONNECTED)
                 .build();
 
-        final PeriodicWorkRequest stitchReportingRequest =
-                new PeriodicWorkRequest.Builder(StitchReporter.class, minutes, TimeUnit.MINUTES)
-                        .setConstraints(stitchReportingConstraints)
-                        .setInputData(stitchReportData)
+        final PeriodicWorkRequest reportingRequest =
+                new PeriodicWorkRequest.Builder(StatsReporter.class, minutes, TimeUnit.MINUTES)
+                        .setConstraints(reportingConstraints)
+                        .setInputData(reportData)
                         .addTag(REPORT_TAG)
                         .build();
-        Log.d(TAG, "Enqueuing Unique Periodic Stitch Reporting Task for instance " + instance + " with TAG: " + REPORT_TAG);
-        WorkManager.getInstance(Objects.requireNonNull(getApplicationContext())).enqueueUniquePeriodicWork(REPORT_TAG, ExistingPeriodicWorkPolicy.KEEP, stitchReportingRequest);
+        Log.d(TAG, "Enqueuing Unique Periodic Reporting Task for instance " + instance + " with TAG: " + REPORT_TAG);
+        WorkManager.getInstance(Objects.requireNonNull(context)).enqueueUniquePeriodicWork(REPORT_TAG, ExistingPeriodicWorkPolicy.KEEP, reportingRequest);
 
     }
 
-    public static void enqueueOneTimeStitchReportingWork(String instance, Integer minOneMinutes, Integer initialDelayInSeconds) {
+    public static void enqueueOneTimeReportingWork(Context context, String instance, Integer minOneMinutes, Integer initialDelayInSeconds) {
 
-        Data stitchReportData = new Data.Builder()
+        Data reportData = new Data.Builder()
                 .putString("INSTANCE", instance)
                 .putBoolean("ONETIME", true)
                 .putInt("MIN_ONE", minOneMinutes)
                 .build();
 
-        Constraints stitchReportingConstraints = new Constraints.Builder()
+        Constraints reportingConstraints = new Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.CONNECTED)
                 .build();
 
         //Use waiting tag if initial Delay is more than 0
         String tag = initialDelayInSeconds > 0 ? REPORT_ONE_WAIT_TAG : REPORT_ONE_TAG;
 
-        final OneTimeWorkRequest stitchReportingRequest =
-                new OneTimeWorkRequest.Builder(StitchReporter.class)
-                        .setConstraints(stitchReportingConstraints)
-                        .setInputData(stitchReportData)
+        final OneTimeWorkRequest reportingRequest =
+                new OneTimeWorkRequest.Builder(StatsReporter.class)
+                        .setConstraints(reportingConstraints)
+                        .setInputData(reportData)
                         .setInitialDelay(initialDelayInSeconds, TimeUnit.SECONDS)
                         .addTag(tag)
                         .build();
-        Log.d(TAG, "Enqueuing One Time Stitch Reporting Task for instance " + instance + " with TAG: " + REPORT_ONE_TAG);
-        WorkManager.getInstance(Objects.requireNonNull(getApplicationContext())).enqueue(stitchReportingRequest);
+        Log.d(TAG, "Enqueuing One Time Reporting Task for instance " + instance + " with TAG: " + REPORT_ONE_TAG);
+        WorkManager.getInstance(Objects.requireNonNull(context)).enqueue(reportingRequest);
     }
 
-    public static int clearTasks(String taskTAG) {
+    public static int clearTasks(Context context, String taskTAG) {
         try {
-            WorkManager.getInstance(Objects.requireNonNull(getApplicationContext())).cancelAllWorkByTag(taskTAG);
-            WorkManager.getInstance(getApplicationContext()).pruneWork();
+            WorkManager.getInstance(Objects.requireNonNull(context)).cancelAllWorkByTag(taskTAG);
+            WorkManager.getInstance(context).pruneWork();
             return 1;
         } catch (Exception ex) {
             return 0;

@@ -155,8 +155,8 @@ public class MainActivity extends AppCompatActivity {
 
             mWorkManager = WorkManager.getInstance(getApplicationContext());
 
-            WorkerUtils.enqueueSMSSendingWork(mSharedPreferences.getString("pref_sms_destination", "1415"), smsQueryMsg, smsInterval, smsIntervalMin);
-            WorkerUtils.enqueueStitchReportingWork(instanceName, reportInterval, reportIntervalMin, reportOneIntervalMin);
+            WorkerUtils.enqueueSMSSendingWork(getApplicationContext(), mSharedPreferences.getString("pref_sms_destination", "1415"), smsQueryMsg, smsInterval, smsIntervalMin);
+            WorkerUtils.enqueueReportingWork(getApplicationContext(), instanceName, reportInterval, reportIntervalMin, reportOneIntervalMin);
         });
 
 
@@ -175,7 +175,7 @@ public class MainActivity extends AppCompatActivity {
                     Log.d(TAG, "Work state of gatewatch" + i + " : " + workList.get(i).getState());
                 }
 
-                int clearStatus = WorkerUtils.clearTasks(Constants.SMS_TAG);
+                int clearStatus = WorkerUtils.clearTasks(getApplicationContext(), Constants.SMS_TAG);
                 Log.d(TAG, " SMS sending tasks cleared " + clearStatus);
 
                 mWorkLiveData = mWorkManager.getWorkInfosByTag(Constants.REPORT_TAG);
@@ -183,8 +183,8 @@ public class MainActivity extends AppCompatActivity {
                     Log.d(TAG, "Work state of gatewatch" + i + " : " + workList.get(i).getState());
                 }
 
-                clearStatus = WorkerUtils.clearTasks(Constants.REPORT_TAG);
-                Log.d(TAG, " Stitch reporting tasks cleared " + clearStatus);
+                clearStatus = WorkerUtils.clearTasks(getApplicationContext(), Constants.REPORT_TAG);
+                Log.d(TAG, " Backend reporting tasks cleared " + clearStatus);
             } catch (ExecutionException | InterruptedException e) {
                 throw new RuntimeException(e);
             }
@@ -221,7 +221,7 @@ public class MainActivity extends AppCompatActivity {
             try {
                 List<WorkInfo> workList = mWorkLiveData.get();
                 for (int i = 0; i < Objects.requireNonNull(workList).size(); i++) {
-                    Log.d(TAG, "Work state of Stitch Reporters " + i + " : " + workList.get(i).getState());
+                    Log.d(TAG, "Work state of Reporters " + i + " : " + workList.get(i).getState());
                     infoBuilder
                             .append("SR")
                             .append(i)
@@ -260,7 +260,7 @@ public class MainActivity extends AppCompatActivity {
             try {
                 List<WorkInfo> workList = mWorkLiveData.get();
                 for (int i = 0; i < Objects.requireNonNull(workList).size(); i++) {
-                    Log.d(TAG, "Work state of one time Stitch reporters " + i + " : " + workList.get(i).getState());
+                    Log.d(TAG, "Work state of one time reporters " + i + " : " + workList.get(i).getState());
                     infoBuilder.append("S1R").append(i);
                     infoBuilder.append(": ");
                     infoBuilder.append(workList.get(i).getState());
@@ -279,7 +279,7 @@ public class MainActivity extends AppCompatActivity {
             try {
                 List<WorkInfo> workList = mWorkLiveData.get();
                 for (int i = 0; i < Objects.requireNonNull(workList).size(); i++) {
-                    Log.d(TAG, "Work state of Stitch reporters with wait time " + i + " : " + workList.get(i).getState());
+                    Log.d(TAG, "Work state of reporters with wait time " + i + " : " + workList.get(i).getState());
                     infoBuilder.append("S1WR").append(i);
                     infoBuilder.append(": ");
                     infoBuilder.append(workList.get(i).getState());
