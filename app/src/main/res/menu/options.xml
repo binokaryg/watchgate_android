@@ -3,5 +3,5 @@
 
     <item android:id="@+id/settings"
         android:icon="@drawable/ic_sync_black_24dp"
-        android:title="Settings" />
+        android:title="@string/settings" />
 </menu>

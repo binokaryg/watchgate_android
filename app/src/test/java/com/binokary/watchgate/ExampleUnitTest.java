@@ -16,13 +16,11 @@ import static org.junit.Assert.assertTrue;
  */
 public class ExampleUnitTest {
 
-    String SMSQueryMsg_Prepaid = "Dear Customer, your current balance is Rs 614.98,Expiry Date is 2020-06-13 23:59:59. Please dial *1415# to subscribe and query data package.-NT";
+    final String SMSQueryMsg_Prepaid = "Dear Customer, your current balance is Rs 614.98,Expiry Date is 2020-06-13 23:59:59. Please dial *1415# to subscribe and query data package.-NT";
     String SMSQueryMsg_Postpaid = "Dear customer, your due amount is Rs 6,709.69, and your available credit is Rs 2,869.19.  Please dial *1415# to subscribe and query data package.-NT";
     String SMSQueryMsg_NCell = "Hi, Your Balance: RS. 828.53 ,Loan balance: Rs. 0.\n" +
             "You have 1971.22 MB Of Viber Data expiring on 2021-12-15 18:06:19,9799.08 MB Of All Time Data expiring on 2021-12-15 18:06:19,left.Ncell";
-    String SMSPackInfo = "Dear customer, your current free sms is 1357 piece";
-    //String SMSPackInfo0 = "Dear customer, your current free sms is 0 piece";
-    //String SMSPackNo = "Dear Customer, you have no free resource available. ";
+    final String SMSPackInfo = "Dear customer, your current free sms is 1357 piece";
 
     @Test
     public void checkIntParse() {
@@ -47,19 +45,19 @@ public class ExampleUnitTest {
         while (matcher.find())
         {
             //System.out.println(matcher.group(1));
-            assertEquals(matcher.group(1),"0");
+            assertEquals("0", matcher.group(1));
         }
     }
 
     @Test
     public void getPostpaidDue2() {
-        String myData = "Dear customer, your due amount is Rs 7368.56, and your available credit is Rs 37282.72. Please dial *1415# to subscribe and query data package.-NT";
+        String myData = SMSQueryMsg_Postpaid;
         Pattern pattern = Pattern.compile(".*your due.*?([0-9,]+).*");
         Matcher matcher = pattern.matcher(myData);
         while (matcher.find())
         {
             //System.out.println(matcher.group(1));
-            assertEquals(matcher.group(1),"7368");
+            assertEquals("6,709", matcher.group(1));
         }
     }
 
@@ -71,7 +69,7 @@ public class ExampleUnitTest {
         while (matcher.find())
         {
             //System.out.println(matcher.group(1));
-            assertEquals(matcher.group(1),"0");
+            assertEquals("0", matcher.group(1));
         }
     }
 
@@ -83,59 +81,54 @@ public class ExampleUnitTest {
         while (matcher.find())
         {
             //System.out.println(matcher.group(1));
-            assertEquals(matcher.group(1),"2822");
+            assertEquals("2822", matcher.group(1));
         }
     }
 
     @Test
     public void getPrepaid() {
-        String myData = SMSQueryMsg_Prepaid;
         Pattern pattern = Pattern.compile(".*current balance.*?([0-9,]+).*");
-        Matcher matcher = pattern.matcher(myData);
+        Matcher matcher = pattern.matcher(SMSQueryMsg_Prepaid);
         while (matcher.find())
         {
             //System.out.println(matcher.group(1));
-            assertEquals(matcher.group(1),"614");
+            assertEquals("614", matcher.group(1));
         }
     }
 
     @Test
     public void getNCell() {
-        String myData = SMSQueryMsg_Prepaid;
         Pattern pattern = Pattern.compile(".*Your Balance:.*?([0-9,]+).*");
-        Matcher matcher = pattern.matcher(myData);
+        Matcher matcher = pattern.matcher(SMSQueryMsg_Prepaid);
         while (matcher.find())
         {
             //System.out.println(matcher.group(1));
-            assertEquals(matcher.group(1),"828");
+            assertEquals("828", matcher.group(1));
         }
     }
 
     @Test
     public void matchPrepaid() {
-        String myData = SMSQueryMsg_Prepaid;
         Pattern pattern = Pattern.compile(".*current balance.*?([0-9,]+).*");
-        Matcher matcher = pattern.matcher(myData);
+        Matcher matcher = pattern.matcher(SMSQueryMsg_Prepaid);
         assertTrue(matcher.matches());
     }
 
     @Test
     public void matchSMSPackMsg() {
-        String myData = SMSPackInfo;
         Pattern pattern = Pattern.compile(".*free sms.*?([0-9,]+).*");
-        Matcher matcher = pattern.matcher(myData);
+        Matcher matcher = pattern.matcher(SMSPackInfo);
         assertTrue(matcher.matches());
     }
 
     @Test
     public void getSMSPackInfo() {
-        String myData = SMSPackInfo;
         Pattern pattern = Pattern.compile(".*free sms.*?([0-9,]+).*");
-        Matcher matcher = pattern.matcher(myData);
+        Matcher matcher = pattern.matcher(SMSPackInfo);
         while (matcher.find())
         {
             //System.out.println(matcher.group(1));
-            assertEquals(matcher.group(1),"1357");
+            assertEquals("1357", matcher.group(1));
         }
     }
 

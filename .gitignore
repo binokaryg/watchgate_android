@@ -154,5 +154,5 @@ crashlytics-build.properties
 *.war
 *.ear
 /app/google-services.json
-/app/src/main/res/values/mongodb-stitch.xml
+/app/src/main/res/values/variables.xml
 /app/release/output-metadata.json

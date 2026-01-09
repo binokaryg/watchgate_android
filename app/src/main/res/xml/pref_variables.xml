@@ -73,7 +73,7 @@
         app:useSimpleSummaryProvider="true" />
 
     <EditTextPreference
-        android:defaultValue=""
+        android:defaultValue="@string/api_url"
         android:inputType="textUri"
         android:key="pref_backend_url"
         android:maxLines="1"
@@ -84,7 +84,7 @@
         app:useSimpleSummaryProvider="true" />
 
     <EditTextPreference
-        android:defaultValue=""
+        android:defaultValue="@string/api_key"
         android:inputType="text"
         android:key="pref_api_key"
         android:maxLines="1"

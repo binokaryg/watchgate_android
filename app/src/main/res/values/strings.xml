@@ -1,8 +1,5 @@
 <resources>
     <string name="app_name">watchgate</string>
-    <string name="editText">text</string>
-    <string name="buttonGet">Get</string>
-    <string name="buttonAdd">ADD</string>
     <string name="textViewHealth">Health</string>
     <string name="textViewTemp">Temperature</string>
     <string name="textViewPlugged">Plugged</string>
@@ -10,19 +7,13 @@
     <string name="textViewMobile">Mobile Data</string>
     <string name="textViewNetwork">Network</string>
     <string name="textViewLevel">Battery Level</string>
-    <string name="editTextHint">Edit Text</string>
     <string name="permission_alert_dialog_title">Alert</string>
     <string name="permission_dialog_message">Please allow all access</string>
     <string name="action_ok">OK</string>
-    <string name="error_invalid_phone_number">Invalid Phone Number</string>
-    <string name="btn_normal_sms">SMS</string>
-    <string name="btn_conditional_sms">CSMS</string>
     <string name="toast_sending_sms">Sending SMS to </string>
-    <string name="buttonUpdate">Update</string>
     <string name="textViewBalance">Balance</string>
     <string name="title_activity_settings">Settings</string>
     <string name="watchgate_title">Watch Gate</string>
-    <string name="msg_token_fmt">FCM Token generated</string>
 
     <!-- Strings related to Settings -->
     <string name="pref_header_general">General Settings</string>
@@ -64,4 +55,5 @@
     <string name="free_space">Free Space</string>
     <string name="refresh">refresh</string>
     <string name="textViewInstance">Instance</string>
+    <string name="settings">Settings</string>
 </resources>
