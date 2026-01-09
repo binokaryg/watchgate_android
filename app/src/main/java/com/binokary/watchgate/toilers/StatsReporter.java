@@ -19,6 +19,7 @@ import com.android.volley.Response;
 
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.RequestFuture;
 import com.android.volley.toolbox.Volley;
 import com.binokary.watchgate.Constants;
 import com.binokary.watchgate.PrefStrings;
@@ -30,6 +31,9 @@ import org.json.JSONException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import static android.content.Context.MODE_PRIVATE;
 
@@ -142,42 +146,42 @@ public class StatsReporter extends Worker {
                             return Result.failure();
                         }
                         // Use Volley to make HTTP POST request with synchronous execution
+
+                        RequestFuture<JSONObject> future = RequestFuture.newFuture();
                         RequestQueue queue = Volley.newRequestQueue(applicationContext);
-                        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
+
+                        JsonObjectRequest request = new JsonObjectRequest(
                                 Request.Method.POST,
                                 backendUrl,
                                 statusData,
-                                response -> {
-                                    Log.v(TAG, "Updated instance successfully");
-                                    Log.v(TAG, response.toString());
-                                    stats.putLong(PrefStrings.UPD_DATE, System.currentTimeMillis());
-                                    stats.apply();
-                                },
-                                error -> {
-                                    Log.e(TAG, "Failed to update for " + (oneTime ? "One Time" : "Periodic") + " request", error);
-                                    if (error.networkResponse != null) {
-                                        Log.e(TAG, "Response code: " + error.networkResponse.statusCode);
-                                    }
-                                }) {
+                                future,
+                                future
+                        ) {
                             @Override
                             public Map<String, String> getHeaders() {
                                 Map<String, String> headers = new HashMap<>();
                                 headers.put("Content-Type", "application/json");
                                 if (!apiKey.isEmpty()) {
-                                    headers.put("Authorization", "Bearer " + apiKey);
+                                    headers.put("Authorization", "Bearer " + apiKey.trim());
                                 }
                                 return headers;
                             }
                         };
 
-                        // Set a timeout for the request
-                        jsonObjectRequest.setRetryPolicy(new com.android.volley.DefaultRetryPolicy(
-                                30000,  // 30 seconds timeout
-                                0,      // no retries
-                                com.android.volley.DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
-                        ));
+                        queue.add(request);
 
-                        queue.add(jsonObjectRequest);
+                        try {
+                            JSONObject response = future.get(30, TimeUnit.SECONDS);
+
+                            Log.v(TAG, "Updated instance successfully: " + response.toString());
+                            stats.putLong(PrefStrings.UPD_DATE, System.currentTimeMillis());
+                            stats.apply();
+                            return Result.success();
+
+                        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+                            Log.e(TAG, "Sync Volley Request Failed: " + e.getMessage());
+                            return Result.retry(); // Now you can actually retry on failure!
+                        }
 
                         // Note: Volley runs asynchronously. For a production app, consider using
                         // a synchronous HTTP client or implementing proper callback handling.
