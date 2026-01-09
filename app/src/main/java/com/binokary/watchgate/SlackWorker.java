@@ -10,11 +10,9 @@ import androidx.work.WorkerParameters;
 import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.Response;
-import com.android.volley.toolbox.HttpHeaderParser;
+import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
-
-import org.json.JSONObject;
 
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CountDownLatch;
@@ -64,8 +62,10 @@ public class SlackWorker extends Worker {
 
                 @Override
                 protected Response<String> parseNetworkResponse(NetworkResponse response) {
-                    if (response != null) {
-                        return Response.success(String.valueOf(response.statusCode), HttpHeaderParser.parseCacheHeaders(response));
+                    // PROBLEM FIXED: Value 'response' is always 'null' check.
+                    // If response is null, super.parseNetworkResponse(response) would crash.
+                    if (response == null || response.data == null) {
+                        return Response.error(new VolleyError("Empty response"));
                     }
                     return super.parseNetworkResponse(response);
                 }
@@ -75,7 +75,11 @@ public class SlackWorker extends Worker {
             Volley.newRequestQueue(getApplicationContext()).add(stringRequest);
 
             // 4. Wait for Volley to finish (Max 30 seconds)
-            latch.await(30, TimeUnit.SECONDS);
+            boolean completed = latch.await(30, TimeUnit.SECONDS);
+            if (!completed) {
+                Log.e(TAG, "Slack request timed out");
+                return Result.retry();
+            }
 
         } catch (Exception e) {
             Log.e(TAG, "Worker Exception: " + e.getMessage());

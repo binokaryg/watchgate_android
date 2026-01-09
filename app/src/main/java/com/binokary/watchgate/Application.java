@@ -4,15 +4,14 @@ import android.content.Context;
 
 public class Application extends android.app.Application {
 
-    private static Context context;//TODO: Is this memory leak?
-
+    private static Application instance;
     @Override
     public void onCreate() {
         super.onCreate();
-        context = getApplicationContext();
+        instance = this;
     }
 
     public static Context getContext() {
-        return context;
+        return instance.getApplicationContext();
     }
 }

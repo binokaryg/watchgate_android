@@ -6,7 +6,6 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkCapabilities;
-import android.net.NetworkInfo;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.BatteryManager;
@@ -27,8 +26,6 @@ import static com.binokary.watchgate.Constants.PREF_STATS;
 
 public final class StatsHelper {
     public static final String TAG = Constants.MAIN_TAG + StatsHelper.class.getSimpleName();
-    protected static ConnectivityManager cm;
-    protected static TelephonyManager tm;
     static SharedPreferences.Editor stats;
 
     public StatsHelper() {
@@ -37,11 +34,11 @@ public final class StatsHelper {
     public static void CheckAndUpdateStats(Context appContext) {
         stats = appContext.getSharedPreferences(PREF_STATS, MODE_PRIVATE).edit();
         int battery = -1;
-        boolean plugged = false;
-        int temp = -1;
-        int health = -1;
+        boolean plugged;
+        int temp;
+        int health;
         String wifi = "N/A";
-        String carrierName = "N/A";
+        String carrierName;
         int wifiSignalStrength = -1;
 
         try {
@@ -73,32 +70,21 @@ public final class StatsHelper {
 
         // Connection
         try {
-            cm = (ConnectivityManager) appContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+            ConnectivityManager cm = (ConnectivityManager) appContext.getSystemService(Context.CONNECTIVITY_SERVICE);
             int result = 0; // 0: none; 1: mobile; 2: wifi; 3: vpn
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                if (cm != null) {
-                    android.net.Network network = cm.getActiveNetwork();
-                    if (network != null) {
-                        NetworkCapabilities capabilities = cm.getNetworkCapabilities(network);
-                        if (capabilities != null) {
-                            if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
-                                result = 2;
-                            } else if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
-                                result = 1;
-                            } else if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_VPN)) {
-                                result = 3;
-                            }
+            if (cm != null) {
+                android.net.Network network = cm.getActiveNetwork();
+                if (network != null) {
+                    NetworkCapabilities capabilities = cm.getNetworkCapabilities(network);
+                    if (capabilities != null) {
+                        if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
+                            result = 2;
+                        } else if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
+                            result = 1;
+                        } else if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_VPN)) {
+                            result = 3;
                         }
-                    }
-                }
-            } else {
-                if (cm != null) {
-                    NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-                    if (activeNetwork != null && activeNetwork.isConnected()) {
-                        if (activeNetwork.getType() == ConnectivityManager.TYPE_WIFI) result = 2;
-                        else if (activeNetwork.getType() == ConnectivityManager.TYPE_MOBILE) result = 1;
-                        else if (activeNetwork.getType() == ConnectivityManager.TYPE_VPN) result = 3;
                     }
                 }
             }
@@ -135,10 +121,10 @@ public final class StatsHelper {
         }
 
         // Mobile Network
-        int mobileSignalStrength = -1; // Default to -1 (unknown)
+        int mobileSignalStrength; // Default to -1 (unknown)
 
         try {
-            tm = (TelephonyManager) appContext.getSystemService(TELEPHONY_SERVICE);
+            TelephonyManager tm = (TelephonyManager) appContext.getSystemService(TELEPHONY_SERVICE);
             if (tm != null) {
                 // 1. Get Carrier Name
                 carrierName = tm.getNetworkOperatorName();

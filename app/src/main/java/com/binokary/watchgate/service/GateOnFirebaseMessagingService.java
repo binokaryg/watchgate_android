@@ -13,16 +13,11 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
-import androidx.work.BackoffPolicy;
-import androidx.work.Data;
-import androidx.work.OneTimeWorkRequest;
-import androidx.work.WorkManager;
 
 import com.binokary.watchgate.Constants;
 import com.binokary.watchgate.MainActivity;
 import com.binokary.watchgate.NotificationID;
 import com.binokary.watchgate.R;
-import com.binokary.watchgate.SlackWorker;
 import com.binokary.watchgate.toilers.WorkerUtils;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
@@ -31,7 +26,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 
 public class GateOnFirebaseMessagingService extends FirebaseMessagingService {
 
@@ -81,7 +75,7 @@ public class GateOnFirebaseMessagingService extends FirebaseMessagingService {
                     Intent launchIntent = getPackageManager().getLaunchIntentForPackage(packageName);
                     if (launchIntent != null) {
                         startActivity(launchIntent);//null pointer check in case package name was not found
-                        Log.d(TAG, "Attempted START : " + launchIntent.toString());
+                        Log.d(TAG, "Attempted START : " + launchIntent);
                     } else {
                         Log.e(TAG, "Could not attempt START: " + "intent is null");
                     }
@@ -97,7 +91,7 @@ public class GateOnFirebaseMessagingService extends FirebaseMessagingService {
                     Intent launchIntent = getPackageManager().getLaunchIntentForPackage(packageName);
                     if (launchIntent != null) {
                         startActivity(launchIntent);//null pointer check in case package name was not found
-                        Log.d(TAG, "Attempted RESTART : " + launchIntent.toString());
+                        Log.d(TAG, "Attempted RESTART : " + launchIntent);
                     } else {
                         Log.e(TAG, "Could not attempt RESTART: " + packageName + " : intent is null");
                     }
@@ -150,7 +144,7 @@ public class GateOnFirebaseMessagingService extends FirebaseMessagingService {
                 WorkerUtils.enqueueSlackWork(this, jsonBody);
             } catch (
                     JSONException e) {
-                Log.e(TAG, e.getMessage());
+                Log.e(TAG, Objects.requireNonNull(e.getMessage()));
             }
         }
     }

@@ -18,7 +18,6 @@ import org.json.JSONObject;
 
 import java.util.Locale;
 import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 
 import static android.content.Context.MODE_PRIVATE;
 
@@ -120,9 +119,6 @@ public class SMSReceiver extends BroadcastReceiver {
                         isBalanceInfo = true;
                         Toast.makeText(context, "Balance Info SMS Received: " + smsBody, Toast.LENGTH_LONG).show();
                         Log.d(TAG, "SMS detected: From " + smsSender + " With text " + smsBody);
-
-                        //lastBalanceSMSInTime = System.currentTimeMillis();
-                        //String currentDateTimeString = DateFormat.getDateTimeInstance().format(new Date());
 
 
                         try {
