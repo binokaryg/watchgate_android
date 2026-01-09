@@ -99,15 +99,18 @@ public class StatsReporter extends Worker {
                     long lastSMSInDateL = prefs.getLong(PrefStrings.LAST_SMS_IN_DATE, 0);
                     String carrierName = prefs.getString(PrefStrings.MOBILE_CARRIER, "N/A");
 
+                    java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", java.util.Locale.US);
+                    sdf.setTimeZone(java.util.TimeZone.getTimeZone("UTC"));
+
                     // Build JSON object for the backend API
 
                     JSONObject statusData = new JSONObject();
                     try {
-                        statusData.put("date", new Date(dateL).toString());
-                        statusData.put("lastSMSInDate", new Date(lastSMSInDateL).toString());
+                        statusData.put("date", sdf.format(new Date(dateL)));
+                        statusData.put("lastSMSInDate", sdf.format(new Date(lastSMSInDateL)));
                         statusData.put("id", instance);
                         if (balanceDateL > 0) { //Only if there is balance date
-                            statusData.put("balanceDate", new Date(balanceDateL).toString());
+                            statusData.put("balanceDate", sdf.format(new Date(balanceDateL)));
                             if (isPostpaid) {
                                 statusData.put("balanceDue", balanceDue);
                                 statusData.put("balanceCredit", balanceCredit);

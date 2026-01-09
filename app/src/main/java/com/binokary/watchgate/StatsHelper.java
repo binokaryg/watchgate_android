@@ -156,7 +156,7 @@ public final class StatsHelper {
     public static String DateStringFromMS(long ld) {
         Date d = new Date(ld);
         DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US);
-        df.setTimeZone(TimeZone.getDefault());
+        df.setTimeZone(TimeZone.getTimeZone("UTC"));
         return df.format(d);
     }
 
