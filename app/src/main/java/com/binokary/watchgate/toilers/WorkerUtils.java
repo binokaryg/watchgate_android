@@ -19,6 +19,7 @@ package com.binokary.watchgate.toilers;
 import android.content.Context;
 import android.util.Log;
 
+import androidx.work.BackoffPolicy;
 import androidx.work.Constraints;
 import androidx.work.Data;
 import androidx.work.ExistingPeriodicWorkPolicy;
@@ -36,6 +37,10 @@ import static com.binokary.watchgate.Constants.REPORT_ONE_WAIT_TAG;
 import static com.binokary.watchgate.Constants.REPORT_TAG;
 import static com.binokary.watchgate.Constants.SMS_ONE_TAG;
 import static com.binokary.watchgate.Constants.SMS_TAG;
+
+import com.binokary.watchgate.SlackWorker;
+
+import org.json.JSONObject;
 
 
 public final class WorkerUtils {
@@ -132,6 +137,19 @@ public final class WorkerUtils {
                         .build();
         Log.d(TAG, "Enqueuing One Time Reporting Task for instance " + instance + " with TAG: " + REPORT_ONE_TAG);
         WorkManager.getInstance(Objects.requireNonNull(context)).enqueue(reportingRequest);
+    }
+
+    public static void enqueueSlackWork(Context context, JSONObject jsonBody) {
+        Data inputData = new Data.Builder()
+                .putString("json_body", jsonBody.toString())
+                .build();
+
+        OneTimeWorkRequest slackWork = new OneTimeWorkRequest.Builder(SlackWorker.class)
+                .setInputData(inputData)
+                .setBackoffCriteria(BackoffPolicy.LINEAR, 10, TimeUnit.SECONDS)
+                .build();
+
+        WorkManager.getInstance(context).enqueue(slackWork);
     }
 
     public static int clearTasks(Context context, String taskTAG) {

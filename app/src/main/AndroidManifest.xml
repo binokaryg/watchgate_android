@@ -49,7 +49,7 @@
 
         <receiver
             android:name=".SMSReceiver"
-            android:exported="false"
+            android:exported="true"
             android:enabled="true"
             android:permission="android.permission.BROADCAST_SMS">
             <intent-filter>

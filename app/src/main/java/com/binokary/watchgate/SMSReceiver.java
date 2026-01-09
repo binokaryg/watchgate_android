@@ -18,6 +18,7 @@ import org.json.JSONObject;
 
 import java.util.Locale;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 import static android.content.Context.MODE_PRIVATE;
 
@@ -102,7 +103,7 @@ public class SMSReceiver extends BroadcastReceiver {
                                         "text",
                                         mSharedPreferences.getString("instance_name", "none").toUpperCase() +
                                                 " :money_with_wings: Topped Up");
-                                SlackHelper.sendMessage(context, jsonBody);
+                                WorkerUtils.enqueueSlackWork(context, jsonBody);
                             } catch (
                                     JSONException e) {
                                 Log.e(TAG, Objects.requireNonNull(e.getMessage()));
@@ -145,7 +146,7 @@ public class SMSReceiver extends BroadcastReceiver {
                                                     "text",
                                                     mSharedPreferences.getString("instance_name", "none").toUpperCase() +
                                                             " :money_with_wings: Topped Up. New balance is Rs. " + balance);
-                                            SlackHelper.sendMessage(context, jsonBody);
+                                            WorkerUtils.enqueueSlackWork(context, jsonBody);
                                         } catch (
                                                 JSONException e) {
                                             Log.e(TAG, Objects.requireNonNull(e.getMessage()));
@@ -266,7 +267,7 @@ public class SMSReceiver extends BroadcastReceiver {
                             mSharedPreferences.getString("instance_name", "none").toUpperCase()
                                     + mSharedPreferences.getString("pref_critical_balance_msg_slack", ": :red_circle: Low Balance: Rs ")
                                     + balanceInRs);
-                    SlackHelper.sendMessage(context, jsonBody);
+                    WorkerUtils.enqueueSlackWork(context, jsonBody);
                 } catch (
                         JSONException e) {
                     Log.e(TAG, Objects.requireNonNull(e.getMessage()));
@@ -303,4 +304,6 @@ public class SMSReceiver extends BroadcastReceiver {
             Log.e(TAG, "Error on SMS notification to user: " + ex.getMessage());
         }
     }
+
 }
+

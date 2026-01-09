@@ -8,13 +8,18 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
 import androidx.preference.EditTextPreference;
+import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
 
 import com.google.firebase.messaging.FirebaseMessaging;
 
-public class SettingsActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
+
+public class SettingsActivity extends AppCompatActivity implements
+        SharedPreferences.OnSharedPreferenceChangeListener,
+        PreferenceFragmentCompat.OnPreferenceStartFragmentCallback {
 
     private final String TAG = Constants.MAIN_TAG + "Settings";
 
@@ -28,6 +33,14 @@ public class SettingsActivity extends AppCompatActivity implements SharedPrefere
                     .replace(R.id.settings, new SettingsActivity.SettingsFragment())
                     .commit();
         }
+
+        // Listener to reset the title when going back
+        getSupportFragmentManager().addOnBackStackChangedListener(() -> {
+            if (getSupportFragmentManager().getBackStackEntryCount() == 0) {
+                setTitle(R.string.title_activity_settings);
+            }
+        });
+
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
@@ -35,9 +48,41 @@ public class SettingsActivity extends AppCompatActivity implements SharedPrefere
     }
 
     @Override
+    public boolean onPreferenceStartFragment(PreferenceFragmentCompat caller, Preference pref) {
+        // Instantiate the new Fragment
+        final Bundle args = pref.getExtras();
+        final Fragment fragment = getSupportFragmentManager().getFragmentFactory().instantiate(
+                getClassLoader(),
+                pref.getFragment());
+        fragment.setArguments(args);
+        fragment.setTargetFragment(caller, 0);
+
+        // Replace the existing Fragment with the new one
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.settings, fragment)
+                .addToBackStack(null) // <--- THIS FIXES THE BACK BUTTON
+                .commit();
+
+        // Update the Title to match the clicked item (e.g., "General Settings")
+        setTitle(pref.getTitle());
+
+        return true;
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        // 1. Try to pop the fragment back stack (go back one screen inside Settings)
+        if (getSupportFragmentManager().popBackStackImmediate()) {
+            return true;
+        }
+
+        // 2. If stack is empty, go to MainActivity
+        return super.onSupportNavigateUp();
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
-        // Set up a listener whenever a key changes
         SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
         pref.registerOnSharedPreferenceChangeListener(this);
     }
@@ -45,41 +90,37 @@ public class SettingsActivity extends AppCompatActivity implements SharedPrefere
     @Override
     protected void onPause() {
         super.onPause();
-        // Unregister the listener whenever a key changes
         SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
         pref.unregisterOnSharedPreferenceChangeListener(this);
     }
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        // do stuff
-        if (key.equals("switch_preference_notification")) {
+        if ("switch_preference_notification".equals(key)) {
             final String topic = sharedPreferences.getString("instance_name", "none");
             boolean subscribe = sharedPreferences.getBoolean("switch_preference_notification", false);
 
             if (subscribe) {
-                FirebaseMessaging.getInstance().subscribeToTopic(topic).addOnCompleteListener(task -> {
-                    if (!task.isSuccessful()) {
-                        Log.d(TAG, "Error subscribing to topic " + task.getException());
-                        return;
-                    }
-
-                    Log.d(TAG, "Subscribed to topic " + topic);
-                    Toast.makeText(getApplicationContext(), "Subscribed to topic " + topic, Toast.LENGTH_LONG).show();
-                });
+                FirebaseMessaging.getInstance().subscribeToTopic(topic)
+                        .addOnCompleteListener(task -> {
+                            if (task.isSuccessful()) {
+                                Log.d(TAG, "Subscribed to topic " + topic);
+                                Toast.makeText(getApplicationContext(), "Subscribed to " + topic, Toast.LENGTH_SHORT).show();
+                            }
+                        });
             } else {
-                FirebaseMessaging.getInstance().unsubscribeFromTopic(topic).addOnCompleteListener(task -> {
-                    if (!task.isSuccessful()) {
-                        Log.d(TAG, "Error unsubscribing from topic " + task.getException());
-                        return;
-                    }
-
-                    Log.d(TAG, "Unsubscribed from topic " + topic);
-                    Toast.makeText(getApplicationContext(), "Unsubscribed from topic " + topic, Toast.LENGTH_LONG).show();
-                });
+                FirebaseMessaging.getInstance().unsubscribeFromTopic(topic)
+                        .addOnCompleteListener(task -> {
+                            if (task.isSuccessful()) {
+                                Log.d(TAG, "Unsubscribed from topic " + topic);
+                                Toast.makeText(getApplicationContext(), "Unsubscribed from " + topic, Toast.LENGTH_SHORT).show();
+                            }
+                        });
             }
         }
     }
+
+    // --- Fragments ---
 
     public static class SettingsFragment extends PreferenceFragmentCompat {
         @Override
@@ -92,25 +133,23 @@ public class SettingsActivity extends AppCompatActivity implements SharedPrefere
         @Override
         public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
             setPreferencesFromResource(R.xml.pref_general, rootKey);
+
+            // Input Type logic...
             EditTextPreference instanceName = findPreference("instance_name");
-            EditTextPreference countryCode = findPreference("country_code");
             if (instanceName != null) {
-                instanceName.setOnBindEditTextListener(
-                        editText -> {
-                            editText.setInputType(InputType.TYPE_CLASS_TEXT);
-                            editText.setMaxLines(1);
-                        }
-                );
-            }
-            if (countryCode != null) {
-                countryCode.setOnBindEditTextListener(
-                        editText -> {
-                            editText.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_SIGNED);
-                            editText.setMaxLines(1);
-                        }
-                );
+                instanceName.setOnBindEditTextListener(editText -> {
+                    editText.setInputType(InputType.TYPE_CLASS_TEXT);
+                    editText.setMaxLines(1);
+                });
             }
 
+            EditTextPreference countryCode = findPreference("country_code");
+            if (countryCode != null) {
+                countryCode.setOnBindEditTextListener(editText -> {
+                    editText.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_SIGNED);
+                    editText.setMaxLines(1);
+                });
+            }
         }
     }
 
@@ -148,5 +187,4 @@ public class SettingsActivity extends AppCompatActivity implements SharedPrefere
             setPreferencesFromResource(R.xml.pref_smspacks, rootKey);
         }
     }
-
 }
