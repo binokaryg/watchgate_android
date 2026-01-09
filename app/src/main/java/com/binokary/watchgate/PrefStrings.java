@@ -16,6 +16,8 @@ public final class PrefStrings {
     public static final String IS_POSTPAID = "isPostpaid";
     public static final String WIFI_STRENGTH = "wifiStrength";
     public static final String MOBILE_CARRIER = "mobileCarrier";
+
+    public static final String MOBILE_STRENGTH = "mobileStrength";
     public static final String COUNT_SMS_IN = "countSMSIn";
     public static final String LAST_SMS_IN_DATE = "lastSMSInDate";
     public static final String SMS_PACK_INFO = "smsPackInfo";

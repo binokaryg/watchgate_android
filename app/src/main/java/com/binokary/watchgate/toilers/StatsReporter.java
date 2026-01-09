@@ -94,11 +94,11 @@ public class StatsReporter extends Worker {
                     int battery = prefs.getInt(PrefStrings.BATTERY, -1);
                     boolean plugged = prefs.getBoolean(PrefStrings.PLUGGED, false);
                     boolean data = prefs.getBoolean(PrefStrings.MOBILE_DATA, false);
+                    int mobileStrength = prefs.getInt(PrefStrings.MOBILE_STRENGTH, -1);
                     int temp = prefs.getInt(PrefStrings.TEMPERATURE, -1);
                     //int health = prefs.getInt(PrefStrings.HEALTH, -1);
                     String wifi = prefs.getString(PrefStrings.WIFI_SSID, "N/A");
                     int wifiStrength = prefs.getInt(PrefStrings.WIFI_STRENGTH, -1);
-                    //int mobileStrength = prefs.getInt(PrefStrings.MOBILE_STRENGTH, -1);
                     long lastSMSInDateL = prefs.getLong(PrefStrings.LAST_SMS_IN_DATE, 0);
                     String carrierName = prefs.getString(PrefStrings.MOBILE_CARRIER, "N/A");
 
@@ -124,6 +124,7 @@ public class StatsReporter extends Worker {
                         statusData.put("plugged", plugged);
                         statusData.put("data", data);
                         statusData.put("wifiStrength", wifiStrength);
+                        statusData.put("mobileStrength", mobileStrength);
                         statusData.put("carrier", carrierName);
 
                         if (remainingSMS > -1) {
