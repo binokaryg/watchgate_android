@@ -71,7 +71,13 @@
         android:singleLine="false"
         android:title="All Instances"
         app:useSimpleSummaryProvider="true" />
-
+    <EditTextPreference
+        android:defaultValue="@string/slack_url"
+        android:key="slackUrl"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="Slack URL"
+        app:useSimpleSummaryProvider="true" />
     <EditTextPreference
         android:defaultValue="@string/api_url"
         android:inputType="textUri"
@@ -82,7 +88,6 @@
         android:title="Backend API URL"
         android:summary="URL of your self-hosted backend endpoint (e.g., https://your-server.com/api/status)"
         app:useSimpleSummaryProvider="true" />
-
     <EditTextPreference
         android:defaultValue="@string/api_key"
         android:inputType="text"

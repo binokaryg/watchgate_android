@@ -1,9 +1,11 @@
 package com.binokary.watchgate;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.preference.PreferenceManager;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
@@ -28,6 +30,7 @@ public class SlackWorker extends Worker {
     @NonNull
     @Override
     public Result doWork() {
+        SharedPreferences mPrefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         String jsonString = getInputData().getString("json_body");
         if (jsonString == null) return Result.failure();
 
@@ -36,7 +39,11 @@ public class SlackWorker extends Worker {
 
         try {
             // 1. Get the URL from resources (Context is available via getApplicationContext())
-            String hookUrl = getApplicationContext().getString(R.string.slack_url);
+            String hookUrl = mPrefs.getString("slackUrl", "");
+            if (hookUrl.isEmpty()) {
+                Log.e(TAG, "Slack URL is not configured. Please set it in settings.");
+                return Result.failure();
+            }
 
             StringRequest stringRequest = new StringRequest(Request.Method.POST, hookUrl,
                     response -> {
