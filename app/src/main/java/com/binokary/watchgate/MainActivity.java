@@ -2,7 +2,6 @@ package com.binokary.watchgate;
 
 import android.Manifest;
 import android.app.AlertDialog;
-import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -315,7 +314,7 @@ public class MainActivity extends AppCompatActivity {
         if (android.os.Build.VERSION.SDK_INT >= 26) {
             // For Android SDK 26 and above, it is necessary to create a channel to create notifications.
             NotificationChannel channel = new NotificationChannel("channel_persistent",
-                    "PERSISTENT", NotificationManager.IMPORTANCE_HIGH);
+                    "PERSISTENT", NotificationManager.IMPORTANCE_LOW);
             notificationManager.createNotificationChannel(channel);
         }
         String versionName = BuildConfig.VERSION_NAME;
@@ -325,7 +324,7 @@ public class MainActivity extends AppCompatActivity {
         persistentNotificationBuilder = new NotificationCompat.Builder(getApplicationContext(), "channel_persistent");
 
         persistentNotificationBuilder.setAutoCancel(false)
-                .setDefaults(Notification.DEFAULT_ALL)
+                .setOnlyAlertOnce(true)
                 .setWhen(System.currentTimeMillis())
                 .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_i_see))
                 .setSmallIcon(R.drawable.ic_remove_red_eye_black_24dp)
